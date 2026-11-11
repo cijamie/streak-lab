@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Streak Lab</title>
+<meta name="description" content="Turn photos into pixel-streak art: vertical, radial or edge streaks, a duotone grade with grain, and exports sized for Instagram posts, carousels and Reels. Runs entirely in your browser.">
+<link rel="canonical" href="https://jamies.dev/streak-lab/">
+<meta name="theme-color" content="#efe5d2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1c33" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Streak Lab">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="jamies.dev">
+<meta property="og:title" content="Streak Lab">
+<meta property="og:description" content="Turn photos into pixel-streak art and export it for Instagram posts, carousels and Reels. Free, and your photos never leave your device.">
+<meta property="og:url" content="https://jamies.dev/streak-lab/">
+<meta property="og:image" content="https://jamies.dev/streak-lab/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Streak Lab: a moon over orange pixel streaks on navy">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Streak Lab">
+<meta name="twitter:description" content="Turn photos into pixel-streak art and export it for Instagram posts, carousels and Reels.">
+<meta name="twitter:image" content="https://jamies.dev/streak-lab/og-image.png">
+<meta name="twitter:image:alt" content="Streak Lab: a moon over orange pixel streaks on navy">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#efe5d2; --panel:#f8f1e4; --fg:#12233f; --muted:#5a6d8a; --line:#d6c9b1;
+  --accent:#d97a2e; --accent-fg:#fff8ee; --stage:#12233f; --chip:#fffaf1;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1c33; --panel:#152540; --fg:#f1e4cc; --muted:#94a6c2; --line:#2a3d5e;
+    --accent:#e8893a; --accent-fg:#1a1206; --stage:#08111f; --chip:#1a2c4a; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1c33; --panel:#152540; --fg:#f1e4cc; --muted:#94a6c2; --line:#2a3d5e;
+  --accent:#e8893a; --accent-fg:#1a1206; --stage:#08111f; --chip:#1a2c4a; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:0 max(16px,var(--sar)) var(--sab) max(16px,var(--sal))}
+button,select,input,label{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{font:inherit;color:inherit}
+button:disabled,label.disabled{opacity:.45;cursor:not-allowed}
+[hidden]{display:none!important}
+button:focus-visible,input:focus-visible,select:focus-visible,label.btn:focus-within,.pickzone:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---- top bar */
+.top{display:flex;align-items:center;gap:10px;padding:calc(10px + var(--sat)) 0 10px}
+.brand{display:flex;align-items:center;gap:9px;margin-right:auto;min-width:0}
+.brand svg{width:30px;height:30px;flex:none;border-radius:8px}
+.brand h1{margin:0;font-weight:800;font-size:24px;line-height:1;letter-spacing:-.02em;white-space:nowrap;
+  background:repeating-linear-gradient(90deg,var(--fg) 0 3px,var(--accent) 3px 4px,var(--fg) 4px 9px,var(--accent) 9px 10px,var(--fg) 10px 14px);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---- buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;background:var(--accent);color:var(--accent-fg);font:inherit;font-weight:600;
+  min-height:42px;padding:9px 16px;border-radius:10px;cursor:pointer;white-space:nowrap;position:relative}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.wide{width:100%}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--chip);color:var(--fg);font:inherit;font-size:13.5px;min-height:36px;padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip:hover:not(:disabled),.btn.ghost:hover{border-color:var(--accent)}
+input[type=file]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+
+/* ---- app layout (phone first: the photo stays pinned while the controls scroll under it) */
+.app{display:grid;gap:12px;padding-bottom:28px}
+.app>*{min-width:0}
+.work{position:sticky;top:0;z-index:5;background:var(--bg);padding:max(6px,var(--sat)) 0 8px;margin:0 -2px;display:flex;flex-direction:column;gap:8px}
+.stage{position:relative;background:var(--stage);border-radius:14px;overflow:hidden;min-height:220px;display:grid;place-items:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage.has-photo{min-height:0}
+#zoomer{position:relative;transform-origin:0 0;will-change:transform}
+#zoomer canvas{display:block}
+#overlay{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.stage.panmode #overlay{cursor:grab}
+
+.zoombar{position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:2px;background:rgba(8,17,31,.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:999px;padding:3px;color:#f1e4cc;font-size:13px;z-index:2}
+.zoombar button{border:0;background:transparent;color:inherit;font:inherit;min-width:36px;height:34px;padding:0 9px;border-radius:999px;cursor:pointer}
+.zoombar button[aria-pressed="true"]{background:#f1e4cc;color:#12233f}
+.zoombar span{min-width:42px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* empty state */
+.empty{color:#dfe6f0;text-align:center;padding:28px 20px;max-width:440px;display:grid;gap:12px;justify-items:center}
+.empty h2{margin:0;font-size:clamp(22px,4vw,30px);line-height:1.1;font-weight:800;color:#f7e8cf}
+.empty p{margin:0;color:#b9c5d8;font-size:14.5px}
+.empty .small{font-size:13px;color:#8fa2bf}
+.stage.dragging{outline:3px dashed var(--accent);outline-offset:-10px}
+
+/* busy veil + status toast */
+.veil{position:absolute;inset:0;background:rgba(8,17,31,.45);display:none;place-items:center;z-index:3}
+body.is-busy .veil{display:grid}
+.spin{width:38px;height:38px;border-radius:50%;border:4px solid rgba(247,232,207,.3);border-top-color:#f7e8cf;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
+.toast{position:absolute;left:10px;right:10px;bottom:10px;z-index:4;margin:0 auto;max-width:520px;background:rgba(8,17,31,.92);color:#f1e4cc;border-radius:10px;padding:9px 12px;font-size:13.5px;text-align:center;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.25)}
+
+/* tool strip under the photo */
+.tools{display:flex;gap:8px;align-items:center}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px;background:var(--chip)}
+.seg button{flex:1;border:0;background:transparent;color:var(--fg);font:inherit;font-size:14px;min-height:36px;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg);font-weight:600}
+.tools .seg{flex:1;min-width:0}
+.tools .seg button{padding:6px 6px}
+#compareBtn{flex:none;min-height:44px;border-radius:999px;padding:6px 14px}
+#compareBtn.held{background:var(--fg);color:var(--bg)}
+.ctx{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;min-height:36px}
+.ctx .hint{flex:1 1 220px}
+.ctx .row{flex:1 1 220px}
+
+/* side panel with tabs */
+.side{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.tabs{display:flex;gap:2px;padding:6px;border-bottom:1px solid var(--line);position:sticky;top:var(--workH,0px);z-index:4;background:var(--panel);border-radius:14px 14px 0 0}
+.tabs button{flex:1;border:0;background:transparent;font:inherit;font-size:14.5px;min-height:40px;padding:6px 4px;border-radius:9px;cursor:pointer;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--bg);color:var(--fg);font-weight:600;box-shadow:inset 0 -2px 0 var(--accent)}
+.pane{padding:14px;display:grid;gap:14px}
+.group{display:grid;gap:10px}
+.group + .group{border-top:1px solid var(--line);padding-top:14px}
+.group h2{margin:0;font-size:15px;font-weight:600}
+.row{display:grid;grid-template-columns:100px minmax(0,1fr) 40px;align-items:center;gap:8px;font-size:14px}
+.row output{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.row select{width:100%}
+input[type=range]{width:100%;height:30px;margin:0;accent-color:var(--accent);background:transparent}
+.swatches{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:8px;background:none;padding:2px;cursor:pointer}
+.hint{margin:0;color:var(--muted);font-size:13px}
+select{font:inherit;font-size:14px;background:var(--chip);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 8px;min-height:38px}
+input[type=text]{font:inherit;font-size:16px;color:var(--fg);background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:0;flex:1;min-height:38px}
+.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+details{font-size:13.5px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--fg);font-weight:600;min-height:32px;display:flex;align-items:center}
+details p{margin:6px 0 0}
+#saveBox{display:none;gap:8px}
+#saveBox img{width:100%;border-radius:8px}
+.thumbs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.thumbs button{padding:0;border:2px solid transparent;border-radius:8px;overflow:hidden;background:var(--stage);cursor:pointer;display:block}
+.thumbs button:hover,.thumbs button:focus-visible{border-color:var(--accent)}
+.thumbs img{display:block;width:100%;height:auto}
+.slides{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.slides figure{margin:0;display:grid;gap:4px}
+.slides img{width:100%;border-radius:6px;display:block}
+.slides figcaption{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+#reelBox{display:none;gap:8px}
+#reelBox video,#reelCanvas{width:100%;max-height:60vh;object-fit:contain;background:#000;border-radius:8px;display:block}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;min-height:32px}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.only-wide{display:none}
+
+/* tablet / desktop / landscape phone: fixed app shell, photo left, controls right */
+@media (min-width:760px), (orientation:landscape) and (min-width:560px){
+  html,body{height:100%}
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+  .top{flex:none}
+  .brand svg{width:34px;height:34px}
+  .brand h1{font-size:28px}
+  .app{flex:1;min-height:0;grid-template-columns:minmax(0,1fr) clamp(300px,31vw,380px);gap:16px;padding-bottom:16px}
+  .work{position:static;padding:0;margin:0;min-height:0}
+  .stage{flex:1;min-height:0}
+  .side{overflow:auto;min-height:0;overscroll-behavior:contain}
+  .tabs{top:0}
+  .only-wide{display:inline}
+  .only-narrow{display:none}
+}
+@media (max-width:559px){
+  .zoombar{font-size:12px;top:6px;right:6px}
+  .zoombar button{min-width:32px;height:30px;padding:0 7px}
+  .zoombar span{min-width:36px}
+}
+@media (orientation:landscape) and (max-height:500px){
+  .top{padding-top:calc(4px + var(--sat));padding-bottom:6px}
+  .brand h1{font-size:20px}
+  .top .btn{min-height:36px;padding:6px 12px}
+  .ctx .hint{display:none}
+}
+@media (max-width:420px){
+  .row{grid-template-columns:88px minmax(0,1fr) 36px}
+  .top .btn{padding:8px 12px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2340"/><circle cx="40" cy="22" r="11" fill="#f7e8cf"/><g fill="#e0843a"><rect x="9" y="30" width="4" height="25" rx="2"/><rect x="17" y="22" width="4" height="33" rx="2"/><rect x="25" y="34" width="4" height="21" rx="2"/><rect x="33" y="27" width="4" height="28" rx="2"/><rect x="41" y="37" width="4" height="18" rx="2"/><rect x="49" y="29" width="4" height="26" rx="2"/></g></svg>
+    <h1>Streak Lab</h1>
+  </div>
+  <label class="btn ghost" id="newBtn" hidden>New photo<input type="file" accept="image/*" class="pick"></label>
+  <button class="btn" id="topSave" data-act hidden>Save</button>
+</header>
+
+<main class="app">
+  <section class="work" id="work" aria-label="Photo">
+    <div class="stage" id="stage">
+      <div class="empty" id="empty">
+        <h2>Pull your photo into streaks</h2>
+        <p>Streak it straight up, around a centre point, or out of any edge you draw. Grade it in two tones with grain, then export full-size photos, Instagram carousels or a Reel.</p>
+        <label class="btn pickzone">Choose a photo<input type="file" accept="image/*" class="pick"></label>
+        <p class="small"><span class="only-wide">Or drop a photo here, or paste one. </span>Your photo stays on this device.</p>
+      </div>
+      <div id="zoomer" hidden><canvas id="view"></canvas><canvas id="overlay" aria-label="Photo. Tap or drag to place streaks, edges or protect paint."></canvas></div>
+      <div class="zoombar" id="zoombar" hidden>
+        <button id="zoomOut" aria-label="Zoom out">−</button><span id="zoomPct" aria-live="off">100%</span><button id="zoomIn" aria-label="Zoom in">+</button><button id="zoomFit">Fit</button><button id="panBtn" aria-pressed="false" title="Move the photo with one finger or the mouse">Pan</button>
+      </div>
+      <div class="veil" aria-hidden="true"><div class="spin"></div></div>
+      <p class="toast" id="status" role="status" aria-live="polite" hidden></p>
+    </div>
+
+    <div class="tools" id="tools" hidden>
+      <div class="seg" id="toolSeg" aria-label="What a tap or drag on the photo does">
+        <button data-tool="move" id="primaryTool" aria-pressed="true">Set line</button>
+        <button data-tool="paint" aria-pressed="false">Protect</button>
+        <button data-tool="erase" aria-pressed="false">Erase</button>
+      </div>
+      <button class="chip" id="compareBtn" title="Hold to see the original photo">Before</button>
+    </div>
+    <div class="ctx" id="ctx" hidden>
+      <p class="hint" id="tapHint">Tap the photo to set where the streaks start.</p>
+      <div class="inline" id="edgeBtns" hidden>
+        <button class="chip" id="undoEdge">Undo edge</button>
+        <button class="chip" id="clearEdges">Clear edges</button>
+      </div>
+      <div class="row" id="brushRow" hidden><label for="brush">Brush size</label><input type="range" id="brush" min="4" max="120" value="30"><output></output></div>
+      <button class="chip" id="clearMask" hidden>Clear protect</button>
+    </div>
+  </section>
+
+  <section class="side" aria-label="Controls">
+    <div class="tabs" role="tablist" aria-label="Controls">
+      <button role="tab" id="tab-streaks" aria-controls="pane-streaks" aria-selected="true">Streaks</button>
+      <button role="tab" id="tab-colour" aria-controls="pane-colour" aria-selected="false" tabindex="-1">Colour</button>
+      <button role="tab" id="tab-looks" aria-controls="pane-looks" aria-selected="false" tabindex="-1">Looks</button>
+      <button role="tab" id="tab-export" aria-controls="pane-export" aria-selected="false" tabindex="-1">Export</button>
+    </div>
+
+    <div class="pane" role="tabpanel" id="pane-streaks" aria-labelledby="tab-streaks">
+      <div class="group">
+        <div class="seg" id="modeSeg" aria-label="Streak mode">
+          <button data-mode="vertical" aria-pressed="true">Vertical</button>
+          <button data-mode="radial" aria-pressed="false">Radial</button>
+          <button data-mode="edge" aria-pressed="false">Edge</button>
+        </div>
+        <p class="hint" id="modeHint"></p>
+        <div class="row" id="methodRow"><label for="method">Method</label>
+          <select id="method"><option value="stretch">Stretch</option><option value="sort">Pixel sort</option></select><span></span></div>
+        <div class="row" id="sideRow" hidden><label for="side">Direction</label>
+          <select id="side"><option value="up">Up</option><option value="down">Down</option><option value="left">Left</option><option value="right">Right</option><option value="angle">Custom angle</option><option value="a">Out from edge, this side</option><option value="b">Out from edge, other side</option><option value="both">Out from edge, both sides</option></select><span></span></div>
+        <div class="row" id="angleRow" hidden><label for="angle">Angle</label><input type="range" id="angle" min="-180" max="180" value="0"><output></output></div>
+        <div class="row" id="startRow"><label for="start" id="startLabel">Start line</label><input type="range" id="start" min="0" max="100" value="62"><output></output></div>
+        <div class="row"><label for="len">Length</label><input type="range" id="len" min="0" max="100" value="85"><output></output></div>
+        <div class="row"><label for="thr">Threshold</label><input type="range" id="thr" min="0" max="95" value="25"><output></output></div>
+        <div class="row"><label for="jit">Randomness</label><input type="range" id="jit" min="0" max="100" value="55"><output></output></div>
+        <div class="row"><label for="band">Band width</label><input type="range" id="band" min="1" max="16" value="3"><output></output></div>
+        <div class="inline"><button class="chip" id="shuffle" data-act>Shuffle streaks</button></div>
+      </div>
+      <div class="group">
+        <details>
+          <summary>How it works</summary>
+          <p><b>Vertical</b> and <b>Radial</b>: tap the photo to place the start line or the centre of the rings. <b>Threshold</b> decides how bright a pixel must be to streak; <b>Length</b> and <b>Randomness</b> shape the streaks.</p>
+          <p><b>Edge</b>: drag along a ridge, treetop, outline or the rim of the moon. Streaks shoot out in the Direction you pick, and the white ticks show which way. Draw as many edges as you like.</p>
+          <p><b>Protect</b> (red) keeps the subject sharp. <b>Erase</b> removes protect paint and cuts away parts of edges. Hold <b>Before</b> to compare with the original.</p>
+          <p><b>Zoom</b>: pinch with two fingers or scroll with a mouse or trackpad; + and − work too. Two fingers also move the photo; turn on <b>Pan</b> to move it with one finger or the mouse.</p>
+          <p class="only-wide">Shortcuts: <b>Ctrl/⌘ Z</b> undoes the last edge, hold <b>\</b> to see the original.</p>
+        </details>
+      </div>
+    </div>
+
+    <div class="pane" role="tabpanel" id="pane-colour" aria-labelledby="tab-colour" hidden>
+      <div class="group">
+        <h2>Duotone</h2>
+        <div class="swatches">
+          <input type="color" id="c1" value="#0f2340" aria-label="Shadow colour">
+          <input type="color" id="c2" value="#e0843a" aria-label="Mid colour">
+          <input type="color" id="c3" value="#f7e8cf" aria-label="Highlight colour">
+        </div>
+        <p class="hint">Shadows, mid-tones, highlights. Or start from a palette:</p>
+        <div class="swatches">
+          <button class="chip" data-preset="ember">Ember</button>
+          <button class="chip" data-preset="gold">Gold</button>
+          <button class="chip" data-preset="ice">Ice</button>
+          <button class="chip" data-preset="rose">Rose</button>
+          <button class="chip" data-preset="moss">Moss</button>
+        </div>
+        <div class="row"><label for="amt">Strength</label><input type="range" id="amt" min="0" max="100" value="90"><output></output></div>
+        <div class="row"><label for="grain">Grain</label><input type="range" id="grain" min="0" max="100" value="35"><output></output></div>
+      </div>
+    </div>
+
+    <div class="pane" role="tabpanel" id="pane-looks" aria-labelledby="tab-looks" hidden>
+      <div class="group">
+        <h2>Variations</h2>
+        <div class="inline">
+          <button class="btn" id="variBtn" data-act>Show 4 variations</button>
+          <button class="chip" id="shuffle2" data-act>Shuffle streaks</button>
+        </div>
+        <div class="thumbs" id="thumbs"></div>
+        <p class="hint" id="variHint" hidden>Tap a variation to use its settings.</p>
+      </div>
+      <div class="group">
+        <h2>Saved looks</h2>
+        <div class="inline">
+          <select id="presetSel" aria-label="Saved looks" style="flex:1;min-width:0"><option value="">Choose a saved look…</option></select>
+          <button class="chip" id="presetDel">Delete</button>
+        </div>
+        <div class="inline">
+          <input type="text" id="presetName" placeholder="Name this look" aria-label="Look name" enterkeyhint="done">
+          <button class="chip" id="presetSave">Save look</button>
+        </div>
+        <p class="hint">A look keeps the mode, direction, sliders, colours and streak pattern, so a whole series matches. Edges and protect paint stay with each photo. Looks are saved in this browser only.</p>
+        <div class="inline"><button class="chip" id="resetBtn">Reset all settings</button></div>
+      </div>
+    </div>
+
+    <div class="pane" role="tabpanel" id="pane-export" aria-labelledby="tab-export" hidden>
+      <div class="group">
+        <h2>Full-size photo</h2>
+        <div class="row"><label for="fmt">Format</label>
+          <select id="fmt"><option value="jpeg">JPEG, high quality</option><option value="png">PNG, lossless</option></select><span></span></div>
+        <button class="btn wide" id="saveBtn" data-act>Save full size</button>
+        <p class="hint" id="sizeInfo">Load a photo to export it.</p>
+        <div id="saveBox"><img id="saveImg" alt="Finished image at full size"><button class="chip" id="saveAgain">Save again</button></div>
+      </div>
+      <div class="group">
+        <h2>Instagram carousel</h2>
+        <label class="check"><input type="checkbox" id="carVar" checked> Add 2 variations</label>
+        <div class="inline"><button class="btn" id="carBtn" data-act>Make carousel</button><button class="chip" id="carAll" hidden>Save all</button></div>
+        <p class="hint">1080 × 1350 slides: finished photo, original, your edges drawn on, then variations.</p>
+        <div class="slides" id="slides"></div>
+      </div>
+      <div class="group">
+        <h2>Reel</h2>
+        <div class="row"><label for="reelStyle">Animation</label>
+          <select id="reelStyle"><option value="grow">Streaks grow</option><option value="wipe">Before/after wipe</option></select><span></span></div>
+        <div class="inline"><button class="btn" id="reelBtn" data-act>Make Reel</button></div>
+        <p class="hint">7 seconds at 1080 × 1920, silent so you can add music in Instagram. Keep this screen open while it records.</p>
+        <canvas id="reelCanvas" width="1080" height="1920" hidden></canvas>
+        <div id="reelBox"><video id="reelVid" controls playsinline loop muted></video><div class="inline"><button class="btn" id="reelSave">Save Reel</button></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const MAXD=1600, TAU=Math.PI*2, CANVAS_MAX=16000000;
+const view=$('view'), vctx=view.getContext('2d',{willReadFrequently:true});
+const ov=$('overlay'), octx=ov.getContext('2d');
+const maskCv=document.createElement('canvas'), mctx=maskCv.getContext('2d');
+let src=null, W=0, H=0, mask=null, busy=false, seed=1;
+let fullImg=null, FW=0, FH=0, strokes=[], edges=[], curEdge=null, edgesDirty=false;
+const st={mode:'vertical', tool:'move', cx:.5, cy:.5, startV:62, startR:12};
+const tick=()=>new Promise(r=>setTimeout(r,30));
+const hints={vertical:'Tap or drag on the photo to set where the streaks start.',radial:'Tap or drag on the photo to set the centre of the rings.',edge:'Drag along the edge you want streaks to grow from. You can draw several edges.'};
+const modeHints={vertical:'Streaks rise straight up from a line across the photo.',radial:'Streaks radiate outward in rings around a centre point.',edge:'Streaks grow out of edges you draw on the photo.'};
+const toolHints={paint:'Paint over the parts that should stay sharp.',erase:'Rub out protect paint, or cut away parts of an edge.'};
+const primaryLabel={vertical:'Set line',radial:'Set centre',edge:'Draw edge'};
+const PALETTES={ember:['#0f2340','#e0843a','#f7e8cf'],gold:['#0a0e1c','#c79a3f','#fff0c8'],ice:['#0b1a2b','#4f8fb8','#eef6fb'],rose:['#1d0f24','#d4577b','#fbe3ea'],moss:['#0f1a12','#8a9a3c','#eef0d6']};
+
+// ---------- status toast and busy state
+let toastT=0;
+function armToast(){const el=$('status');clearTimeout(toastT);if(el.hidden||busy)return;
+  toastT=setTimeout(()=>{el.hidden=true},/fail|couldn|can’t|won’t|too old|too large/i.test(el.textContent)?10000:5000)}
+const status=t=>{const el=$('status');el.textContent=t;el.hidden=!t;armToast()};
+$('status').onclick=()=>{if(!busy)$('status').hidden=true};
+function refreshActs(){document.querySelectorAll('[data-act]').forEach(b=>b.disabled=busy||!src)}
+function setBusy(on){busy=on;document.body.classList.toggle('is-busy',on);refreshActs();
+  document.querySelectorAll('.tabs button,#compareBtn').forEach(b=>b.disabled=on);if(!on)armToast()}
+refreshActs();
+
+// ---------- saving files (claude.ai capability, or share sheet / download elsewhere)
+let dl=null;
+try{if(window.claude&&typeof window.claude.use==='function')window.claude.use('downloads').then(d=>{dl=d}).catch(()=>{})}catch(e){}
+async function saveFiles(list){ // list of {blob,name}
+  if(dl){for(const f of list){try{await dl.save({filename:f.name,data:f.blob})}catch(e){if(e&&e.code==='declined')return false;if(e&&e.code==='rate_limited'){await new Promise(r=>setTimeout(r,1500));try{await dl.save({filename:f.name,data:f.blob})}catch(_){}}}}return true}
+  const files=list.map(f=>new File([f.blob],f.name,{type:f.blob.type}));
+  if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files});return true}catch(e){if(e.name==='AbortError')return false}}
+  for(const f of list){const a=document.createElement('a');a.href=URL.createObjectURL(f.blob);a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);await new Promise(r=>setTimeout(r,400))}
+  return true;
+}
+const stamp=()=>new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
+
+// ---------- tabs
+const TABS=['streaks','colour','looks','export'];
+function showTab(name,focus){
+  TABS.forEach(t=>{const b=$('tab-'+t),on=t===name;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;$('pane-'+t).hidden=!on});
+  if(focus)$('tab-'+name).focus();
+  try{localStorage.setItem('streaklab.tab',name)}catch(e){}
+  const side=document.querySelector('.side'); if(side.scrollTop)side.scrollTop=0;
+}
+TABS.forEach((t,i)=>{const b=$('tab-'+t);b.onclick=()=>showTab(t);
+  b.onkeydown=e=>{const k=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(k){e.preventDefault();showTab(TABS[(i+k+TABS.length)%TABS.length],true)}}});
+try{const t=localStorage.getItem('streaklab.tab');if(TABS.includes(t))showTab(t)}catch(e){}
+
+// ---------- controls
+const sliders=['start','len','thr','jit','band','brush','amt','grain'];
+const syncOut=k=>{const el=$(k);el.parentNode.querySelector('output').textContent=el.value+(k==='angle'?'°':'')};
+sliders.forEach(k=>{const el=$(k);syncOut(k);
+  el.addEventListener('input',()=>{syncOut(k); if(k==='start'){st.mode==='vertical'?st.startV=+el.value:st.startR=+el.value} if(k!=='brush')schedule(); drawOverlay();});
+});
+syncOut('angle'); $('angle').addEventListener('input',()=>{syncOut('angle');drawOverlay();schedule()});
+['method','c1','c2','c3'].forEach(k=>$(k).addEventListener('input',schedule));
+$('side').addEventListener('input',()=>{$('angleRow').hidden=$('side').value!=='angle';drawOverlay();schedule()});
+document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const p=PALETTES[b.dataset.preset];['c1','c2','c3'].forEach((k,i)=>$(k).value=p[i]);schedule()});
+
+function setSeg(segId,attr,val){document.querySelectorAll('#'+segId+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset[attr]===val))}
+function updateCtx(){
+  const t=st.tool, brush=t==='paint'||t==='erase';
+  $('tapHint').textContent=brush?toolHints[t]:hints[st.mode];
+  $('edgeBtns').hidden=!(t==='edge'||(t==='erase'&&edges.length));
+  $('brushRow').hidden=!brush; $('clearMask').hidden=!brush;
+}
+function setTool(t){st.tool=t;setSeg('toolSeg','tool',t);updateCtx()}
+function setMode(m){
+  st.mode=m; setSeg('modeSeg','mode',m);
+  const e=m==='edge';
+  $('startRow').hidden=e; $('methodRow').hidden=e; $('sideRow').hidden=!e; $('angleRow').hidden=!e||$('side').value!=='angle';
+  if(!e){$('start').value=m==='vertical'?st.startV:st.startR; syncOut('start');
+    $('startLabel').textContent=m==='vertical'?'Start line':'Start radius'}
+  $('modeHint').textContent=modeHints[m];
+  const pt=$('primaryTool'); pt.dataset.tool=e?'edge':'move'; pt.textContent=primaryLabel[m];
+  if(st.tool==='move'||st.tool==='edge')setTool(pt.dataset.tool); else updateCtx();
+  schedule(); drawOverlay();
+}
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+document.querySelectorAll('#toolSeg button').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+$('clearMask').onclick=()=>{if(!mask)return;mask.fill(0);strokes=[];mctx.clearRect(0,0,W,H);drawOverlay();schedule()};
+$('undoEdge').onclick=()=>{edges.pop();updateCtx();drawOverlay();schedule()};
+$('clearEdges').onclick=()=>{edges=[];updateCtx();drawOverlay();schedule()};
+
+// ---------- settings, looks and variations
+const LOOK_KEYS=['mode','method','side','angle','len','thr','jit','band','amt','grain','c1','c2','c3','seed'];
+function getSettings(){return{mode:st.mode,method:$('method').value,side:$('side').value,angle:+$('angle').value,
+  startV:st.startV,startR:st.startR,cx:st.cx,cy:st.cy,len:+$('len').value,thr:+$('thr').value,jit:+$('jit').value,band:+$('band').value,
+  amt:+$('amt').value,grain:+$('grain').value,c1:$('c1').value,c2:$('c2').value,c3:$('c3').value,seed}}
+function applyLook(s){
+  ['method','side','c1','c2','c3'].forEach(k=>{if(s[k]!=null)$(k).value=s[k]});
+  ['angle','len','thr','jit','band','amt','grain'].forEach(k=>{if(s[k]!=null){$(k).value=s[k];syncOut(k)}});
+  if(s.seed!=null)seed=s.seed;
+  setMode(s.mode||st.mode);
+}
+const DEFAULTS=getSettings();
+$('resetBtn').onclick=()=>{st.startV=DEFAULTS.startV;st.startR=DEFAULTS.startR;st.cx=.5;st.cy=.5;applyLook(DEFAULTS);status('Settings reset. Your edges and protect paint are kept.')};
+$('shuffle').onclick=$('shuffle2').onclick=()=>{seed=1+Math.floor(Math.random()*99999);schedule()};
+function variants(base){
+  const pal=Object.keys(PALETTES), cur=pal.find(k=>PALETTES[k][1]===base.c2), pi=Math.max(0,pal.indexOf(cur));
+  const R=()=>1+Math.floor(Math.random()*99999), clamp=(v,a,b)=>Math.max(a,Math.min(b,Math.round(v)));
+  const withPal=(o,k)=>Object.assign(o,{c1:PALETTES[k][0],c2:PALETTES[k][1],c3:PALETTES[k][2]});
+  const v=[];
+  v.push({...base,seed:R(),jit:clamp(base.jit+25,0,100)});
+  v.push(withPal({...base,seed:R()},pal[(pi+1)%pal.length]));
+  const d={...base,seed:R(),len:clamp(base.len*.7,10,100)};
+  if(base.mode==='edge'){const opts=['up','both','angle'].filter(x=>x!==base.side);d.side=opts[0];if(d.side==='angle')d.angle=20}
+  else d.method=base.method==='sort'?'stretch':'sort';
+  v.push(d);
+  v.push(withPal({...base,seed:R(),band:clamp(1+Math.random()*9,1,16),thr:clamp(base.thr+(Math.random()-.5)*30,0,95)},pal[(pi+2)%pal.length]));
+  return v;
+}
+function loadPresets(){try{return JSON.parse(localStorage.getItem('streaklab.looks')||'{}')}catch(e){return{}}}
+function storePresets(o){try{localStorage.setItem('streaklab.looks',JSON.stringify(o));return true}catch(e){return false}}
+function fillPresets(sel){const o=loadPresets(),s=$('presetSel');s.length=1;Object.keys(o).sort().forEach(n=>{const op=document.createElement('option');op.value=op.textContent=n;s.appendChild(op)});if(sel)s.value=sel;$('presetDel').disabled=!s.value}
+fillPresets();
+$('presetSave').onclick=()=>{const n=$('presetName').value.trim();if(!n){$('presetName').focus();status('Type a name for the look first.');return}
+  const s=getSettings(),look={};LOOK_KEYS.forEach(k=>look[k]=s[k]);const o=loadPresets();o[n]=look;
+  if(storePresets(o)){fillPresets(n);$('presetName').value='';status(`Saved the look “${n}”.`)}else status('This browser won’t let the page store looks.')};
+$('presetName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('presetSave').click()}});
+$('presetSel').onchange=()=>{$('presetDel').disabled=!$('presetSel').value;const o=loadPresets()[$('presetSel').value];if(o){applyLook(o);status(`Applied the look “${$('presetSel').value}”.`)}};
+$('presetDel').onclick=()=>{const n=$('presetSel').value;if(!n)return;if(!confirm(`Delete the look “${n}”?`))return;const o=loadPresets();delete o[n];storePresets(o);fillPresets();status(`Deleted “${n}”.`)};
+
+// ---------- loading (file picker, drag and drop, paste)
+function loadFile(f){
+  if(!f||busy)return;
+  if(f.type&&!f.type.startsWith('image/')){status('That isn’t an image. Choose a JPEG, PNG or HEIC photo.');return}
+  const img=new Image(); img.onload=()=>{
+    if(fullImg)URL.revokeObjectURL(fullImg.src);
+    fullImg=img; FW=img.naturalWidth; FH=img.naturalHeight;
+    const s=Math.min(1,MAXD/Math.max(FW,FH));
+    W=Math.round(FW*s); H=Math.round(FH*s);
+    [view,ov,maskCv].forEach(c=>{c.width=W;c.height=H});
+    vctx.drawImage(img,0,0,W,H); src=vctx.getImageData(0,0,W,H).data.slice();
+    mask=new Uint8Array(W*H); strokes=[]; edges=[]; st.cx=.5; st.cy=.5;
+    $('empty').hidden=true; $('zoomer').hidden=false; $('zoombar').hidden=false; $('stage').classList.add('has-photo');
+    ['tools','ctx','newBtn','topSave'].forEach(k=>$(k).hidden=false);
+    $('saveBox').style.display='none'; $('slides').innerHTML=''; $('carAll').hidden=true; $('reelBox').style.display='none'; $('thumbs').innerHTML=''; $('variHint').hidden=true; status('');
+    $('sizeInfo').textContent=s<1?`Original size ${FW} × ${FH}. You’re editing a smaller preview; saving renders at the original size.`:`Original size ${FW} × ${FH}.`;
+    refreshActs(); updateCtx(); layout(true); render(); drawOverlay();
+  }; img.onerror=()=>{URL.revokeObjectURL(img.src);status('That file couldn’t be opened. Try a JPEG, PNG or HEIC exported from your photo app.')};
+  img.src=URL.createObjectURL(f);
+}
+document.querySelectorAll('.pick').forEach(inp=>inp.addEventListener('change',e=>{loadFile(e.target.files[0]);e.target.value=''}));
+let dragDepth=0;
+const hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
+addEventListener('dragenter',e=>{if(!hasFiles(e))return;e.preventDefault();dragDepth++;$('stage').classList.add('dragging')});
+addEventListener('dragleave',()=>{if(--dragDepth<=0){dragDepth=0;$('stage').classList.remove('dragging')}});
+addEventListener('dragover',e=>{if(hasFiles(e))e.preventDefault()});
+addEventListener('drop',e=>{if(!hasFiles(e))return;e.preventDefault();dragDepth=0;$('stage').classList.remove('dragging');loadFile(e.dataTransfer.files[0])});
+addEventListener('paste',e=>{if(e.target.closest&&e.target.closest('input[type=text]'))return;const it=[...(e.clipboardData?.items||[])].find(i=>i.type.startsWith('image/'));if(it){e.preventDefault();loadFile(it.getAsFile())}});
+
+// ---------- overlay
+function dirVectors(tx,ty,p){const v=p.side;
+  if(v==='up')return[[0,-1]]; if(v==='down')return[[0,1]]; if(v==='left')return[[-1,0]]; if(v==='right')return[[1,0]];
+  if(v==='angle'){const a=p.angle*Math.PI/180;return[[Math.sin(a),-Math.cos(a)]]}
+  const s=v==='a'?[1]:v==='b'?[-1]:[1,-1]; return s.map(g=>[ty*g,-tx*g])}
+function maxR(cx,cy,w,h){return Math.ceil(Math.max(Math.hypot(cx,cy),Math.hypot(w-cx,cy),Math.hypot(cx,h-cy),Math.hypot(w-cx,h-cy)))}
+function drawOverlay(){ if(!src)return;
+  const p=getSettings();
+  octx.clearRect(0,0,W,H); octx.globalAlpha=.45; octx.drawImage(maskCv,0,0); octx.globalAlpha=1;
+  const sc=W/(ov.getBoundingClientRect().width||W);
+  octx.lineWidth=2*sc; octx.setLineDash([8*sc,6*sc]); octx.strokeStyle='rgba(255,255,255,.85)';
+  if(st.mode==='vertical'){octx.beginPath();const y=st.startV/100*(H-1);octx.moveTo(0,y);octx.lineTo(W,y);octx.stroke()}
+  else if(st.mode==='radial'){octx.beginPath();const R=maxR(st.cx*W,st.cy*H,W,H);octx.arc(st.cx*W,st.cy*H,Math.max(2,st.startR/100*R),0,TAU);octx.stroke()}
+  octx.setLineDash([]);
+  const all=curEdge?edges.concat([curEdge]):edges, show=st.mode==='edge';
+  for(const e of all){
+    if(e.length<2)continue;
+    octx.globalAlpha=show?1:.35;
+    octx.strokeStyle='#ffa53a'; octx.lineWidth=3*sc; octx.lineJoin=octx.lineCap='round';
+    octx.beginPath(); e.forEach((q,i)=>{const x=q.x*W,y=q.y*H;i?octx.lineTo(x,y):octx.moveTo(x,y)}); octx.stroke();
+    if(show){
+      octx.strokeStyle='#fff'; octx.lineWidth=1.5*sc; let acc=0;
+      for(let i=1;i<e.length;i++){const ax=e[i-1].x*W,ay=e[i-1].y*H,bx=e[i].x*W,by=e[i].y*H,l=Math.hypot(bx-ax,by-ay);acc+=l;
+        if(acc>=28*sc&&l>0){acc=0;const tx=(bx-ax)/l,ty=(by-ay)/l;
+          for(const [nx,ny] of dirVectors(tx,ty,p)){octx.beginPath();octx.moveTo(bx,by);octx.lineTo(bx+nx*14*sc,by+ny*14*sc);octx.stroke()}}}
+    }
+    octx.globalAlpha=1;
+  }
+}
+
+// ---------- layout, zoom and pan
+const zm={z:1,tx:0,ty:0,pan:false};
+const wideMQ=matchMedia('(min-width:760px), (orientation:landscape) and (min-width:560px)');
+let layoutKey='';
+function layout(force){
+  if(!src)return;
+  const stage=$('stage'), wide=wideMQ.matches;
+  let sw, mh;
+  if(wide){stage.style.height='';sw=stage.clientWidth;mh=stage.clientHeight}
+  else{sw=stage.clientWidth;mh=Math.max(200,Math.round(innerHeight*.5))}
+  const key=[wide,sw,wide?mh:0].join();
+  if(!force&&key===layoutKey)return; layoutKey=key; // ignore phone URL-bar height changes so zoom isn't reset while scrolling
+  const s=Math.min(sw/W,mh/H);
+  view.style.width=W*s+'px'; view.style.height=H*s+'px';
+  if(!wide)stage.style.height=Math.round(H*s)+'px';
+  zm.z=1;zm.tx=0;zm.ty=0; applyZoom(); syncWorkH();
+}
+function syncWorkH(){document.documentElement.style.setProperty('--workH',wideMQ.matches?'0px':$('work').offsetHeight+'px')}
+function applyZoom(){$('zoomer').style.transform=`translate(${zm.tx}px,${zm.ty}px) scale(${zm.z})`;$('zoomPct').textContent=Math.round(zm.z*100)+'%';drawOverlay()}
+function origin(){const r=$('zoomer').getBoundingClientRect();return{x:r.left-zm.tx,y:r.top-zm.ty}}
+function zoomAt(sx,sy,nz){nz=Math.max(1,Math.min(16,nz));const o=origin(),lx=(sx-o.x-zm.tx)/zm.z,ly=(sy-o.y-zm.ty)/zm.z;
+  zm.z=nz;zm.tx=sx-o.x-nz*lx;zm.ty=sy-o.y-nz*ly;if(nz===1){zm.tx=0;zm.ty=0}applyZoom()}
+function stageCentre(){const r=$('stage').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]}
+$('zoomIn').onclick=()=>zoomAt(...stageCentre(),zm.z*1.6);
+$('zoomOut').onclick=()=>zoomAt(...stageCentre(),zm.z/1.6);
+$('zoomFit').onclick=()=>{zm.z=1;zm.tx=0;zm.ty=0;applyZoom()};
+$('panBtn').onclick=()=>{zm.pan=!zm.pan;$('panBtn').setAttribute('aria-pressed',zm.pan);$('stage').classList.toggle('panmode',zm.pan)};
+$('stage').addEventListener('wheel',e=>{if(!src)return;e.preventDefault();zoomAt(e.clientX,e.clientY,zm.z*Math.exp(-e.deltaY*.0025))},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+addEventListener('resize',()=>layout());
+wideMQ.addEventListener?.('change',()=>layout(true));
+if(window.ResizeObserver)new ResizeObserver(()=>{syncWorkH();if(wideMQ.matches)layout()}).observe($('work'));
+
+// ---------- before / after
+let comparing=false;
+function compareOn(){if(!src||busy||comparing)return;comparing=true;$('compareBtn').classList.add('held');vctx.putImageData(new ImageData(src,W,H),0,0);ov.style.opacity=0}
+function compareOff(){if(!comparing)return;comparing=false;$('compareBtn').classList.remove('held');ov.style.opacity='';render()}
+const cb=$('compareBtn');
+cb.addEventListener('pointerdown',e=>{e.preventDefault();try{cb.setPointerCapture(e.pointerId)}catch(_){}compareOn()});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>cb.addEventListener(t,compareOff));
+cb.addEventListener('contextmenu',e=>e.preventDefault());
+cb.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();compareOn()}});
+cb.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')compareOff()});
+cb.addEventListener('blur',compareOff);
+
+// ---------- keyboard shortcuts
+addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('input[type=text],select'))return;
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'&&edges.length&&!busy){e.preventDefault();$('undoEdge').click()}
+  else if(e.key==='\\'&&!e.repeat)compareOn();
+});
+addEventListener('keyup',e=>{if(e.key==='\\')compareOff()});
+
+// ---------- painting
+function dot(m,w,h,t,px,py,rad){
+  const x0=Math.max(0,px-rad|0),x1=Math.min(w-1,px+rad|0),y0=Math.max(0,py-rad|0),y1=Math.min(h-1,py+rad|0),r2=rad*rad,v=t==='paint'?1:0;
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if((x-px)**2+(y-py)**2<=r2)m[y*w+x]=v;
+}
+function maskAt(w,h){const m=new Uint8Array(w*h);for(const s of strokes)dot(m,w,h,s.t,s.x*w,s.y*h,s.r*w);return m}
+let drawing=false;
+function pt(e){const r=ov.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+function paintAt(p){const rad=+$('brush').value*(W/ov.getBoundingClientRect().width);const t=st.tool;
+  strokes.push({t,x:p.x/W,y:p.y/H,r:rad/W});
+  dot(mask,W,H,t,p.x,p.y,rad);
+  mctx.save(); if(t==='erase')mctx.globalCompositeOperation='destination-out';
+  mctx.fillStyle='#ff3b3b'; mctx.beginPath(); mctx.arc(p.x,p.y,rad,0,TAU); mctx.fill(); mctx.restore();
+  if(t==='erase'&&edges.length){
+    const r2=rad*rad, out=[];
+    for(const e of edges){let cur=[];
+      for(const q of e){if((q.x*W-p.x)**2+(q.y*H-p.y)**2<=r2){if(cur.length>1)out.push(cur);cur=[]}else cur.push(q)}
+      if(cur.length>1)out.push(cur)}
+    edges=out; edgesDirty=true}
+  drawOverlay()}
+const ptrs=new Map(); let pinch=null, panning=null;
+function pinchInfo(){const [a,b]=[...ptrs.values()];return{d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2,my:(a.y+b.y)/2}}
+ov.addEventListener('pointerdown',e=>{if(!src||busy)return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); ov.setPointerCapture(e.pointerId);
+  if(ptrs.size===2){
+    if(drawing){drawing=false;curEdge=null;drawOverlay()} panning=null;
+    const i=pinchInfo(), o=origin(); pinch={...i,z:zm.z,lx:(i.mx-o.x-zm.tx)/zm.z,ly:(i.my-o.y-zm.ty)/zm.z,o}; return}
+  if(ptrs.size>2)return;
+  if(zm.pan||e.button===1){panning={x:e.clientX,y:e.clientY,tx:zm.tx,ty:zm.ty};return}
+  const p=pt(e);
+  if(st.tool==='move'){
+    if(st.mode==='vertical'){st.startV=Math.round(p.y/H*100);$('start').value=st.startV}
+    else if(st.mode==='radial'){st.cx=p.x/W;st.cy=p.y/H}
+    syncOut('start'); drawOverlay(); schedule(); drawing=true; return}
+  drawing=true;
+  if(st.tool==='edge'){curEdge=[{x:p.x/W,y:p.y/H}];drawOverlay()} else paintAt(p)});
+ov.addEventListener('pointermove',e=>{
+  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&ptrs.size===2){const i=pinchInfo(), nz=Math.max(1,Math.min(16,pinch.z*i.d/pinch.d));
+    zm.z=nz; zm.tx=i.mx-pinch.o.x-nz*pinch.lx; zm.ty=i.my-pinch.o.y-nz*pinch.ly; applyZoom(); return}
+  if(panning){zm.tx=panning.tx+e.clientX-panning.x;zm.ty=panning.ty+e.clientY-panning.y;applyZoom();return}
+  if(!drawing)return;const p=pt(e), sc=W/ov.getBoundingClientRect().width;
+  if(st.tool==='move'){if(st.mode==='vertical'){st.startV=Math.max(0,Math.min(100,Math.round(p.y/H*100)));$('start').value=st.startV}else if(st.mode==='radial'){st.cx=Math.max(0,Math.min(1,p.x/W));st.cy=Math.max(0,Math.min(1,p.y/H))}syncOut('start');drawOverlay();schedule();return}
+  if(st.tool==='edge'){const l=curEdge[curEdge.length-1];if(Math.hypot(p.x-l.x*W,p.y-l.y*H)>=1.5*sc){curEdge.push({x:p.x/W,y:p.y/H});drawOverlay()}}
+  else paintAt(p)});
+['pointerup','pointercancel'].forEach(t=>ov.addEventListener(t,e=>{ptrs.delete(e.pointerId);
+  if(ptrs.size<2)pinch=null; if(!ptrs.size)panning=null;
+  if(!drawing)return;drawing=false;
+  if(curEdge){if(curEdge.length>1)edges.push(curEdge);curEdge=null;drawOverlay();updateCtx()}
+  edgesDirty=false; schedule()}));
+
+// ---------- processing (works on a context: {src,w,h,mask,bs})
+const lum=(d,i)=>(d[i]*.299+d[i+1]*.587+d[i+2]*.114)/255;
+const rnd=(i,s)=>{const x=Math.sin((i+s*1013.7)*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+function streakCols(d,w,r0,p,bs,touched,dist){
+  const thr=p.thr/100, jit=p.jit/100, bw=Math.max(1,Math.round(p.band*bs)), lf=p.len/100;
+  if(p.method==='sort'){sortCols(d,w,r0,thr,lf,bw,jit,p.seed,touched,dist);return}
+  for(let bx=0;bx<w;bx+=bw){
+    const be=Math.min(w,bx+bw); let L=0;
+    for(let x=bx;x<be;x++)L+=lum(d,(r0*w+x)*4); L/=(be-bx);
+    const t=Math.max(0,Math.min(1,(L-thr)/(1-thr+1e-6)));
+    const len=Math.round(Math.sqrt(t)*lf*(1-jit+jit*rnd(bx/bw|0,p.seed))*r0); if(len<1)continue; const fs=len*.8;
+    for(let x=bx;x<be;x++){
+      const s=(r0*w+x)*4, R=d[s], G=d[s+1], B=d[s+2];
+      for(let k=1;k<=len&&r0-k>=0;k++){
+        const q=(r0-k)*w+x, i=q*4, f=k<fs?1:(len-k)/(len-fs+1e-6);
+        d[i]+=(R-d[i])*f; d[i+1]+=(G-d[i+1])*f; d[i+2]+=(B-d[i+2])*f;
+        if(touched)touched[q]=1; if(dist)dist[q]=k;
+      }
+    }
+  }
+}
+function sortCols(d,w,r0,thr,lf,bw,jit,sd,touched,dist){
+  const buf=[];
+  for(let x=0;x<w;x++){
+    const lim=Math.max(0,Math.round(r0-lf*r0*(1-jit+jit*rnd(x/bw|0,sd))));
+    let y=r0;
+    while(y>=lim){
+      while(y>=lim&&lum(d,(y*w+x)*4)<thr)y--;
+      const end=y; buf.length=0;
+      while(y>=lim&&lum(d,(y*w+x)*4)>=thr){const i=(y*w+x)*4;buf.push([d[i],d[i+1],d[i+2],lum(d,i)]);y--}
+      if(buf.length>1){buf.sort((a,b)=>b[3]-a[3]);
+        for(let k=0;k<buf.length;k++){const q=(end-k)*w+x,i=q*4;d[i]=buf[k][0];d[i+1]=buf[k][1];d[i+2]=buf[k][2];if(touched)touched[q]=1;if(dist)dist[q]=r0-(end-k)}}
+    }
+  }
+}
+function radial(c,out,p,dist){
+  const {src,w,h}=c, cx=p.cx*w, cy=p.cy*h, R=maxR(cx,cy,w,h), A=Math.min(12000,Math.ceil(TAU*R));
+  const cs=new Float64Array(A), sn=new Float64Array(A);
+  for(let a=0;a<A;a++){cs[a]=Math.cos(a/A*TAU);sn[a]=Math.sin(a/A*TAU)}
+  const pd=new Uint8ClampedArray(A*R*4);
+  for(let j=0;j<R;j++){const r=R-1-j;
+    for(let a=0;a<A;a++){const x=Math.round(cx+r*cs[a]), y=Math.round(cy+r*sn[a]);
+      if(x>=0&&x<w&&y>=0&&y<h){const i=(y*w+x)*4,o=(j*A+a)*4;pd[o]=src[i];pd[o+1]=src[i+1];pd[o+2]=src[i+2]}}}
+  const touched=new Uint8Array(A*R), pdist=dist?new Float32Array(A*R):null;
+  streakCols(pd,A,R-1-Math.round(p.startR/100*(R-1)),p,c.bs,touched,pdist);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const dx=x-cx, dy=y-cy, r=Math.round(Math.hypot(dx,dy)), j=R-1-r; if(j<0)continue;
+    let th=Math.atan2(dy,dx); if(th<0)th+=TAU;
+    const a=Math.round(th/TAU*A)%A, q=j*A+a; if(!touched[q])continue;
+    const o=q*4, i=(y*w+x)*4; out[i]=pd[o]; out[i+1]=pd[o+1]; out[i+2]=pd[o+2];
+    if(dist)dist[y*w+x]=pdist[q];
+  }
+}
+function edgeStreaks(c,out,p,dist){
+  const {src,w,h}=c, thr=p.thr/100, jit=p.jit/100, bw=Math.max(1,Math.round(p.band*c.bs)), maxLen=p.len/100*.75*Math.hypot(w,h);
+  const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs));
+  edges.forEach((e,ei)=>{
+    const xs=[],ys=[];
+    for(let i=1;i<e.length;i++){const ax=e[i-1].x*w,ay=e[i-1].y*h,bx=e[i].x*w,by=e[i].y*h,l=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.ceil(l/step));
+      for(let k=0;k<n;k++){xs.push(ax+(bx-ax)*k/n);ys.push(ay+(by-ay)*k/n)}}
+    xs.push(e[e.length-1].x*w);ys.push(e[e.length-1].y*h);
+    const N=xs.length; if(N<3)return;
+    const tx=new Float64Array(N),ty=new Float64Array(N),ang=new Float64Array(N);
+    for(let k=0;k<N;k++){const a=Math.max(0,k-win),b=Math.min(N-1,k+win);let dx=xs[b]-xs[a],dy=ys[b]-ys[a],l=Math.hypot(dx,dy)||1;tx[k]=dx/l;ty[k]=dy/l;ang[k]=Math.atan2(ty[k],tx[k])}
+    const per=Math.max(1,Math.round(bw/step)), bands=Math.ceil(N/per), blen=new Float64Array(bands);
+    for(let b=0;b<bands;b++){let L=0,n=0;
+      for(let k=b*per;k<Math.min(N,(b+1)*per);k++){const x=Math.round(xs[k]),y=Math.round(ys[k]);if(x>=0&&x<w&&y>=0&&y<h){L+=lum(src,(y*w+x)*4);n++}}
+      if(!n)continue; L/=n;
+      const t=Math.max(0,Math.min(1,(L-thr)/(1-thr+1e-6)));
+      blen[b]=Math.sqrt(t)*maxLen*(1-jit+jit*rnd(b+ei*7919,p.seed))}
+    for(let k=0;k<N;k++){
+      const len=blen[(k/per)|0]; if(len<1)continue;
+      const sx=Math.round(xs[k]),sy=Math.round(ys[k]); if(sx<0||sx>=w||sy<0||sy>=h)continue;
+      const s=(sy*w+sx)*4, R=src[s],G=src[s+1],B=src[s+2], fs=len*.8;
+      let dth=perp&&k<N-1?Math.abs(ang[k+1]-ang[k]):0; if(dth>Math.PI)dth=TAU-dth;
+      for(const [nx,ny] of dirVectors(tx[k],ty[k],p)){
+        for(let d=1;d<=len;d+=.7){
+          const f=d<fs?1:(len-d)/(len-fs+1e-6), wide=Math.min(6,Math.ceil(step+d*dth));
+          for(let j=0;j<wide;j++){
+            const x=Math.round(xs[k]+nx*d+tx[k]*j*.9), y=Math.round(ys[k]+ny*d+ty[k]*j*.9);
+            if(x<0||x>=w||y<0||y>=h)continue;
+            const q=y*w+x, i=q*4; out[i]+=(R-out[i])*f; out[i+1]+=(G-out[i+1])*f; out[i+2]+=(B-out[i+2])*f;
+            if(dist&&d<dist[q])dist[q]=d;
+          }
+        }
+      }
+    }
+  });
+}
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+function grade(out,p){
+  const c=[hex(p.c1),hex(p.c2),hex(p.c3)], lut=new Uint8Array(768);
+  for(let v=0;v<256;v++){const t=v/255, seg=t<.5?0:1, f=t<.5?t*2:(t-.5)*2;
+    for(let k=0;k<3;k++)lut[v*3+k]=c[seg][k]+(c[seg+1][k]-c[seg][k])*f}
+  const amt=p.amt/100, g=p.grain*1.1, sd=p.seed|0;
+  for(let o=0,px=0;o<out.length;o+=4,px++){
+    let n=0; if(g){let x=Math.imul(px^sd,2654435761);x^=x>>>15;x=Math.imul(x,2246822519);x^=x>>>13;n=((x>>>0)/4294967296-.5)*g}
+    const v=Math.round(lum(out,o)*255);
+    for(let k=0;k<3;k++)out[o+k]=out[o+k]+(lut[v*3+k]-out[o+k])*amt+n;
+    out[o+3]=255;
+  }
+  return out;
+}
+function compute(c,p,wantDist){
+  const out=new Uint8ClampedArray(c.src), dist=wantDist?new Float32Array(c.w*c.h).fill(Infinity):null;
+  if(p.mode==='vertical')streakCols(out,c.w,Math.min(c.h-1,Math.round(p.startV/100*(c.h-1))),p,c.bs,null,dist);
+  else if(p.mode==='radial')radial(c,out,p,dist);
+  else edgeStreaks(c,out,p,dist);
+  for(let i=0;i<c.w*c.h;i++)if(c.mask[i]){const o=i*4;out[o]=c.src[o];out[o+1]=c.src[o+1];out[o+2]=c.src[o+2];if(dist)dist[i]=Infinity}
+  grade(out,p);
+  return wantDist?{out,dist,orig:grade(new Uint8ClampedArray(c.src),p)}:{out};
+}
+function previewCtx(){return{src,w:W,h:H,mask,bs:1}}
+// read the original photo at any size (tiled, so very large photos fit browser canvas limits)
+function ctxAt(tw,th){
+  const s=new Uint8ClampedArray(tw*th*4), rows=Math.max(1,Math.floor(4000000/tw));
+  const tc=document.createElement('canvas'); tc.width=tw; tc.height=Math.min(rows,th); const tx=tc.getContext('2d',{willReadFrequently:true});
+  for(let y=0;y<th;y+=rows){const hh=Math.min(rows,th-y);tx.clearRect(0,0,tw,tc.height);
+    tx.drawImage(fullImg,0,y*FH/th,FW,hh*FH/th,0,0,tw,hh);s.set(tx.getImageData(0,0,tw,hh).data,y*tw*4)}
+  tc.width=tc.height=1;
+  return{src:s,w:tw,h:th,mask:maskAt(tw,th),bs:tw/W};
+}
+function toCanvas(d,w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').putImageData(new ImageData(d,w,h),0,0);return c}
+
+function render(){ if(!src||busy)return; vctx.putImageData(new ImageData(compute(previewCtx(),getSettings()).out,W,H),0,0); }
+let timer=0; function schedule(){clearTimeout(timer);timer=setTimeout(render,70)}
+
+// ---------- variations
+$('variBtn').onclick=async()=>{
+  if(!src||busy)return; setBusy(true); status('Rendering variations…'); await tick();
+  try{
+    const s=Math.min(1,480/Math.max(FW,FH)), c=ctxAt(Math.round(FW*s),Math.round(FH*s)), base=getSettings(), box=$('thumbs');
+    box.innerHTML='';
+    for(const v of variants(base)){
+      const cv=toCanvas(compute(c,v).out,c.w,c.h), b=document.createElement('button'), im=new Image();
+      im.src=cv.toDataURL('image/jpeg',.85); im.alt='Variation'; b.appendChild(im);
+      b.onclick=()=>{applyLook(v);status('Variation applied. Shuffle or tweak from here.')};
+      box.appendChild(b); await tick();
+    }
+    $('variHint').hidden=false; status('');
+  }catch(e){status('Couldn’t render variations: '+(e.message||e))}
+  setBusy(false);
+};
+
+// ---------- full-size save
+function canvasBlob(cv,type,q){return new Promise((res,rej)=>cv.toBlob(b=>b?res(b):rej(new Error('the browser couldn’t encode an image this large')),type,q))}
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function chunk(type,data){const out=new Uint8Array(12+data.length),dv=new DataView(out.buffer);
+  dv.setUint32(0,data.length);for(let i=0;i<4;i++)out[4+i]=type.charCodeAt(i);out.set(data,8);
+  let c=0xffffffff;for(let i=4;i<8+data.length;i++)c=CRC[(c^out[i])&255]^(c>>>8);dv.setUint32(8+data.length,(c^0xffffffff)>>>0);return out}
+async function encodePNG(d,w,h){
+  if(typeof CompressionStream==='undefined')throw new Error('this browser is too old to write very large PNGs');
+  const raw=new Uint8Array((w*3+1)*h);let p=0;
+  for(let y=0;y<h;y++){raw[p++]=0;for(let x=0,i=y*w*4;x<w;x++,i+=4){raw[p++]=d[i];raw[p++]=d[i+1];raw[p++]=d[i+2]}}
+  const z=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer());
+  const ih=new Uint8Array(13),dv=new DataView(ih.buffer);dv.setUint32(0,w);dv.setUint32(4,h);ih[8]=8;ih[9]=2;
+  return new Blob([new Uint8Array([137,80,78,71,13,10,26,10]),chunk('IHDR',ih),chunk('IDAT',z),chunk('IEND',new Uint8Array(0))],{type:'image/png'})}
+
+$('saveBtn').onclick=async()=>{
+  if(!src||busy)return; setBusy(true); $('saveBox').style.display='none';
+  try{
+    status(`Reading the photo at ${FW} × ${FH}…`); await tick();
+    const c=ctxAt(FW,FH);
+    status('Rendering streaks at full size…'); await tick();
+    const out=compute(c,getSettings()).out;
+    status('Encoding…'); await tick();
+    const fits=FW*FH<=CANVAS_MAX, want=$('fmt').value; let blob, note='';
+    if(fits){const cv=toCanvas(out,FW,FH);blob=await canvasBlob(cv,want==='jpeg'?'image/jpeg':'image/png',.97);cv.width=cv.height=1}
+    else{blob=await encodePNG(out,FW,FH); if(want==='jpeg')note=' It’s too large for the browser’s JPEG encoder, so it’s lossless PNG.'}
+    const img=$('saveImg'); if(img.src.startsWith('blob:'))URL.revokeObjectURL(img.src);
+    img.src=URL.createObjectURL(blob); $('saveBox').style.display='grid';
+    const ext=blob.type==='image/png'?'png':'jpg';
+    status(`Rendered ${FW} × ${FH} ${ext.toUpperCase()}, ${(blob.size/1e6).toFixed(1)} MB.${note}`);
+    setBusy(false);
+    lastSave={blob,name:`streak-${stamp()}.${ext}`};
+    await saveFiles([lastSave]);
+  }catch(e){status(`Full-size render failed: ${e.message||e}. Very large photos can run out of memory on a phone; try the same file on a computer.`)}
+  setBusy(false);
+};
+
+// ---------- carousel
+let slideFiles=[];
+function cropRect(w,h,ar){return w/h>ar?{w:h*ar,h,x:(w-h*ar)/2,y:0}:{w,h:w/ar,x:0,y:(h-w/ar)/2}}
+async function slideFrom(cv,cr){const s=document.createElement('canvas');s.width=1080;s.height=1350;const x=s.getContext('2d');
+  x.imageSmoothingQuality='high';x.drawImage(cv,cr.x,cr.y,cr.w,cr.h,0,0,1080,1350);const b=await canvasBlob(s,'image/jpeg',.95);s.width=s.height=1;return b}
+$('carBtn').onclick=async()=>{
+  if(!src||busy)return; setBusy(true); $('slides').innerHTML=''; $('carAll').hidden=true; slideFiles=[];
+  try{
+    status('Building carousel slides…'); await tick();
+    const full=cropRect(FW,FH,.8), s=Math.min(1,Math.max(1080/full.w,.01)), tw=Math.round(FW*s), th=Math.round(FH*s);
+    const c=ctxAt(tw,th), cr=cropRect(tw,th,.8), p=getSettings(), list=[];
+    list.push(['Finished',toCanvas(compute(c,p).out,tw,th)]); await tick();
+    const orig=toCanvas(c.src,tw,th); list.push(['Original',orig]);
+    // process slide: original with edges / start line and protect area drawn on
+    const pc=document.createElement('canvas');pc.width=tw;pc.height=th;const px=pc.getContext('2d');px.drawImage(orig,0,0);
+    if(strokes.length){const mc=document.createElement('canvas');mc.width=tw;mc.height=th;const mx=mc.getContext('2d'),md=mx.createImageData(tw,th);
+      for(let i=0;i<tw*th;i++)if(c.mask[i]){md.data[i*4]=255;md.data[i*4+1]=59;md.data[i*4+2]=59;md.data[i*4+3]=95}
+      mx.putImageData(md,0,0);px.drawImage(mc,0,0)}
+    const lw=Math.max(3,tw/220);px.lineWidth=lw;px.lineCap=px.lineJoin='round';px.strokeStyle='#ffa53a';
+    if(p.mode==='edge'){for(const e of edges){px.beginPath();e.forEach((q,i)=>{i?px.lineTo(q.x*tw,q.y*th):px.moveTo(q.x*tw,q.y*th)});px.stroke()}}
+    else if(p.mode==='vertical'){const y=p.startV/100*(th-1);px.setLineDash([lw*4,lw*3]);px.beginPath();px.moveTo(0,y);px.lineTo(tw,y);px.stroke()}
+    else{px.setLineDash([lw*4,lw*3]);px.beginPath();px.arc(p.cx*tw,p.cy*th,Math.max(4,p.startR/100*maxR(p.cx*tw,p.cy*th,tw,th)),0,TAU);px.stroke()}
+    list.push(['Process',pc]);
+    if($('carVar').checked){for(const v of variants(p).slice(0,2)){list.push(['Variation',toCanvas(compute(c,v).out,tw,th)]);status(`Rendering variations…`);await tick()}}
+    status('Encoding slides…'); await tick();
+    let n=1;
+    for(const [label,cv] of list){
+      const blob=await slideFrom(cv,cr), name=`streak-${stamp()}-${n}.jpg`; slideFiles.push({blob,name});
+      const fig=document.createElement('figure'), im=new Image(), cap=document.createElement('figcaption'), sb=document.createElement('button');
+      im.src=URL.createObjectURL(blob); im.alt=`Slide ${n}: ${label}`;
+      cap.textContent=`${n}. ${label}`; sb.className='chip'; sb.textContent='Save'; const f={blob,name}; sb.onclick=()=>saveFiles([f]);
+      cap.appendChild(sb); fig.append(im,cap); $('slides').appendChild(fig); n++;
+    }
+    $('carAll').hidden=false;
+    status(`${list.length} slides ready at 1080 × 1350. Save them, or long-press each image.`);
+  }catch(e){status('Couldn’t build the carousel: '+(e.message||e))}
+  setBusy(false);
+};
+$('carAll').onclick=()=>{if(slideFiles.length)saveFiles(slideFiles)};
+
+// ---------- reel
+let reelFile=null;
+function pickMime(){if(typeof MediaRecorder==='undefined')return null;
+  for(const m of['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'])if(MediaRecorder.isTypeSupported(m))return m;return ''}
+const ease=t=>t<=0?0:t>=1?1:t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+$('reelBtn').onclick=async()=>{
+  if(!src||busy)return;
+  const mime=pickMime(); if(mime===null){status('This browser can’t record video. Try Safari or Chrome.');return}
+  setBusy(true); $('reelBox').style.display='none';
+  try{
+    status('Preparing the Reel…'); await tick();
+    const p=getSettings(), s=Math.min(1080/FW,1920/FH), iw=Math.round(FW*s), ih=Math.round(FH*s);
+    const c=ctxAt(iw,ih), r=compute(c,p,true), style=$('reelStyle').value;
+    let maxD=0; for(const d of r.dist)if(d!==Infinity&&d>maxD)maxD=d;
+    const cSrc=toCanvas(c.src,iw,ih), cOrig=toCanvas(r.orig,iw,ih), cFin=toCanvas(r.out,iw,ih);
+    const fr=document.createElement('canvas');fr.width=iw;fr.height=ih;const fx=fr.getContext('2d'),fimg=fx.createImageData(iw,ih);
+    const f32=new Uint32Array(fimg.data.buffer), o32=new Uint32Array(r.out.buffer), g32=new Uint32Array(r.orig.buffer), dist=r.dist;
+    const vc=$('reelCanvas'), vx=vc.getContext('2d'), ox=(1080-iw)/2, oy=(1920-ih)/2, bg=p.c1;
+    vc.hidden=false;
+    const draw=t=>{
+      vx.fillStyle=bg; vx.fillRect(0,0,1080,1920); vx.globalAlpha=1;
+      if(t<1){vx.drawImage(cSrc,ox,oy);return}
+      if(style==='wipe'){
+        if(t>=4){vx.drawImage(cFin,ox,oy);return}
+        const X=ease((t-1)/3)*iw; vx.drawImage(cSrc,ox,oy);
+        if(X>0){vx.drawImage(cFin,0,0,X,ih,ox,oy,X,ih);vx.fillStyle='rgba(255,255,255,.9)';vx.fillRect(ox+X-2,oy,4,ih)}
+        return}
+      if(t<1.6){vx.drawImage(cSrc,ox,oy);vx.globalAlpha=(t-1)/.6;vx.drawImage(cOrig,ox,oy);vx.globalAlpha=1;return}
+      if(t>=4.6){vx.drawImage(cFin,ox,oy);return}
+      const T=ease((t-1.6)/3)*maxD;
+      for(let i=0;i<f32.length;i++)f32[i]=dist[i]<=T?o32[i]:g32[i];
+      fx.putImageData(fimg,0,0); vx.drawImage(fr,ox,oy);
+    };
+    draw(0);
+    const stream=vc.captureStream(30), rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:12000000}:{videoBitsPerSecond:12000000}), chunks=[];
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    const done=new Promise(res=>{rec.onstop=res});
+    status('Recording… keep this screen open (7 seconds).');
+    rec.start(250);
+    const DUR=7; const t0=performance.now();
+    await new Promise(res=>{const loop=()=>{const t=(performance.now()-t0)/1000;draw(Math.min(t,DUR));if(t<DUR)requestAnimationFrame(loop);else res()};requestAnimationFrame(loop)});
+    rec.stop(); await done; stream.getTracks().forEach(tr=>tr.stop()); vc.hidden=true;
+    const type=rec.mimeType||mime||'video/webm', ext=type.includes('mp4')?'mp4':'webm';
+    const blob=new Blob(chunks,{type:type.split(';')[0]}); reelFile={blob,name:`streak-reel-${stamp()}.${ext}`};
+    const v=$('reelVid'); if(v.src.startsWith('blob:'))URL.revokeObjectURL(v.src); v.src=URL.createObjectURL(blob); $('reelBox').style.display='grid'; v.play().catch(()=>{});
+    status(`Reel ready: ${ext.toUpperCase()}, ${(blob.size/1e6).toFixed(1)} MB.`+(ext==='webm'?' This browser only records WebM; Instagram wants MP4, so convert it or record in Safari.':''));
+  }catch(e){$('reelCanvas').hidden=true;status('Couldn’t make the Reel: '+(e.message||e))}
+  setBusy(false);
+};
+$('reelSave').onclick=()=>{if(reelFile)saveFiles([reelFile])};
+
+// ---------- shortcuts into the export tab
+let lastSave=null;
+$('saveAgain').onclick=()=>{if(lastSave)saveFiles([lastSave])};
+$('topSave').onclick=()=>{showTab('export');$('saveBtn').click()};
+setMode('vertical');
+})();
+</script>
+</body>
+</html>
