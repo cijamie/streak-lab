@@ -15,14 +15,27 @@ Everything runs in your browser. Photos are never uploaded anywhere.
    - **Vertical**: tap or drag on the photo to set the line the streaks rise from.
    - **Radial**: tap or drag to set the centre of the rings.
    - **Edge**: drag along a ridge, treetop, outline or the rim of the moon. Then pick a Direction. The white ticks show which way the streaks will go.
-3. **Shape the streaks** with Length, Threshold (how bright a pixel must be to streak), Randomness and Band width. Use **Shuffle streaks** to try a new random pattern.
-4. **Protect** (red paint) keeps the subject sharp. **Erase** removes protect paint and cuts away parts of edges. Hold **Before** to compare with the original.
-5. **Colour**: set the three duotone colours or start from a palette, then adjust strength and grain.
-6. **Looks**: render 4 variations and tap one to use it, or save the current settings as a named look so a whole series matches.
-7. **Export**:
+3. **Stack layers** to combine modes on one photo, for example Radial rings around the moon plus Edge streaks off a ridge. Tap **+ Add layer**, then pick the layer's mode. Each layer has its own sliders and edges, and the controls and photo tools always work on the selected layer. Layers apply in order, so later layers streak the result of earlier ones. You can have up to 4.
+4. **Shape the streaks** with Length, Threshold (how bright a pixel must be to streak), Randomness and Band width. Use **Shuffle streaks** to try a new random pattern.
+5. **Protect** (red paint) keeps the subject sharp. **Erase** removes protect paint and cuts away parts of edges. Hold **Before** to compare with the original.
+6. **Colour**: set the three duotone colours or start from a palette, then adjust strength and grain.
+7. **Looks**: render 4 variations and tap one to use it, or save the current settings, including all layers, as a named look so a whole series matches.
+8. **Export**:
    - **Full size** at the photo's original resolution, as JPEG or PNG. Photos over 16 megapixels are saved as PNG.
    - **Instagram carousel**: 1080 × 1350 slides showing the finished photo, the original, your edges, and two variations if you want them.
-   - **Reel**: a 7-second, 1080 × 1920 silent video in which the streaks grow or wipe across. Safari and Chrome record MP4. Browsers that only record WebM say so.
+   - **Video**: a silent clip for Reels, Stories or the feed. Press **Preview** to watch it without recording, then **Make video**. Safari and Chrome record MP4. Browsers that only record WebM say so.
+     - **Animations**:
+       - **Streaks grow**: the streaks grow out of the original photo.
+       - **Before/after wipe**: a line sweeps across from the original to the finished photo.
+       - **Streaks breathe** (loops): the streaks grow and shrink back.
+       - **Slow push-in**: the camera slowly zooms toward the streaks.
+       - **Colour cycle** (loops): cross-fades through the palettes.
+       - **Stop-motion streaks** (loops): flicks through new random streak patterns.
+       - **Glitch reveal**: the original breaks into glitchy slices that settle into the finished photo.
+       - **Beat cuts**: cuts between finished, original and variations on every beat, at a BPM you set to match your song.
+     - **Size**: Reel / Story 9:16 (1080 × 1920), Feed 4:5 (1080 × 1350) or Square 1:1 (1080 × 1080).
+     - **Length**: 5, 7, 10 or 15 seconds.
+     - **Framing**: show the whole photo on a shadow-colour or blurred-photo background, or fill the frame.
 
 **Zoom**: pinch, scroll, or use the + and − buttons. Two fingers move the photo. Turn on **Pan** to move it with one finger or the mouse.
 

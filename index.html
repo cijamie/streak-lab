@@ -159,6 +159,11 @@ details p{margin:6px 0 0}
 .check{display:flex;gap:8px;align-items:center;font-size:14px;min-height:32px}
 .check input{width:18px;height:18px;accent-color:var(--accent)}
 .only-wide{display:none}
+.layerhead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.layers{display:flex;flex-wrap:wrap;gap:6px}
+.layers .chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:600}
+.layers .chip.add{border-style:dashed}
+.layers .chip.del{color:var(--muted)}
 
 /* tablet / desktop / landscape phone: fixed app shell, photo left, controls right */
 @media (min-width:760px), (orientation:landscape) and (min-width:560px){
@@ -207,7 +212,7 @@ details p{margin:6px 0 0}
     <div class="stage" id="stage">
       <div class="empty" id="empty">
         <h2>Pull your photo into streaks</h2>
-        <p>Streak it straight up, around a centre point, or out of any edge you draw. Grade it in two tones with grain, then export full-size photos, Instagram carousels or a Reel.</p>
+        <p>Streak it straight up, around a centre point, or out of any edge you draw. Stack modes as layers, grade it in two tones with grain, then export full-size photos, Instagram carousels or videos.</p>
         <label class="btn pickzone">Choose a photo<input type="file" accept="image/*" class="pick"></label>
         <p class="small"><span class="only-wide">Or drop a photo here, or paste one. </span>Your photo stays on this device.</p>
       </div>
@@ -248,6 +253,10 @@ details p{margin:6px 0 0}
 
     <div class="pane" role="tabpanel" id="pane-streaks" aria-labelledby="tab-streaks">
       <div class="group">
+        <div class="layerhead"><h2>Layers</h2><span class="hint" id="layerHint">Stack modes on one photo, e.g. Radial + Edge.</span></div>
+        <div class="layers" id="layerBar" role="group" aria-label="Streak layers"></div>
+      </div>
+      <div class="group">
         <div class="seg" id="modeSeg" aria-label="Streak mode">
           <button data-mode="vertical" aria-pressed="true">Vertical</button>
           <button data-mode="radial" aria-pressed="false">Radial</button>
@@ -271,6 +280,7 @@ details p{margin:6px 0 0}
           <summary>How it works</summary>
           <p><b>Vertical</b> and <b>Radial</b>: tap the photo to place the start line or the centre of the rings. <b>Threshold</b> decides how bright a pixel must be to streak; <b>Length</b> and <b>Randomness</b> shape the streaks.</p>
           <p><b>Edge</b>: drag along a ridge, treetop, outline or the rim of the moon. Streaks shoot out in the Direction you pick, and the white ticks show which way. Draw as many edges as you like.</p>
+          <p><b>Layers</b>: add a layer to stack another mode on the same photo, such as Radial rings around the moon plus Edge streaks off a ridge. Each layer has its own mode, sliders and edges; the controls and the photo tools always work on the selected layer. Layers apply in order, so later layers streak the result of earlier ones. Colour, grain and protect paint apply once to the whole photo.</p>
           <p><b>Protect</b> (red) keeps the subject sharp. <b>Erase</b> removes protect paint and cuts away parts of edges. Hold <b>Before</b> to compare with the original.</p>
           <p><b>Zoom</b>: pinch with two fingers or scroll with a mouse or trackpad; + and − work too. Two fingers also move the photo; turn on <b>Pan</b> to move it with one finger or the mouse.</p>
           <p class="only-wide">Shortcuts: <b>Ctrl/⌘ Z</b> undoes the last edge, hold <b>\</b> to see the original.</p>
@@ -320,7 +330,7 @@ details p{margin:6px 0 0}
           <button class="chip" id="presetSave">Save look</button>
         </div>
         <p class="hint">A look keeps the mode, direction, sliders, colours and streak pattern, so a whole series matches. Edges and protect paint stay with each photo. Looks are saved in this browser only.</p>
-        <div class="inline"><button class="chip" id="resetBtn">Reset all settings</button></div>
+        <div class="inline"><button class="chip" id="resetBtn">Reset sliders and colours</button></div>
       </div>
     </div>
 
@@ -341,13 +351,31 @@ details p{margin:6px 0 0}
         <div class="slides" id="slides"></div>
       </div>
       <div class="group">
-        <h2>Reel</h2>
+        <h2>Video</h2>
         <div class="row"><label for="reelStyle">Animation</label>
-          <select id="reelStyle"><option value="grow">Streaks grow</option><option value="wipe">Before/after wipe</option></select><span></span></div>
-        <div class="inline"><button class="btn" id="reelBtn" data-act>Make Reel</button></div>
-        <p class="hint">7 seconds at 1080 × 1920, silent so you can add music in Instagram. Keep this screen open while it records.</p>
+          <select id="reelStyle">
+            <option value="grow">Streaks grow</option>
+            <option value="wipe">Before/after wipe</option>
+            <option value="breathe">Streaks breathe (loops)</option>
+            <option value="push">Slow push-in</option>
+            <option value="palette">Colour cycle (loops)</option>
+            <option value="shuffle">Stop-motion streaks (loops)</option>
+            <option value="glitch">Glitch reveal</option>
+            <option value="beat">Beat cuts</option>
+          </select><span></span></div>
+        <div class="row"><label for="reelSize">Size</label>
+          <select id="reelSize"><option value="reel">Reel / Story 9:16</option><option value="feed">Feed 4:5</option><option value="square">Square 1:1</option></select><span></span></div>
+        <div class="row"><label for="reelDur">Length</label>
+          <select id="reelDur"><option value="5">5 seconds</option><option value="7" selected>7 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option></select><span></span></div>
+        <div class="row"><label for="reelFit">Framing</label>
+          <select id="reelFit"><option value="fit">Whole photo</option><option value="fill">Fill the frame</option></select><span></span></div>
+        <div class="row" id="bgRow"><label for="reelBg">Background</label>
+          <select id="reelBg"><option value="colour">Shadow colour</option><option value="blur">Blurred photo</option></select><span></span></div>
+        <div class="row" id="bpmRow" hidden><label for="bpm">Beats/min</label><input type="range" id="bpm" min="60" max="180" value="120"><output></output></div>
+        <p class="hint" id="reelHint"></p>
+        <div class="inline"><button class="btn ghost" id="reelPrev" data-act>Preview</button><button class="btn" id="reelBtn" data-act>Make video</button><button class="btn ghost" id="reelStop" hidden>Stop</button></div>
         <canvas id="reelCanvas" width="1080" height="1920" hidden></canvas>
-        <div id="reelBox"><video id="reelVid" controls playsinline loop muted></video><div class="inline"><button class="btn" id="reelSave">Save Reel</button></div></div>
+        <div id="reelBox"><video id="reelVid" controls playsinline loop muted></video><div class="inline"><button class="btn" id="reelSave">Save video</button></div></div>
       </div>
     </div>
   </section>
@@ -418,7 +446,7 @@ document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const p=PAL
 function setSeg(segId,attr,val){document.querySelectorAll('#'+segId+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset[attr]===val))}
 function updateCtx(){
   const t=st.tool, brush=t==='paint'||t==='erase';
-  $('tapHint').textContent=brush?toolHints[t]:hints[st.mode];
+  $('tapHint').textContent=(brush?toolHints[t]:hints[st.mode])+(!brush&&layers.length>1?` (Layer ${act+1})`:'');
   $('edgeBtns').hidden=!(t==='edge'||(t==='erase'&&edges.length));
   $('brushRow').hidden=!brush; $('clearMask').hidden=!brush;
 }
@@ -432,27 +460,79 @@ function setMode(m){
   $('modeHint').textContent=modeHints[m];
   const pt=$('primaryTool'); pt.dataset.tool=e?'edge':'move'; pt.textContent=primaryLabel[m];
   if(st.tool==='move'||st.tool==='edge')setTool(pt.dataset.tool); else updateCtx();
+  if(layers.length)renderLayers();
   schedule(); drawOverlay();
 }
 document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 document.querySelectorAll('#toolSeg button').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
 $('clearMask').onclick=()=>{if(!mask)return;mask.fill(0);strokes=[];mctx.clearRect(0,0,W,H);drawOverlay();schedule()};
 $('undoEdge').onclick=()=>{edges.pop();updateCtx();drawOverlay();schedule()};
-$('clearEdges').onclick=()=>{edges=[];updateCtx();drawOverlay();schedule()};
+$('clearEdges').onclick=()=>{edges=[];if(layers[act])layers[act].edges=edges;updateCtx();drawOverlay();schedule()};
+
+// ---------- layers: each has its own mode, sliders, seed, start position and edges
+const PARAM_KEYS=['mode','method','side','angle','len','thr','jit','band','seed'], POS_KEYS=['startV','startR','cx','cy'], MAX_LAYERS=4;
+const MODE_NAMES={vertical:'Vertical',radial:'Radial',edge:'Edge'};
+let layers=[], act=0;
+function curLayer(){return{mode:st.mode,method:$('method').value,side:$('side').value,angle:+$('angle').value,len:+$('len').value,thr:+$('thr').value,
+  jit:+$('jit').value,band:+$('band').value,seed,startV:st.startV,startR:st.startR,cx:st.cx,cy:st.cy,edges}}
+function storeActive(){layers[act]=curLayer()}
+function loadLayer(i){
+  act=i; const L=layers[i];
+  $('method').value=L.method; $('side').value=L.side;
+  ['angle','len','thr','jit','band'].forEach(k=>{$(k).value=L[k];syncOut(k)});
+  seed=L.seed; st.startV=L.startV; st.startR=L.startR; st.cx=L.cx; st.cy=L.cy; edges=L.edges;
+  setMode(L.mode);
+}
+function renderLayers(){
+  const bar=$('layerBar'); bar.innerHTML='';
+  layers.forEach((L,i)=>{const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed',i===act);
+    b.textContent=`${i+1}. ${MODE_NAMES[i===act?st.mode:L.mode]}`;b.onclick=()=>{if(i===act)return;storeActive();loadLayer(i)};bar.appendChild(b)});
+  if(layers.length<MAX_LAYERS){const a=document.createElement('button');a.className='chip add';a.textContent='+ Add layer';a.onclick=addLayer;bar.appendChild(a)}
+  if(layers.length>1){const d=document.createElement('button');d.className='chip del';d.textContent=`Remove layer ${act+1}`;d.onclick=removeLayer;bar.appendChild(d)}
+}
+function addLayer(){
+  storeActive(); const used=layers.map(L=>L.mode);
+  const mode=['edge','radial','vertical'].find(m=>!used.includes(m))||'radial';
+  layers.push({...LAYER_DEFAULT,mode,seed:1+Math.floor(Math.random()*99999),edges:[]});
+  loadLayer(layers.length-1);
+  status(`Added layer ${layers.length}: ${MODE_NAMES[mode]}. `+(mode==='edge'?'Drag along an edge on the photo.':'Tap the photo to place it.'));
+}
+function removeLayer(){
+  if(layers.length<2)return; const n=act+1; layers.splice(act,1); loadLayer(Math.max(0,act-1)); status(`Removed layer ${n}.`);
+}
+// the layers to render: the selected one comes from the controls, the rest from storage
+function layerList(p){
+  if(!p.layers||p.layers.length<2)return[{...p,edges:p.edges||edges}];
+  return p.layers.map((L,i)=>i===p.act?{...p,edges:p.edges||edges}:{...p,...L});
+}
 
 // ---------- settings, looks and variations
 const LOOK_KEYS=['mode','method','side','angle','len','thr','jit','band','amt','grain','c1','c2','c3','seed'];
 function getSettings(){return{mode:st.mode,method:$('method').value,side:$('side').value,angle:+$('angle').value,
   startV:st.startV,startR:st.startR,cx:st.cx,cy:st.cy,len:+$('len').value,thr:+$('thr').value,jit:+$('jit').value,band:+$('band').value,
-  amt:+$('amt').value,grain:+$('grain').value,c1:$('c1').value,c2:$('c2').value,c3:$('c3').value,seed}}
+  amt:+$('amt').value,grain:+$('grain').value,c1:$('c1').value,c2:$('c2').value,c3:$('c3').value,seed,
+  layers:layers.length>1?layers.map((L,i)=>i===act?null:L):undefined,act}}
 function applyLook(s){
+  if(s.layers&&s.layers.length>1){
+    ['c1','c2','c3'].forEach(k=>{if(s[k]!=null)$(k).value=s[k]});
+    ['amt','grain'].forEach(k=>{if(s[k]!=null){$(k).value=s[k];syncOut(k)}});
+    storeActive();
+    layers=s.layers.map((e,i)=>{e=e||s;const L={...(layers[i]||{...LAYER_DEFAULT,edges:[]})};
+      PARAM_KEYS.forEach(k=>{if(e[k]!=null)L[k]=e[k]});POS_KEYS.forEach(k=>{if(e[k]!=null)L[k]=e[k]});
+      if(Array.isArray(e.edges))L.edges=e.edges; return L});
+    loadLayer(Math.min(s.act||0,layers.length-1)); return}
   ['method','side','c1','c2','c3'].forEach(k=>{if(s[k]!=null)$(k).value=s[k]});
   ['angle','len','thr','jit','band','amt','grain'].forEach(k=>{if(s[k]!=null){$(k).value=s[k];syncOut(k)}});
   if(s.seed!=null)seed=s.seed;
   setMode(s.mode||st.mode);
 }
-const DEFAULTS=getSettings();
-$('resetBtn').onclick=()=>{st.startV=DEFAULTS.startV;st.startR=DEFAULTS.startR;st.cx=.5;st.cy=.5;applyLook(DEFAULTS);status('Settings reset. Your edges and protect paint are kept.')};
+const DEFAULTS=getSettings(), LAYER_DEFAULT=(({edges,...L})=>L)(curLayer());
+layers=[curLayer()];
+$('resetBtn').onclick=()=>{ // sliders and colours back to defaults; layers keep their mode, position and edges
+  storeActive(); const d={};['method','side','angle','len','thr','jit','band','seed'].forEach(k=>d[k]=LAYER_DEFAULT[k]);
+  layers=layers.map(L=>({...L,...d})); loadLayer(act);
+  applyLook({c1:DEFAULTS.c1,c2:DEFAULTS.c2,c3:DEFAULTS.c3,amt:DEFAULTS.amt,grain:DEFAULTS.grain});
+  status('Sliders and colours reset. Your layers, edges and protect paint are kept.')};
 $('shuffle').onclick=$('shuffle2').onclick=()=>{seed=1+Math.floor(Math.random()*99999);schedule()};
 function variants(base){
   const pal=Object.keys(PALETTES), cur=pal.find(k=>PALETTES[k][1]===base.c2), pi=Math.max(0,pal.indexOf(cur));
@@ -473,7 +553,9 @@ function storePresets(o){try{localStorage.setItem('streaklab.looks',JSON.stringi
 function fillPresets(sel){const o=loadPresets(),s=$('presetSel');s.length=1;Object.keys(o).sort().forEach(n=>{const op=document.createElement('option');op.value=op.textContent=n;s.appendChild(op)});if(sel)s.value=sel;$('presetDel').disabled=!s.value}
 fillPresets();
 $('presetSave').onclick=()=>{const n=$('presetName').value.trim();if(!n){$('presetName').focus();status('Type a name for the look first.');return}
-  const s=getSettings(),look={};LOOK_KEYS.forEach(k=>look[k]=s[k]);const o=loadPresets();o[n]=look;
+  const s=getSettings(),look={};LOOK_KEYS.forEach(k=>look[k]=s[k]);
+  if(s.layers){look.layers=s.layers.map(L=>{if(!L)return null;const o={};PARAM_KEYS.forEach(k=>o[k]=L[k]);return o});look.act=s.act}
+  const o=loadPresets();o[n]=look;
   if(storePresets(o)){fillPresets(n);$('presetName').value='';status(`Saved the look “${n}”.`)}else status('This browser won’t let the page store looks.')};
 $('presetName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('presetSave').click()}});
 $('presetSel').onchange=()=>{$('presetDel').disabled=!$('presetSel').value;const o=loadPresets()[$('presetSel').value];if(o){applyLook(o);status(`Applied the look “${$('presetSel').value}”.`)}};
@@ -490,10 +572,10 @@ function loadFile(f){
     W=Math.round(FW*s); H=Math.round(FH*s);
     [view,ov,maskCv].forEach(c=>{c.width=W;c.height=H});
     vctx.drawImage(img,0,0,W,H); src=vctx.getImageData(0,0,W,H).data.slice();
-    mask=new Uint8Array(W*H); strokes=[]; edges=[]; st.cx=.5; st.cy=.5;
+    mask=new Uint8Array(W*H); strokes=[]; edges=[]; st.cx=.5; st.cy=.5; layers.forEach(L=>{L.edges=[];L.cx=.5;L.cy=.5}); layers[act].edges=edges;
     $('empty').hidden=true; $('zoomer').hidden=false; $('zoombar').hidden=false; $('stage').classList.add('has-photo');
     ['tools','ctx','newBtn','topSave'].forEach(k=>$(k).hidden=false);
-    $('saveBox').style.display='none'; $('slides').innerHTML=''; $('carAll').hidden=true; $('reelBox').style.display='none'; $('thumbs').innerHTML=''; $('variHint').hidden=true; status('');
+    $('saveBox').style.display='none'; $('slides').innerHTML=''; $('carAll').hidden=true; $('reelBox').style.display='none'; reelPrep=null; $('thumbs').innerHTML=''; $('variHint').hidden=true; status('');
     $('sizeInfo').textContent=s<1?`Original size ${FW} × ${FH}. You’re editing a smaller preview; saving renders at the original size.`:`Original size ${FW} × ${FH}.`;
     refreshActs(); updateCtx(); layout(true); render(); drawOverlay();
   }; img.onerror=()=>{URL.revokeObjectURL(img.src);status('That file couldn’t be opened. Try a JPEG, PNG or HEIC exported from your photo app.')};
@@ -518,6 +600,13 @@ function drawOverlay(){ if(!src)return;
   const p=getSettings();
   octx.clearRect(0,0,W,H); octx.globalAlpha=.45; octx.drawImage(maskCv,0,0); octx.globalAlpha=1;
   const sc=W/(ov.getBoundingClientRect().width||W);
+  layers.forEach((L,i)=>{if(i===act||layers.length<2)return;
+    octx.globalAlpha=.4; octx.lineWidth=2*sc; octx.strokeStyle='rgba(255,255,255,.85)'; octx.setLineDash([4*sc,6*sc]);
+    if(L.mode==='vertical'){octx.beginPath();const y=L.startV/100*(H-1);octx.moveTo(0,y);octx.lineTo(W,y);octx.stroke()}
+    else if(L.mode==='radial'){octx.beginPath();const R=maxR(L.cx*W,L.cy*H,W,H);octx.arc(L.cx*W,L.cy*H,Math.max(2,L.startR/100*R),0,TAU);octx.stroke()}
+    else{octx.setLineDash([]);octx.strokeStyle='#ffa53a';octx.lineWidth=3*sc;octx.lineJoin=octx.lineCap='round';
+      for(const e of L.edges){if(e.length<2)continue;octx.beginPath();e.forEach((q,j)=>{const x=q.x*W,y=q.y*H;j?octx.lineTo(x,y):octx.moveTo(x,y)});octx.stroke()}}
+    octx.globalAlpha=1});
   octx.lineWidth=2*sc; octx.setLineDash([8*sc,6*sc]); octx.strokeStyle='rgba(255,255,255,.85)';
   if(st.mode==='vertical'){octx.beginPath();const y=st.startV/100*(H-1);octx.moveTo(0,y);octx.lineTo(W,y);octx.stroke()}
   else if(st.mode==='radial'){octx.beginPath();const R=maxR(st.cx*W,st.cy*H,W,H);octx.arc(st.cx*W,st.cy*H,Math.max(2,st.startR/100*R),0,TAU);octx.stroke()}
@@ -609,7 +698,7 @@ function paintAt(p){const rad=+$('brush').value*(W/ov.getBoundingClientRect().wi
     for(const e of edges){let cur=[];
       for(const q of e){if((q.x*W-p.x)**2+(q.y*H-p.y)**2<=r2){if(cur.length>1)out.push(cur);cur=[]}else cur.push(q)}
       if(cur.length>1)out.push(cur)}
-    edges=out; edgesDirty=true}
+    edges=out; layers[act].edges=edges; edgesDirty=true}
   drawOverlay()}
 const ptrs=new Map(); let pinch=null, panning=null;
 function pinchInfo(){const [a,b]=[...ptrs.values()];return{d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2,my:(a.y+b.y)/2}}
@@ -698,7 +787,7 @@ function radial(c,out,p,dist){
 function edgeStreaks(c,out,p,dist){
   const {src,w,h}=c, thr=p.thr/100, jit=p.jit/100, bw=Math.max(1,Math.round(p.band*c.bs)), maxLen=p.len/100*.75*Math.hypot(w,h);
   const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs));
-  edges.forEach((e,ei)=>{
+  (p.edges||edges).forEach((e,ei)=>{
     const xs=[],ys=[];
     for(let i=1;i<e.length;i++){const ax=e[i-1].x*w,ay=e[i-1].y*h,bx=e[i].x*w,by=e[i].y*h,l=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.ceil(l/step));
       for(let k=0;k<n;k++){xs.push(ax+(bx-ax)*k/n);ys.push(ay+(by-ay)*k/n)}}
@@ -745,11 +834,18 @@ function grade(out,p){
   }
   return out;
 }
-function compute(c,p,wantDist){
-  const out=new Uint8ClampedArray(c.src), dist=wantDist?new Float32Array(c.w*c.h).fill(Infinity):null;
+function streakLayer(c,out,p,dist){
   if(p.mode==='vertical')streakCols(out,c.w,Math.min(c.h-1,Math.round(p.startV/100*(c.h-1))),p,c.bs,null,dist);
   else if(p.mode==='radial')radial(c,out,p,dist);
   else edgeStreaks(c,out,p,dist);
+}
+function compute(c,p,wantDist){
+  const out=new Uint8ClampedArray(c.src), dist=wantDist?new Float32Array(c.w*c.h).fill(Infinity):null;
+  const list=layerList(p);
+  if(list.length===1)streakLayer(c,out,list[0],dist);
+  else list.forEach((lp,i)=>{ // later layers sample the result of the earlier ones
+    const lc=i?{...c,src:new Uint8ClampedArray(out)}:c, d=dist?new Float32Array(c.w*c.h).fill(Infinity):null;
+    streakLayer(lc,out,lp,d); if(d)for(let j=0;j<d.length;j++)if(d[j]<dist[j])dist[j]=d[j]});
   for(let i=0;i<c.w*c.h;i++)if(c.mask[i]){const o=i*4;out[o]=c.src[o];out[o+1]=c.src[o+1];out[o+2]=c.src[o+2];if(dist)dist[i]=Infinity}
   grade(out,p);
   return wantDist?{out,dist,orig:grade(new Uint8ClampedArray(c.src),p)}:{out};
@@ -841,9 +937,10 @@ $('carBtn').onclick=async()=>{
       for(let i=0;i<tw*th;i++)if(c.mask[i]){md.data[i*4]=255;md.data[i*4+1]=59;md.data[i*4+2]=59;md.data[i*4+3]=95}
       mx.putImageData(md,0,0);px.drawImage(mc,0,0)}
     const lw=Math.max(3,tw/220);px.lineWidth=lw;px.lineCap=px.lineJoin='round';px.strokeStyle='#ffa53a';
-    if(p.mode==='edge'){for(const e of edges){px.beginPath();e.forEach((q,i)=>{i?px.lineTo(q.x*tw,q.y*th):px.moveTo(q.x*tw,q.y*th)});px.stroke()}}
-    else if(p.mode==='vertical'){const y=p.startV/100*(th-1);px.setLineDash([lw*4,lw*3]);px.beginPath();px.moveTo(0,y);px.lineTo(tw,y);px.stroke()}
-    else{px.setLineDash([lw*4,lw*3]);px.beginPath();px.arc(p.cx*tw,p.cy*th,Math.max(4,p.startR/100*maxR(p.cx*tw,p.cy*th,tw,th)),0,TAU);px.stroke()}
+    for(const L of layerList(p)){px.setLineDash([]);
+    if(L.mode==='edge'){for(const e of L.edges){px.beginPath();e.forEach((q,i)=>{i?px.lineTo(q.x*tw,q.y*th):px.moveTo(q.x*tw,q.y*th)});px.stroke()}}
+    else if(L.mode==='vertical'){const y=L.startV/100*(th-1);px.setLineDash([lw*4,lw*3]);px.beginPath();px.moveTo(0,y);px.lineTo(tw,y);px.stroke()}
+    else{px.setLineDash([lw*4,lw*3]);px.beginPath();px.arc(L.cx*tw,L.cy*th,Math.max(4,L.startR/100*maxR(L.cx*tw,L.cy*th,tw,th)),0,TAU);px.stroke()}}
     list.push(['Process',pc]);
     if($('carVar').checked){for(const v of variants(p).slice(0,2)){list.push(['Variation',toCanvas(compute(c,v).out,tw,th)]);status(`Rendering variations…`);await tick()}}
     status('Encoding slides…'); await tick();
@@ -862,53 +959,147 @@ $('carBtn').onclick=async()=>{
 };
 $('carAll').onclick=()=>{if(slideFiles.length)saveFiles(slideFiles)};
 
-// ---------- reel
-let reelFile=null;
+// ---------- video (Reel, Story, feed video)
+let reelFile=null, reelPrep=null, reelStop=false, reelRunning=false;
 function pickMime(){if(typeof MediaRecorder==='undefined')return null;
   for(const m of['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'])if(MediaRecorder.isTypeSupported(m))return m;return ''}
 const ease=t=>t<=0?0:t>=1?1:t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-$('reelBtn').onclick=async()=>{
-  if(!src||busy)return;
-  const mime=pickMime(); if(mime===null){status('This browser can’t record video. Try Safari or Chrome.');return}
-  setBusy(true); $('reelBox').style.display='none';
-  try{
-    status('Preparing the Reel…'); await tick();
-    const p=getSettings(), s=Math.min(1080/FW,1920/FH), iw=Math.round(FW*s), ih=Math.round(FH*s);
-    const c=ctxAt(iw,ih), r=compute(c,p,true), style=$('reelStyle').value;
-    let maxD=0; for(const d of r.dist)if(d!==Infinity&&d>maxD)maxD=d;
-    const cSrc=toCanvas(c.src,iw,ih), cOrig=toCanvas(r.orig,iw,ih), cFin=toCanvas(r.out,iw,ih);
-    const fr=document.createElement('canvas');fr.width=iw;fr.height=ih;const fx=fr.getContext('2d'),fimg=fx.createImageData(iw,ih);
-    const f32=new Uint32Array(fimg.data.buffer), o32=new Uint32Array(r.out.buffer), g32=new Uint32Array(r.orig.buffer), dist=r.dist;
-    const vc=$('reelCanvas'), vx=vc.getContext('2d'), ox=(1080-iw)/2, oy=(1920-ih)/2, bg=p.c1;
-    vc.hidden=false;
-    const draw=t=>{
-      vx.fillStyle=bg; vx.fillRect(0,0,1080,1920); vx.globalAlpha=1;
-      if(t<1){vx.drawImage(cSrc,ox,oy);return}
-      if(style==='wipe'){
+const REEL_SIZES={reel:[1080,1920,'Reel / Story'],feed:[1080,1350,'feed video'],square:[1080,1080,'square video']};
+const REEL_INFO={
+  grow:'The original fades into the grade, then the streaks grow out of it.',
+  wipe:'A line sweeps across, revealing the finished photo over the original.',
+  breathe:'The streaks grow and shrink back like breathing. It loops seamlessly.',
+  push:'The finished photo fades in while the camera slowly pushes in toward the streaks.',
+  palette:'Cross-fades through the colour palettes with the same streaks. It loops seamlessly.',
+  shuffle:'Flicks through new random streak patterns like stop-motion. It loops seamlessly.',
+  glitch:'The original breaks up into glitchy slices that settle into the finished photo.',
+  beat:'Hard cuts between finished, original and two variations on every beat. Set the BPM to match the song you’ll add.'};
+function reelOpts(){return{style:$('reelStyle').value,size:$('reelSize').value,dur:+$('reelDur').value,fit:$('reelFit').value,bgMode:$('reelBg').value,bpm:+$('bpm').value}}
+function syncReelUI(){const o=reelOpts(),[w,h,name]=REEL_SIZES[o.size];
+  $('bgRow').hidden=o.fit!=='fit'; $('bpmRow').hidden=o.style!=='beat';
+  $('reelHint').textContent=`${REEL_INFO[o.style]} ${o.dur} seconds at ${w} × ${h} (${name}), silent so you can add music in Instagram. Keep this screen open while it records.`}
+['reelStyle','reelSize','reelDur','reelFit','reelBg'].forEach(k=>$(k).addEventListener('input',syncReelUI));
+$('bpm').addEventListener('input',()=>{$('bpm').parentNode.querySelector('output').textContent=$('bpm').value;syncReelUI()});
+$('bpm').dispatchEvent(new Event('input')); syncReelUI();
+function reelKey(o){return JSON.stringify([getSettings(),o.style,o.size,o.fit,o.bgMode,edges,strokes.length,FW,FH])}
+// Everything slow happens here, once; preview and recording reuse the result.
+async function prepareReel(o){
+  const key=reelKey(o); if(reelPrep&&reelPrep.key===key)return reelPrep;
+  reelPrep=null;
+  const p=getSettings(), [VW,VH]=REEL_SIZES[o.size];
+  const s=o.fit==='fill'?Math.max(VW/FW,VH/FH):Math.min(VW/FW,VH/FH), iw=Math.round(FW*s), ih=Math.round(FH*s);
+  const c=ctxAt(iw,ih), r=compute(c,p,true);
+  let maxD=0; for(const d of r.dist)if(d!==Infinity&&d>maxD)maxD=d;
+  const cSrc=toCanvas(c.src,iw,ih), cOrig=toCanvas(r.orig,iw,ih), cFin=toCanvas(r.out,iw,ih);
+  const extra=[], big=iw*ih>3000000;
+  if(o.style==='palette'){const ks=Object.keys(PALETTES).filter(k=>PALETTES[k][1]!==p.c2).slice(0,4);
+    for(const k of ks){status(`Grading the ${k} palette…`);await tick();const q={...p,c1:PALETTES[k][0],c2:PALETTES[k][1],c3:PALETTES[k][2]};extra.push(toCanvas(compute(c,q).out,iw,ih))}}
+  if(o.style==='shuffle'){const n=big?4:7;
+    for(let i=0;i<n;i++){status(`Rendering streak pattern ${i+1} of ${n}…`);await tick();extra.push(toCanvas(compute(c,{...p,seed:1+Math.floor(Math.random()*99999)}).out,iw,ih))}}
+  if(o.style==='beat'){let i=0;for(const v of variants(p).slice(0,2)){status(`Rendering variation ${++i} of 2…`);await tick();extra.push(toCanvas(compute(c,v).out,iw,ih))}}
+  let bgC=null;
+  if(o.fit==='fit'&&o.bgMode==='blur'){ // photo scaled to cover the frame, blurred and darkened
+    const k=Math.max(VW/iw,VH/ih), cw=iw*k, ch=ih*k;
+    bgC=document.createElement('canvas');bgC.width=VW;bgC.height=VH;const bx=bgC.getContext('2d');bx.imageSmoothingQuality='high';
+    if(typeof bx.filter==='string'){bx.filter='blur(36px)';bx.drawImage(cFin,(VW-cw)/2-40,(VH-ch)/2-40,cw+80,ch+80);bx.filter='none'}
+    else{ // older Safari: step down then back up, which smooths like a blur
+      let cur=cFin,w=iw,h=ih;const steps=[];
+      while(w>40){w=Math.max(20,Math.round(w/2));h=Math.max(1,Math.round(h/2));const t=document.createElement('canvas');t.width=w;t.height=h;t.getContext('2d').drawImage(cur,0,0,w,h);steps.push(t);cur=t}
+      for(let i=steps.length-2;i>=0;i--){steps[i].getContext('2d').drawImage(cur,0,0,steps[i].width,steps[i].height);cur=steps[i]}
+      bx.drawImage(cur,(VW-cw)/2,(VH-ch)/2,cw,ch)}
+    bx.fillStyle='rgba(0,0,0,.3)';bx.fillRect(0,0,VW,VH)}
+  // where slow zooms aim: the radial centre, the start line, or the middle of the drawn edges
+  let fx=.5,fy=.5;
+  if(p.mode==='radial'){fx=p.cx;fy=p.cy}else if(p.mode==='vertical'){fy=p.startV/100*.8}
+  else if(edges.length){let n=0,sx=0,sy=0;for(const e of edges)for(const q of e){sx+=q.x;sy+=q.y;n++}fx=sx/n;fy=sy/n}
+  fx=Math.max(.25,Math.min(.75,fx)); fy=Math.max(.25,Math.min(.75,fy));
+  const fr=document.createElement('canvas');fr.width=iw;fr.height=ih;const fxc=fr.getContext('2d'),fimg=fxc.createImageData(iw,ih);
+  reelPrep={key,p,VW,VH,iw,ih,ox:(VW-iw)/2,oy:(VH-ih)/2,maxD,dist:r.dist,cSrc,cOrig,cFin,extra,bgC,fx,fy,fr,fxc,fimg,
+    f32:new Uint32Array(fimg.data.buffer),o32:new Uint32Array(r.out.buffer),g32:new Uint32Array(r.orig.buffer)};
+  return reelPrep;
+}
+function reelDrawer(R,o){
+  const vc=$('reelCanvas'), vx=vc.getContext('2d'), {VW,VH,iw,ih,ox,oy,maxD,dist,cSrc,cOrig,cFin,extra,bgC,fr,fxc,fimg,f32,o32,g32}=R, D=o.dur, bg=R.p.c1;
+  vc.width=VW; vc.height=VH;
+  const back=()=>{vx.globalAlpha=1;if(bgC)vx.drawImage(bgC,0,0);else{vx.fillStyle=bg;vx.fillRect(0,0,VW,VH)}};
+  const img=(cv,a=1,z=1)=>{vx.save();vx.globalAlpha=a;if(z!==1){const px=ox+iw*R.fx,py=oy+ih*R.fy;vx.translate(px,py);vx.scale(z,z);vx.translate(-px,-py)}vx.drawImage(cv,ox,oy);vx.restore()};
+  const reveal=T=>{if(T>=maxD)return cFin;for(let i=0;i<f32.length;i++)f32[i]=dist[i]<=T?o32[i]:g32[i];fxc.putImageData(fimg,0,0);return fr};
+  const hash=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+  return t=>{
+    back();
+    switch(o.style){
+      case 'wipe':{
+        if(t<1){vx.drawImage(cSrc,ox,oy);return}
         if(t>=4){vx.drawImage(cFin,ox,oy);return}
         const X=ease((t-1)/3)*iw; vx.drawImage(cSrc,ox,oy);
         if(X>0){vx.drawImage(cFin,0,0,X,ih,ox,oy,X,ih);vx.fillStyle='rgba(255,255,255,.9)';vx.fillRect(ox+X-2,oy,4,ih)}
         return}
-      if(t<1.6){vx.drawImage(cSrc,ox,oy);vx.globalAlpha=(t-1)/.6;vx.drawImage(cOrig,ox,oy);vx.globalAlpha=1;return}
-      if(t>=4.6){vx.drawImage(cFin,ox,oy);return}
-      const T=ease((t-1.6)/3)*maxD;
-      for(let i=0;i<f32.length;i++)f32[i]=dist[i]<=T?o32[i]:g32[i];
-      fx.putImageData(fimg,0,0); vx.drawImage(fr,ox,oy);
-    };
-    draw(0);
+      case 'breathe':{const k=Math.max(1,Math.round(D/3.5));img(reveal(maxD*(.5+.5*Math.cos(TAU*k*t/D))));return}
+      case 'push':{const z=1+.18*ease(t/D);
+        if(t<.8){img(cSrc,1,z);return}
+        if(t<1.8){img(cSrc,1,z);img(cFin,ease(t-.8),z);return}
+        img(cFin,1,z);return}
+      case 'palette':{const fs=[cFin,...extra],n=fs.length,seg=D/n,i=Math.min(n-1,Math.floor(t/seg)),f=(t-i*seg)/seg;
+        img(fs[i]); if(f>.7)img(fs[(i+1)%n],ease((f-.7)/.3)); return}
+      case 'shuffle':{const fs=[cFin,...extra];img(fs[Math.floor(t*8)%fs.length]);return}
+      case 'glitch':{
+        const burst=(s,l)=>t>=s&&t<s+l?1-(t-s)/l:0, g=Math.max(burst(.9,1.6),.55*burst(D-.8,.8)), frame=Math.floor(t*30);
+        const base=t<1.3?cSrc:cFin; img(base);
+        if(g>0){const n=4+Math.round(g*18);
+          for(let i=0;i<n;i++){const a=hash(frame*31+i),b=hash(frame*17+i*7),c2=hash(frame*13+i*3);
+            const y=Math.floor(a*ih),h=Math.max(2,Math.floor(b*ih*.12*g+2)),dx=(c2-.5)*iw*.18*g,from=c2>.45?cFin:cSrc;
+            vx.drawImage(from,0,y,iw,Math.min(h,ih-y),ox+dx,oy+y,iw,Math.min(h,ih-y))}
+          vx.save();vx.globalCompositeOperation='screen';vx.globalAlpha=.35*g;vx.drawImage(cFin,ox+16*g,oy);vx.restore()}
+        return}
+      case 'beat':{const beat=60/o.bpm,i=Math.floor(t/beat),f=(t-i*beat)/beat,seq=[cFin,cSrc,cFin,extra[0]||cFin,cFin,extra[1]||cSrc];
+        img(seq[i%seq.length],1,1+.05*Math.pow(1-f,3));return}
+      default:{ // grow
+        if(t<1){vx.drawImage(cSrc,ox,oy);return}
+        if(t<1.6){vx.drawImage(cSrc,ox,oy);vx.globalAlpha=(t-1)/.6;vx.drawImage(cOrig,ox,oy);vx.globalAlpha=1;return}
+        if(t>=4.6){vx.drawImage(cFin,ox,oy);return}
+        const T=ease((t-1.6)/3)*maxD;
+        for(let i=0;i<f32.length;i++)f32[i]=dist[i]<=T?o32[i]:g32[i];
+        fxc.putImageData(fimg,0,0); vx.drawImage(fr,ox,oy)}
+    }
+  };
+}
+function playLoop(draw,D,onTick){reelStop=false;const t0=performance.now();
+  return new Promise(res=>{const loop=()=>{const t=(performance.now()-t0)/1000;draw(Math.min(t,D));if(onTick)onTick(t);if(t<D&&!reelStop)requestAnimationFrame(loop);else res(t)};requestAnimationFrame(loop)})}
+function reelButtons(running){reelRunning=running;$('reelStop').hidden=!running;$('reelBtn').hidden=$('reelPrev').hidden=running}
+$('reelStop').onclick=()=>{reelStop=true};
+$('reelPrev').onclick=async()=>{
+  if(!src||busy)return; const o=reelOpts();
+  setBusy(true); $('reelBox').style.display='none';
+  try{
+    status('Preparing the preview…'); await tick();
+    const R=await prepareReel(o), draw=reelDrawer(R,o);
+    $('reelCanvas').hidden=false; reelButtons(true); $('reelStop').disabled=false; status('Previewing… nothing is being recorded.');
+    await playLoop(draw,o.dur);
+    status('Preview finished. Make the video when you’re happy with it.');
+  }catch(e){$('reelCanvas').hidden=true;status('Couldn’t preview the video: '+(e.message||e))}
+  reelButtons(false); setBusy(false);
+};
+$('reelBtn').onclick=async()=>{
+  if(!src||busy)return;
+  const mime=pickMime(); if(mime===null){status('This browser can’t record video. Try Safari or Chrome.');return}
+  const o=reelOpts(); setBusy(true); $('reelBox').style.display='none';
+  try{
+    status('Preparing the video…'); await tick();
+    const R=await prepareReel(o), draw=reelDrawer(R,o), vc=$('reelCanvas');
+    vc.hidden=false; draw(0);
     const stream=vc.captureStream(30), rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:12000000}:{videoBitsPerSecond:12000000}), chunks=[];
     rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     const done=new Promise(res=>{rec.onstop=res});
-    status('Recording… keep this screen open (7 seconds).');
+    reelButtons(true); $('reelStop').disabled=false;
+    status(`Recording… keep this screen open (${o.dur} seconds).`);
     rec.start(250);
-    const DUR=7; const t0=performance.now();
-    await new Promise(res=>{const loop=()=>{const t=(performance.now()-t0)/1000;draw(Math.min(t,DUR));if(t<DUR)requestAnimationFrame(loop);else res()};requestAnimationFrame(loop)});
-    rec.stop(); await done; stream.getTracks().forEach(tr=>tr.stop()); vc.hidden=true;
+    let shown=o.dur; const ran=await playLoop(draw,o.dur,t=>{const left=Math.ceil(o.dur-t);if(left<shown&&left>0){shown=left;status(`Recording… ${left} s left. Keep this screen open.`)}});
+    rec.stop(); await done; stream.getTracks().forEach(tr=>tr.stop()); vc.hidden=true; reelButtons(false);
     const type=rec.mimeType||mime||'video/webm', ext=type.includes('mp4')?'mp4':'webm';
-    const blob=new Blob(chunks,{type:type.split(';')[0]}); reelFile={blob,name:`streak-reel-${stamp()}.${ext}`};
+    const blob=new Blob(chunks,{type:type.split(';')[0]}); reelFile={blob,name:`streak-${o.style}-${o.size}-${stamp()}.${ext}`};
     const v=$('reelVid'); if(v.src.startsWith('blob:'))URL.revokeObjectURL(v.src); v.src=URL.createObjectURL(blob); $('reelBox').style.display='grid'; v.play().catch(()=>{});
-    status(`Reel ready: ${ext.toUpperCase()}, ${(blob.size/1e6).toFixed(1)} MB.`+(ext==='webm'?' This browser only records WebM; Instagram wants MP4, so convert it or record in Safari.':''));
-  }catch(e){$('reelCanvas').hidden=true;status('Couldn’t make the Reel: '+(e.message||e))}
+    status(`Video ready: ${ext.toUpperCase()}, ${(blob.size/1e6).toFixed(1)} MB.`+(ran<o.dur-.05?` Stopped early at ${ran.toFixed(1)} s.`:'')+(ext==='webm'?' This browser only records WebM; Instagram wants MP4, so convert it or record in Safari.':''));
+  }catch(e){$('reelCanvas').hidden=true;reelButtons(false);status('Couldn’t make the video: '+(e.message||e))}
   setBusy(false);
 };
 $('reelSave').onclick=()=>{if(reelFile)saveFiles([reelFile])};
@@ -918,6 +1109,7 @@ let lastSave=null;
 $('saveAgain').onclick=()=>{if(lastSave)saveFiles([lastSave])};
 $('topSave').onclick=()=>{showTab('export');$('saveBtn').click()};
 setMode('vertical');
+renderLayers();
 })();
 </script>
 </body>
