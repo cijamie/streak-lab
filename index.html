@@ -340,6 +340,7 @@ dialog[open]{display:flex;flex-direction:column}
       <span class="tname" id="toolName">Line</span><span class="tag" id="layerTag" hidden></span>
       <p class="hint" id="tapHint"></p>
       <div class="bsize" id="brushRow" hidden><label for="brush">Size</label><input type="range" id="brush" min="4" max="120" value="30"><output></output></div>
+      <div class="bsize" id="psoftRow" hidden title="How gently protected areas blend into the streaks"><label for="psoft">Softness</label><input type="range" id="psoft" min="0" max="60" value="15"><output></output></div>
       <button class="chip" id="clearMask" hidden>Clear protect</button>
       <div class="seg mini" id="protSeg" hidden aria-label="Protect with"><button data-prot="brush" aria-pressed="true">Brush</button><button data-prot="subject" aria-pressed="false">Tap subject</button></div>
       <span class="inline" id="edgeOpts" hidden><button class="chip" id="autoTrace" title="Find the strongest horizon, skyline or ridge line">Auto-trace horizon</button><label class="chip" title="Pull edges you draw onto the nearest real outline"><input type="checkbox" id="snapEdges" checked> Snap to outlines</label></span>
@@ -400,6 +401,7 @@ dialog[open]{display:flex;flex-direction:column}
             <select id="method"><option value="stretch">Stretch</option><option value="sort">Pixel sort</option></select></div>
           <div class="selrow" id="sideRow" hidden><label for="side">Direction</label>
             <select id="side"><option value="up">Up</option><option value="down">Down</option><option value="left">Left</option><option value="right">Right</option><option value="angle">Custom angle</option><option value="a">Out from edge, this side</option><option value="b">Out from edge, other side</option><option value="both">Out from edge, both sides</option></select></div>
+          <div class="sl" id="softRow" hidden><label for="soft">Edge softness</label><output></output><input type="range" id="soft" min="0" max="100" value="30"></div>
           <div class="sl" id="angleRow" hidden><label for="angle">Angle</label><output></output><input type="range" id="angle" min="-180" max="180" value="0"></div>
           <div class="sl" id="startRow"><label for="start" id="startLabel">Start line</label><output></output><input type="range" id="start" min="0" max="100" value="62"></div>
           <div class="sl"><label for="len">Length</label><output></output><input type="range" id="len" min="0" max="100" value="85"></div>
@@ -580,7 +582,7 @@ document.querySelectorAll('.sec').forEach(s=>{const h=s.querySelector('.sec-head
 const looksVisible=()=>phoneMQ.matches?document.body.dataset.tab==='looks':!collapsed.has('looks');
 
 // ---------- controls
-const sliders=['start','len','thr','jit','band','brush','amt','grain','angle','lop'];
+const sliders=['start','len','thr','jit','band','brush','amt','grain','angle','lop','soft','psoft'];
 const syncOut=k=>{const el=$(k),o=el.parentNode.querySelector('output');if(o)o.textContent=el.value+(k==='angle'?'°':'');
   el.style.setProperty('--p',((el.value-el.min)/(el.max-el.min)*100)+'%')};
 sliders.forEach(k=>{const el=$(k);syncOut(k);
@@ -591,6 +593,7 @@ document.querySelectorAll('.sl label').forEach(l=>{let last=0;l.addEventListener
   el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))})});
 ['method','c1','c2','c3','blend'].forEach(k=>$(k).addEventListener('input',schedule));
 ['lop','blend'].forEach(k=>$(k).addEventListener('change',()=>renderLayers()));
+$('psoft').addEventListener('change',()=>commit());
 $('side').addEventListener('input',()=>{$('angleRow').hidden=$('side').value!=='angle';drawOverlay();schedule()});
 for(const [k,c] of Object.entries(PALETTES)){const b=document.createElement('button');b.className='pal';b.dataset.preset=k;b.title=k[0].toUpperCase()+k.slice(1)+' palette';
   b.style.background=`linear-gradient(90deg,${c[0]} 0 33%,${c[1]} 33% 66%,${c[2]} 66%)`;b.innerHTML=`<span>${k[0].toUpperCase()+k.slice(1)}</span>`;
@@ -605,8 +608,8 @@ function updateCtx(){
   $('tapHint').textContent=subj?toolHints.subject:brush||t==='pan'?toolHints[t]:hints[st.mode];
   $('edgeBtns').hidden=!(edges.length&&(t==='edge'||t==='erase'));
   $('edgeOpts').hidden=t!=='edge'; $('protSeg').hidden=t!=='paint';
-  $('brushRow').hidden=!brush||subj; $('clearMask').hidden=!brush||!strokes.length;
-  $('ctx').classList.toggle('empty',['layerTag','brushRow','clearMask','edgeBtns','edgeOpts','protSeg'].every(k=>$(k).hidden));
+  $('brushRow').hidden=!brush||subj; $('clearMask').hidden=!brush||!strokes.length; $('psoftRow').hidden=!brush||!strokes.length;
+  $('ctx').classList.toggle('empty',['layerTag','brushRow','clearMask','edgeBtns','edgeOpts','protSeg','psoftRow'].every(k=>$(k).hidden));
   const h=$('tapHint').textContent; if(src&&phoneMQ.matches&&h!==lastHint&&$('tips').hidden)status(h); lastHint=h;
 }
 let lastHint='';
@@ -614,7 +617,7 @@ function setTool(t){st.tool=t;zm.pan=t==='pan';$('stage').classList.toggle('panm
 function setMode(m){
   st.mode=m; setSeg('modeSeg','mode',m);
   const e=m==='edge';
-  $('startRow').hidden=e; $('methodRow').hidden=e; $('sideRow').hidden=!e; $('angleRow').hidden=!e||$('side').value!=='angle';
+  $('startRow').hidden=e; $('methodRow').hidden=e; $('sideRow').hidden=!e; $('softRow').hidden=!e; $('angleRow').hidden=!e||$('side').value!=='angle';
   if(!e){$('start').value=m==='vertical'?st.startV:st.startR; syncOut('start');
     $('startLabel').textContent=m==='vertical'?'Start line':'Start radius'}
   $('modeHint').textContent=modeHints[m];
@@ -630,17 +633,17 @@ $('clearMask').onclick=()=>{if(!mask)return;mask.fill(0);strokes=[];mctx.clearRe
 $('clearEdges').onclick=()=>{edges=[];if(layers[act])layers[act].edges=edges;updateCtx();drawOverlay();schedule();commit()};
 
 // ---------- layers: each has its own mode, sliders, seed, start position and edges
-const PARAM_KEYS=['mode','method','side','angle','len','thr','jit','band','seed','opacity','blend'], POS_KEYS=['startV','startR','cx','cy'], MAX_LAYERS=4;
+const PARAM_KEYS=['mode','method','side','angle','len','thr','jit','band','seed','opacity','blend','soft'], POS_KEYS=['startV','startR','cx','cy'], MAX_LAYERS=4;
 const MODE_NAMES={vertical:'Vertical',radial:'Radial',edge:'Edge'};
 let layers=[], act=0;
 function curLayer(){return{mode:st.mode,method:$('method').value,side:$('side').value,angle:+$('angle').value,len:+$('len').value,thr:+$('thr').value,
-  jit:+$('jit').value,band:+$('band').value,seed,opacity:+$('lop').value,blend:$('blend').value,startV:st.startV,startR:st.startR,cx:st.cx,cy:st.cy,edges}}
+  jit:+$('jit').value,band:+$('band').value,seed,opacity:+$('lop').value,blend:$('blend').value,soft:+$('soft').value,startV:st.startV,startR:st.startR,cx:st.cx,cy:st.cy,edges}}
 function storeActive(){layers[act]=curLayer()}
 function loadLayer(i){
   act=i; const L=layers[i];
   $('method').value=L.method; $('side').value=L.side;
   ['angle','len','thr','jit','band'].forEach(k=>{$(k).value=L[k];syncOut(k)});
-  $('lop').value=L.opacity??100; syncOut('lop'); $('blend').value=L.blend||'normal';
+  $('lop').value=L.opacity??100; syncOut('lop'); $('blend').value=L.blend||'normal'; $('soft').value=L.soft??30; syncOut('soft');
   seed=L.seed; st.startV=L.startV; st.startR=L.startR; st.cx=L.cx; st.cy=L.cy; edges=L.edges;
   setMode(L.mode);
 }
@@ -687,10 +690,10 @@ function layerList(p){
 }
 
 // ---------- settings, looks and variations
-const LOOK_KEYS=['mode','method','side','angle','len','thr','jit','band','amt','grain','c1','c2','c3','seed','opacity','blend'];
+const LOOK_KEYS=['mode','method','side','angle','len','thr','jit','band','amt','grain','c1','c2','c3','seed','opacity','blend','soft'];
 function getSettings(){return{mode:st.mode,method:$('method').value,side:$('side').value,angle:+$('angle').value,
   startV:st.startV,startR:st.startR,cx:st.cx,cy:st.cy,len:+$('len').value,thr:+$('thr').value,jit:+$('jit').value,band:+$('band').value,
-  amt:+$('amt').value,grain:+$('grain').value,c1:$('c1').value,c2:$('c2').value,c3:$('c3').value,seed,opacity:+$('lop').value,blend:$('blend').value,
+  amt:+$('amt').value,grain:+$('grain').value,c1:$('c1').value,c2:$('c2').value,c3:$('c3').value,seed,opacity:+$('lop').value,blend:$('blend').value,soft:+$('soft').value,psoft:+$('psoft').value,
   layers:layers.length>1?layers.map((L,i)=>i===act?null:L):undefined,act}}
 function applyLook(s){
   if(s.layers&&s.layers.length>1){
@@ -704,13 +707,14 @@ function applyLook(s){
   ['method','side','c1','c2','c3','blend'].forEach(k=>{if(s[k]!=null)$(k).value=s[k]});
   ['angle','len','thr','jit','band','amt','grain'].forEach(k=>{if(s[k]!=null){$(k).value=s[k];syncOut(k)}});
   if(s.opacity!=null){$('lop').value=s.opacity;syncOut('lop')}
+  if(s.soft!=null){$('soft').value=s.soft;syncOut('soft')}
   if(s.seed!=null)seed=s.seed;
   setMode(s.mode||st.mode);
 }
 const DEFAULTS=getSettings(), LAYER_DEFAULT=(({edges,...L})=>L)(curLayer());
 layers=[curLayer()];
 $('resetBtn').onclick=()=>{ // sliders and colours back to defaults; layers keep their mode, position and edges
-  storeActive(); const d={};['method','side','angle','len','thr','jit','band','seed','opacity','blend'].forEach(k=>d[k]=LAYER_DEFAULT[k]);
+  storeActive(); const d={};['method','side','angle','len','thr','jit','band','seed','opacity','blend','soft'].forEach(k=>d[k]=LAYER_DEFAULT[k]);
   layers=layers.map(L=>({...L,...d})); loadLayer(act);
   applyLook({c1:DEFAULTS.c1,c2:DEFAULTS.c2,c3:DEFAULTS.c3,amt:DEFAULTS.amt,grain:DEFAULTS.grain});
   status('Sliders and colours reset. Your layers, edges and protect paint are kept.')};
@@ -768,13 +772,13 @@ async function renderStarters(){
 }
 
 // ---------- undo / redo (layers, edges, colours and protect paint)
-function snap(){storeActive();return JSON.stringify({layers,c:[$('c1').value,$('c2').value,$('c3').value],amt:+$('amt').value,grain:+$('grain').value,strokes})}
+function snap(){storeActive();return JSON.stringify({layers,c:[$('c1').value,$('c2').value,$('c3').value],amt:+$('amt').value,grain:+$('grain').value,psoft:+$('psoft').value,strokes})}
 function histUI(){$('undoBtn').disabled=busy||hi<=0;$('redoBtn').disabled=busy||hi>=hist.length-1}
 function commit(){if(!src)return;const s=snap();if(hist[hi]===s)return;hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>80)hist.shift();hi=hist.length-1;histUI();persistState()}
 function redrawMask(){mctx.clearRect(0,0,W,H);
   for(const s of strokes){if(s.t==='auto'){const c=rasterCanvas(s.id);if(c)mctx.drawImage(c,0,0);continue}mctx.save();if(s.t==='erase')mctx.globalCompositeOperation='destination-out';mctx.fillStyle='#ff3b3b';mctx.beginPath();mctx.arc(s.x*W,s.y*H,s.r*W,0,TAU);mctx.fill();mctx.restore()}}
 function restore(s){const o=JSON.parse(s);
-  layers=o.layers; ['c1','c2','c3'].forEach((k,i)=>$(k).value=o.c[i]); $('amt').value=o.amt; $('grain').value=o.grain; syncOut('amt'); syncOut('grain');
+  layers=o.layers; ['c1','c2','c3'].forEach((k,i)=>$(k).value=o.c[i]); $('amt').value=o.amt; $('grain').value=o.grain; syncOut('amt'); syncOut('grain'); if(o.psoft!=null){$('psoft').value=o.psoft;syncOut('psoft')}
   strokes=o.strokes; mask=maskAt(W,H); redrawMask(); loadLayer(Math.min(act,layers.length-1)); updateCtx()}
 function undo(){if(busy||hi<=0)return;hi--;restore(hist[hi]);histUI();persistState()}
 function redo(){if(busy||hi>=hist.length-1)return;hi++;restore(hist[hi]);histUI();persistState()}
@@ -1157,7 +1161,7 @@ function radial(c,out,p,dist){
 }
 function edgeStreaks(c,out,p,dist){
   const {src,w,h}=c, thr=p.thr/100, jit=p.jit/100, bw=Math.max(1,Math.round(p.band*c.bs)), maxLen=p.len/100*.75*Math.hypot(w,h);
-  const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs));
+  const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs)), fe=p.soft>0?p.soft/100*.05*Math.hypot(w,h):0;
   (p.edges||edges).forEach((e,ei)=>{
     const xs=[],ys=[];
     for(let i=1;i<e.length;i++){const ax=e[i-1].x*w,ay=e[i-1].y*h,bx=e[i].x*w,by=e[i].y*h,l=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.ceil(l/step));
@@ -1179,7 +1183,7 @@ function edgeStreaks(c,out,p,dist){
       let dth=perp&&k<N-1?Math.abs(ang[k+1]-ang[k]):0; if(dth>Math.PI)dth=TAU-dth;
       for(const [nx,ny] of dirVectors(tx[k],ty[k],p)){
         for(let d=1;d<=len;d+=.7){
-          const f=d<fs?1:(len-d)/(len-fs+1e-6), wide=Math.min(6,Math.ceil(step+d*dth));
+          let f=d<fs?1:(len-d)/(len-fs+1e-6); if(d<fe){const t=d/fe;f*=t*t*(3-2*t)} const wide=Math.min(6,Math.ceil(step+d*dth));
           for(let j=0;j<wide;j++){
             const x=Math.round(xs[k]+nx*d+tx[k]*j*.9), y=Math.round(ys[k]+ny*d+ty[k]*j*.9);
             if(x<0||x>=w||y<0||y>=h)continue;
@@ -1218,10 +1222,25 @@ function compute(c,p,wantDist){
     const before=new Uint8ClampedArray(out), lc=i?{...c,src:before}:c, d=dist?new Float32Array(c.w*c.h).fill(Infinity):null;
     streakLayer(lc,out,lp,d); if(!plain(lp))blendInto(before,out,lp.blend||'normal',(lp.opacity??100)/100);
     if(d)for(let j=0;j<d.length;j++)if(d[j]<dist[j])dist[j]=d[j]});
-  for(let i=0;i<c.w*c.h;i++)if(c.mask[i]){const o=i*4;out[o]=c.src[o];out[o+1]=c.src[o+1];out[o+2]=c.src[o+2];if(dist)dist[i]=Infinity}
+  const pr=p.psoft>0?Math.round(p.psoft*c.bs):0, soft=pr>0?softMask(c.mask,c.w,c.h,pr):null;
+  if(soft){for(let i=0;i<c.w*c.h;i++){const a=soft[i];if(!a)continue;const o=i*4;
+      out[o]+=(c.src[o]-out[o])*a;out[o+1]+=(c.src[o+1]-out[o+1])*a;out[o+2]+=(c.src[o+2]-out[o+2])*a;if(dist&&a>.5)dist[i]=Infinity}}
+  else for(let i=0;i<c.w*c.h;i++)if(c.mask[i]){const o=i*4;out[o]=c.src[o];out[o+1]=c.src[o+1];out[o+2]=c.src[o+2];if(dist)dist[i]=Infinity}
   grade(out,p);
   return wantDist?{out,dist,orig:grade(new Uint8ClampedArray(c.src),p)}:{out};
 }
+// protect weight: 1 inside the protected area, fading to 0 over r pixels outside it (two box blurs ≈ gaussian)
+function softMask(m,w,h,r){
+  let any=false;for(let i=0;i<m.length;i++)if(m[i]){any=true;break} if(!any)return null;
+  let a=new Float32Array(m.length);for(let i=0;i<m.length;i++)a[i]=m[i];
+  const pass=(src,horiz)=>{const o=new Float32Array(src.length),n=horiz?w:h,lines=horiz?h:w,d=2*r+1;
+    for(let l=0;l<lines;l++){const at=k=>horiz?l*w+k:k*w+l;let sum=0;
+      for(let k=-r;k<=r;k++)sum+=src[at(Math.min(n-1,Math.max(0,k)))];
+      for(let k=0;k<n;k++){o[at(k)]=sum/d;sum+=src[at(Math.min(n-1,k+r+1))]-src[at(Math.max(0,k-r))]}}
+    return o};
+  for(let k=0;k<2;k++){a=pass(a,true);a=pass(a,false)}
+  for(let i=0;i<a.length;i++)a[i]=m[i]?1:Math.min(1,a[i]*2);
+  return a}
 function blendInto(base,out,mode,a){
   for(let k=0;k<out.length;k+=4)for(let j=k;j<k+3;j++){const b=base[j],o=out[j];
     const r=mode==='lighten'?(o>b?o:b):mode==='darken'?(o<b?o:b):mode==='screen'?255-(255-b)*(255-o)/255:o;

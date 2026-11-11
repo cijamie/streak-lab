@@ -19,9 +19,10 @@ Streak Lab works like a photo editor: the photo sits in the middle, the tools ar
    - **Edge**: drag along a ridge, treetop, outline or the rim of the moon, then pick a Direction. The white ticks show which way the streaks go.
      - **Snap to outlines** (on by default) pulls a roughly drawn edge onto the nearest real outline in the photo.
      - **Auto-trace horizon** finds the strongest horizon, skyline or ridge line across the whole photo in one tap.
+     - **Edge softness** fades the streaks in from the line instead of starting them at full strength, so outlines don't get a hard rim.
 3. **Layers** let you combine modes on one photo, such as Radial rings around the moon plus Edge streaks off a ridge. Add up to 4 layers. Each has its own mode, sliders, edges, **opacity** and **blend mode** (Normal, Lighten, Screen, Darken), and later layers streak the result of earlier ones.
 4. **Streaks**: Length, Threshold (how bright a pixel must be to streak), Randomness and Band width. **Shuffle pattern** tries a new random pattern. Double-click or double-tap a slider's name to reset it.
-5. **Protect** keeps parts sharp. Choose **Brush** to paint, or **Tap subject** and tap a person, animal or object: an AI model running on your device (Google's MediaPipe) finds its outline. The model downloads once (about 15 MB) and then works offline. **Erase** removes protect paint and cuts away parts of edges. Hold **Before** to compare with the original.
+5. **Protect** keeps parts sharp. Choose **Brush** to paint, or **Tap subject** and tap a person, animal or object: an AI model running on your device (Google's MediaPipe) finds its outline. The model downloads once (about 15 MB) and then works offline. **Softness** (in the bar above the photo) controls how gently protected areas blend into the streaks. **Erase** removes protect paint and cuts away parts of edges. Hold **Before** to compare with the original.
 6. **Colour**: pick shadow, mid and highlight colours or a palette, then set the duotone strength and grain.
 7. **Looks**: tap a starter look, previewed on your own photo; render 4 variations of your edit; or save your own looks so a whole series matches.
 8. **Export** opens a dialog with three options:
