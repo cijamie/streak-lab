@@ -401,7 +401,7 @@ dialog[open]{display:flex;flex-direction:column}
             <select id="method"><option value="stretch">Stretch</option><option value="sort">Pixel sort</option></select></div>
           <div class="selrow" id="sideRow" hidden><label for="side">Direction</label>
             <select id="side"><option value="up">Up</option><option value="down">Down</option><option value="left">Left</option><option value="right">Right</option><option value="angle">Custom angle</option><option value="a">Out from edge, this side</option><option value="b">Out from edge, other side</option><option value="both">Out from edge, both sides</option></select></div>
-          <div class="sl" id="softRow" hidden><label for="soft">Edge softness</label><output></output><input type="range" id="soft" min="0" max="100" value="15"></div>
+          <div class="sl" id="softRow" hidden><label for="soft" title="How far streaks reach back over the edge, fading in">Edge overlap</label><output></output><input type="range" id="soft" min="0" max="100" value="30"></div>
           <div class="sl" id="angleRow" hidden><label for="angle">Angle</label><output></output><input type="range" id="angle" min="-180" max="180" value="0"></div>
           <div class="sl" id="startRow"><label for="start" id="startLabel">Start line</label><output></output><input type="range" id="start" min="0" max="100" value="62"></div>
           <div class="sl"><label for="len">Length</label><output></output><input type="range" id="len" min="0" max="100" value="85"></div>
@@ -643,7 +643,7 @@ function loadLayer(i){
   act=i; const L=layers[i];
   $('method').value=L.method; $('side').value=L.side;
   ['angle','len','thr','jit','band'].forEach(k=>{$(k).value=L[k];syncOut(k)});
-  $('lop').value=L.opacity??100; syncOut('lop'); $('blend').value=L.blend||'normal'; $('soft').value=L.soft??15; syncOut('soft');
+  $('lop').value=L.opacity??100; syncOut('lop'); $('blend').value=L.blend||'normal'; $('soft').value=L.soft??30; syncOut('soft');
   seed=L.seed; st.startV=L.startV; st.startR=L.startR; st.cx=L.cx; st.cy=L.cy; edges=L.edges;
   setMode(L.mode);
 }
@@ -1159,9 +1159,9 @@ function radial(c,out,p,dist){
     if(dist)dist[y*w+x]=pdist[q];
   }
 }
-function edgeStreaks(c,out,p,dist){
+function edgeStreaks(c,out,p,dist,over){
   const {src,w,h}=c, thr=p.thr/100, jit=p.jit/100, bw=Math.max(1,Math.round(p.band*c.bs)), maxLen=p.len/100*.75*Math.hypot(w,h);
-  const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs)), fe=p.soft>0?p.soft/100*.015*Math.hypot(w,h):0;
+  const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs)), fe=p.soft>0?p.soft/100*.02*Math.hypot(w,h):0;
   (p.edges||edges).forEach((e,ei)=>{
     const xs=[],ys=[];
     for(let i=1;i<e.length;i++){const ax=e[i-1].x*w,ay=e[i-1].y*h,bx=e[i].x*w,by=e[i].y*h,l=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.ceil(l/step));
@@ -1182,8 +1182,12 @@ function edgeStreaks(c,out,p,dist){
       const s=(sy*w+sx)*4, R=src[s],G=src[s+1],B=src[s+2], fs=len*.8;
       let dth=perp&&k<N-1?Math.abs(ang[k+1]-ang[k]):0; if(dth>Math.PI)dth=TAU-dth;
       for(const [nx,ny] of dirVectors(tx[k],ty[k],p)){
+        if(over&&fe>0)for(let d=-fe;d<1;d+=.6){ // overlap: reach back over the edge, fading in towards the line
+          const t=(d+fe)/(fe+1), a=t*t*(3-2*t), x=Math.round(xs[k]+nx*d), y=Math.round(ys[k]+ny*d);
+          if(x<0||x>=w||y<0||y>=h)continue; const q=y*w+x;
+          if(a>over.a[q]){over.a[q]=a;over.c[q*3]=R;over.c[q*3+1]=G;over.c[q*3+2]=B}}
         for(let d=1;d<=len;d+=.7){
-          let f=d<fs?1:(len-d)/(len-fs+1e-6); if(d<fe){const t=d/fe;f*=.35+.65*t*t*(3-2*t)} const wide=Math.min(6,Math.ceil(step+d*dth));
+          const f=d<fs?1:(len-d)/(len-fs+1e-6), wide=Math.min(6,Math.ceil(step+d*dth));
           for(let j=0;j<wide;j++){
             const x=Math.round(xs[k]+nx*d+tx[k]*j*.9), y=Math.round(ys[k]+ny*d+ty[k]*j*.9);
             if(x<0||x>=w||y<0||y>=h)continue;
@@ -1209,23 +1213,25 @@ function grade(out,p){
   }
   return out;
 }
-function streakLayer(c,out,p,dist){
+function streakLayer(c,out,p,dist,over){
   if(p.mode==='vertical')streakCols(out,c.w,Math.min(c.h-1,Math.round(p.startV/100*(c.h-1))),p,c.bs,null,dist);
   else if(p.mode==='radial')radial(c,out,p,dist);
-  else edgeStreaks(c,out,p,dist);
+  else edgeStreaks(c,out,p,dist,over);
 }
 function compute(c,p,wantDist){
   const out=new Uint8ClampedArray(c.src), dist=wantDist?new Float32Array(c.w*c.h).fill(Infinity):null;
-  const list=layerList(p), plain=lp=>(lp.opacity==null||lp.opacity>=100)&&(!lp.blend||lp.blend==='normal');
-  if(list.length===1&&plain(list[0]))streakLayer(c,out,list[0],dist);
+  const list=layerList(p), over=list.some(l=>l.mode==='edge'&&l.soft>0)?{a:new Float32Array(c.w*c.h),c:new Float32Array(c.w*c.h*3)}:null, plain=lp=>(lp.opacity==null||lp.opacity>=100)&&(!lp.blend||lp.blend==='normal');
+  if(list.length===1&&plain(list[0]))streakLayer(c,out,list[0],dist,over);
   else list.forEach((lp,i)=>{ // later layers sample the result of the earlier ones, then blend over it
     const before=new Uint8ClampedArray(out), lc=i?{...c,src:before}:c, d=dist?new Float32Array(c.w*c.h).fill(Infinity):null;
-    streakLayer(lc,out,lp,d); if(!plain(lp))blendInto(before,out,lp.blend||'normal',(lp.opacity??100)/100);
+    streakLayer(lc,out,lp,d,over); if(!plain(lp))blendInto(before,out,lp.blend||'normal',(lp.opacity??100)/100);
     if(d)for(let j=0;j<d.length;j++)if(d[j]<dist[j])dist[j]=d[j]});
   const pr=p.psoft>0?Math.round(p.psoft*c.bs):0, soft=pr>0?softMask(c.mask,c.w,c.h,pr):null;
   if(soft){for(let i=0;i<c.w*c.h;i++){const a=soft[i];if(!a)continue;const o=i*4;
       out[o]+=(c.src[o]-out[o])*a;out[o+1]+=(c.src[o+1]-out[o+1])*a;out[o+2]+=(c.src[o+2]-out[o+2])*a;if(dist&&a>.5)dist[i]=Infinity}}
   else for(let i=0;i<c.w*c.h;i++)if(c.mask[i]){const o=i*4;out[o]=c.src[o];out[o+1]=c.src[o+1];out[o+2]=c.src[o+2];if(dist)dist[i]=Infinity}
+  if(over)for(let i=0;i<c.w*c.h;i++){const a=over.a[i];if(!a)continue;const o=i*4;
+    out[o]+=(over.c[i*3]-out[o])*a;out[o+1]+=(over.c[i*3+1]-out[o+1])*a;out[o+2]+=(over.c[i*3+2]-out[o+2])*a;if(dist&&a>.3&&!(dist[i]<1))dist[i]=1}
   grade(out,p);
   return wantDist?{out,dist,orig:grade(new Uint8ClampedArray(c.src),p)}:{out};
 }
