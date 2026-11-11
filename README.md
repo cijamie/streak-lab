@@ -17,9 +17,11 @@ Streak Lab works like a photo editor: the photo sits in the middle, the tools ar
    - **Vertical**: tap or drag to set the line the streaks rise from.
    - **Radial**: tap or drag to set the centre of the rings.
    - **Edge**: drag along a ridge, treetop, outline or the rim of the moon, then pick a Direction. The white ticks show which way the streaks go.
-3. **Layers** let you combine modes on one photo, such as Radial rings around the moon plus Edge streaks off a ridge. Add up to 4 layers. Each has its own mode, sliders and edges, and later layers streak the result of earlier ones.
+     - **Snap to outlines** (on by default) pulls a roughly drawn edge onto the nearest real outline in the photo.
+     - **Auto-trace horizon** finds the strongest horizon, skyline or ridge line across the whole photo in one tap.
+3. **Layers** let you combine modes on one photo, such as Radial rings around the moon plus Edge streaks off a ridge. Add up to 4 layers. Each has its own mode, sliders, edges, **opacity** and **blend mode** (Normal, Lighten, Screen, Darken), and later layers streak the result of earlier ones.
 4. **Streaks**: Length, Threshold (how bright a pixel must be to streak), Randomness and Band width. **Shuffle pattern** tries a new random pattern. Double-click or double-tap a slider's name to reset it.
-5. **Protect** paints over the parts that should stay sharp. **Erase** removes protect paint and cuts away parts of edges. Hold **Before** to compare with the original.
+5. **Protect** keeps parts sharp. Choose **Brush** to paint, or **Tap subject** and tap a person, animal or object: an AI model running on your device (Google's MediaPipe) finds its outline. The model downloads once (about 15 MB) and then works offline. **Erase** removes protect paint and cuts away parts of edges. Hold **Before** to compare with the original.
 6. **Colour**: pick shadow, mid and highlight colours or a palette, then set the duotone strength and grain.
 7. **Looks**: tap a starter look, previewed on your own photo; render 4 variations of your edit; or save your own looks so a whole series matches.
 8. **Export** opens a dialog with three options:
@@ -38,6 +40,10 @@ Streak Lab works like a photo editor: the photo sits in the middle, the tools ar
    - A tick box adds a small "Made with Streak Lab" credit to slides and videos. It is off by default.
 
 **Undo and redo** cover sliders, colours, layers, edges and protect paint.
+
+**Your work is kept.** The current photo and edit are saved on your device (in the browser's storage, never uploaded), so closing the tab or reloading picks up where you left off. Opening a new photo replaces it.
+
+**Works offline.** Once the app has loaded, a service worker caches it, so the home-screen app opens without a connection, including the subject finder once it has been used.
 
 **Zoom**: pinch, scroll, or use + and −. Two fingers move the photo, or use the **Hand** tool.
 
@@ -79,6 +85,7 @@ Opening `index.html` straight from disk also works, but the web app manifest nee
 | `manifest.webmanifest` | Lets the app be installed to a home screen |
 | `icons/` | Favicon, Apple touch icon and app icons |
 | `og-image.png` | Preview image for links shared on social media |
+| `sw.js` | Service worker that caches the app for offline use |
 | `.nojekyll` | Tells GitHub Pages to serve the files as they are |
 
 The site is published with GitHub Pages from the root of the `main` branch. Because the `cijamie.github.io` user site uses the custom domain `jamies.dev`, the app is served at `https://jamies.dev/streak-lab/`.
