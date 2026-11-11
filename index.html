@@ -340,7 +340,7 @@ dialog[open]{display:flex;flex-direction:column}
       <span class="tname" id="toolName">Line</span><span class="tag" id="layerTag" hidden></span>
       <p class="hint" id="tapHint"></p>
       <div class="bsize" id="brushRow" hidden><label for="brush">Size</label><input type="range" id="brush" min="4" max="120" value="30"><output></output></div>
-      <div class="bsize" id="psoftRow" hidden title="How gently protected areas blend into the streaks"><label for="psoft">Softness</label><input type="range" id="psoft" min="0" max="60" value="15"><output></output></div>
+      <div class="bsize" id="psoftRow" hidden title="How gently protected areas blend into the streaks"><label for="psoft">Softness</label><input type="range" id="psoft" min="0" max="20" value="3"><output></output></div>
       <button class="chip" id="clearMask" hidden>Clear protect</button>
       <div class="seg mini" id="protSeg" hidden aria-label="Protect with"><button data-prot="brush" aria-pressed="true">Brush</button><button data-prot="subject" aria-pressed="false">Tap subject</button></div>
       <span class="inline" id="edgeOpts" hidden><button class="chip" id="autoTrace" title="Find the strongest horizon, skyline or ridge line">Auto-trace horizon</button><label class="chip" title="Pull edges you draw onto the nearest real outline"><input type="checkbox" id="snapEdges" checked> Snap to outlines</label></span>
@@ -401,7 +401,7 @@ dialog[open]{display:flex;flex-direction:column}
             <select id="method"><option value="stretch">Stretch</option><option value="sort">Pixel sort</option></select></div>
           <div class="selrow" id="sideRow" hidden><label for="side">Direction</label>
             <select id="side"><option value="up">Up</option><option value="down">Down</option><option value="left">Left</option><option value="right">Right</option><option value="angle">Custom angle</option><option value="a">Out from edge, this side</option><option value="b">Out from edge, other side</option><option value="both">Out from edge, both sides</option></select></div>
-          <div class="sl" id="softRow" hidden><label for="soft">Edge softness</label><output></output><input type="range" id="soft" min="0" max="100" value="30"></div>
+          <div class="sl" id="softRow" hidden><label for="soft">Edge softness</label><output></output><input type="range" id="soft" min="0" max="100" value="15"></div>
           <div class="sl" id="angleRow" hidden><label for="angle">Angle</label><output></output><input type="range" id="angle" min="-180" max="180" value="0"></div>
           <div class="sl" id="startRow"><label for="start" id="startLabel">Start line</label><output></output><input type="range" id="start" min="0" max="100" value="62"></div>
           <div class="sl"><label for="len">Length</label><output></output><input type="range" id="len" min="0" max="100" value="85"></div>
@@ -643,7 +643,7 @@ function loadLayer(i){
   act=i; const L=layers[i];
   $('method').value=L.method; $('side').value=L.side;
   ['angle','len','thr','jit','band'].forEach(k=>{$(k).value=L[k];syncOut(k)});
-  $('lop').value=L.opacity??100; syncOut('lop'); $('blend').value=L.blend||'normal'; $('soft').value=L.soft??30; syncOut('soft');
+  $('lop').value=L.opacity??100; syncOut('lop'); $('blend').value=L.blend||'normal'; $('soft').value=L.soft??15; syncOut('soft');
   seed=L.seed; st.startV=L.startV; st.startR=L.startR; st.cx=L.cx; st.cy=L.cy; edges=L.edges;
   setMode(L.mode);
 }
@@ -1161,7 +1161,7 @@ function radial(c,out,p,dist){
 }
 function edgeStreaks(c,out,p,dist){
   const {src,w,h}=c, thr=p.thr/100, jit=p.jit/100, bw=Math.max(1,Math.round(p.band*c.bs)), maxLen=p.len/100*.75*Math.hypot(w,h);
-  const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs)), fe=p.soft>0?p.soft/100*.05*Math.hypot(w,h):0;
+  const perp=['a','b','both'].includes(p.side), step=.5, win=Math.max(3,Math.round(8*c.bs)), fe=p.soft>0?p.soft/100*.015*Math.hypot(w,h):0;
   (p.edges||edges).forEach((e,ei)=>{
     const xs=[],ys=[];
     for(let i=1;i<e.length;i++){const ax=e[i-1].x*w,ay=e[i-1].y*h,bx=e[i].x*w,by=e[i].y*h,l=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.ceil(l/step));
@@ -1183,7 +1183,7 @@ function edgeStreaks(c,out,p,dist){
       let dth=perp&&k<N-1?Math.abs(ang[k+1]-ang[k]):0; if(dth>Math.PI)dth=TAU-dth;
       for(const [nx,ny] of dirVectors(tx[k],ty[k],p)){
         for(let d=1;d<=len;d+=.7){
-          let f=d<fs?1:(len-d)/(len-fs+1e-6); if(d<fe){const t=d/fe;f*=t*t*(3-2*t)} const wide=Math.min(6,Math.ceil(step+d*dth));
+          let f=d<fs?1:(len-d)/(len-fs+1e-6); if(d<fe){const t=d/fe;f*=.35+.65*t*t*(3-2*t)} const wide=Math.min(6,Math.ceil(step+d*dth));
           for(let j=0;j<wide;j++){
             const x=Math.round(xs[k]+nx*d+tx[k]*j*.9), y=Math.round(ys[k]+ny*d+ty[k]*j*.9);
             if(x<0||x>=w||y<0||y>=h)continue;
@@ -1239,7 +1239,7 @@ function softMask(m,w,h,r){
       for(let k=0;k<n;k++){o[at(k)]=sum/d;sum+=src[at(Math.min(n-1,k+r+1))]-src[at(Math.max(0,k-r))]}}
     return o};
   for(let k=0;k<2;k++){a=pass(a,true);a=pass(a,false)}
-  for(let i=0;i<a.length;i++)a[i]=m[i]?1:Math.min(1,a[i]*2);
+  for(let i=0;i<a.length;i++){const t=Math.max(0,Math.min(1,(a[i]-.25)*2));a[i]=t*t*(3-2*t)}
   return a}
 function blendInto(base,out,mode,a){
   for(let k=0;k<out.length;k+=4)for(let j=k;j<k+3;j++){const b=base[j],o=out[j];
