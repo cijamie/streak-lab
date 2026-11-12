@@ -1,6 +1,6 @@
 // Streak Lab service worker: lets the installed app open offline.
 // Pages load network-first so updates arrive; everything else is served from cache when possible.
-const V='streaklab-v7';
+const V='streaklab-v8';
 const SHELL=['./','index.html','portals.html','engine.js','worker.js','manifest.webmanifest','icons/favicon.svg','icons/favicon-32.png','icons/apple-touch-icon.png','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png'];
 const CDN=/^https:\/\/(fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net\/npm\/(@mediapipe\/|heic2any@)|storage\.googleapis\.com\/mediapipe-models\/)/;
 const put=(req,res)=>caches.open(V).then(c=>c.put(req,res)).catch(()=>{});

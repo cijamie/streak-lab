@@ -16,22 +16,28 @@ The start screen lets you choose a tool, and shows your recent Streak Lab edits 
 
 [jamies.dev/streak-lab/portals.html](https://jamies.dev/streak-lab/portals.html)
 
-1. **Choose two photos**, or try the sample pair. Portals cuts the same square out of both and swaps them, so each photo shows a window into the other. It works best with two photos that share a colour or a shape.
-2. **Pick a layout:**
-   - **Stacked 4:5** and **Side by side**: one 1080 × 1350 post.
-   - **Story 9:16**: 1080 × 1920.
-   - **Carousel**: two 1080 × 1350 slides, one per photo.
-3. **Style the window:**
-   - **Size**, and **Shape**: square, rounded or circle.
-   - **Border**, with its colour, and an optional **soft shadow**.
-   - **Same spot in both photos** keeps the two windows lined up for a clean swap. Turn it off to place them separately.
-4. **Frame the photos:**
-   - **Drag a window** on the preview to move it.
-   - **Drag a photo** outside its window to reframe it.
-   - **Zoom** each photo, and add a **gap** between them.
-5. **Save** at 1080 or 2160 wide, or tap **Edit the result in Streak Lab** to add streaks, effects or a grade to it.
+Portals puts photos in windows on each other. Pick a style:
 
-The last pair and its settings are kept on the device.
+| Style | Photos | What it does |
+| --- | --- | --- |
+| **Split window** | 4 | Two photos fill the frame side by side (or top and bottom); a window across the seam holds the other two |
+| **Swap squares** | 2 | The same square is cut out of both photos and swapped, so each shows a piece of the other |
+| **Cross split** | 2 | The two photos sit side by side, and a window across the seam shows each one on the other's side |
+| **Window** | 2 | One photo inside a window on another |
+
+1. **Choose photos**, or try the sample photos. For Split window, **Auto-arrange** puts even textures (sand, sea, grass) behind and scenes in the window, choosing the order with the most colour contrast between each window half and the background behind it. **Shuffle** tries other orders.
+2. **Shape:**
+   - **Swap squares:** Stacked 4:5, Side by side, Story 9:16, or a two-slide Carousel.
+   - **Other styles:** 4:5, 1:1 or 9:16.
+3. **Style the window:**
+   - **Size**, and **shape** (square, rounded, or circle for Swap squares).
+   - **Border**, with its colour, and an optional **soft shadow**.
+4. **Frame each part:**
+   - **Drag a part** of the preview to reframe it, and scroll or use the slider to zoom it.
+   - **Swap squares:** drag the window to move it; "Same spot in both photos" keeps the two windows lined up.
+5. **Save** at 1080 or 2160 wide, or tap **Edit the result in Streak Lab** to add streaks, effects or a grade.
+
+Your last photos and settings are kept on the device. For a carousel like the ones on Instagram, make several and post them together.
 
 ## How to use it
 
