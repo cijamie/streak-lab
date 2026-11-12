@@ -1,6 +1,6 @@
 # Streak Lab
 
-Four photo tools for light, motion and pixels. **Streak Lab** is a photo editor for pixel-streak art, **Portals** swaps a square between two photos, and **Pulse** and **Flow** turn one photo into a seamless video loop. Pull pixels into streaks (straight, radial, swirling, out of edges or along paths), add light and motion effects, grade the result in two tones with grain, then export a full-size photo, an Instagram carousel or a video.
+Five photo tools for light, motion and pixels. **Streak Lab** is a photo editor for pixel-streak art, **Portals** swaps a square between two photos, **Pulse** and **Flow** turn one photo into a seamless video loop, and **Stretch** adds one clean pixel stretch and changes nothing else. Pull pixels into streaks (straight, radial, swirling, out of edges or along paths), add light and motion effects, grade the result in two tones with grain, then export a full-size photo, an Instagram carousel or a video.
 
 **Live: [jamies.dev/streak-lab](https://jamies.dev/streak-lab/)**
 
@@ -70,6 +70,23 @@ How they work:
 - **Shared settings:** The **Look** (None, Muted, Night, Mono or Faded, plus grain), the **shape** and the **loop length** (6–12 s) are shared between the two tools, so a series matches.
 - **Make the other version:** This button opens the same photo in the other tool: the source of the pulse becomes what stays still.
 - **Export:** **Make video** records one seamless loop at 1080 wide. It starts and ends on the untouched photo. **Save this frame** saves a still.
+
+## Stretch
+
+[jamies.dev/streak-lab/stretch.html](https://jamies.dev/streak-lab/stretch.html)
+
+One clean pixel stretch, and nothing else changes: no grade, no grain, and the photo keeps its own shape and full resolution.
+
+1. **Tap where the streak starts and drag the way it should go.** The solid line across the start is the *slice*: those pixels are pulled out into a smooth ribbon. A dashed line shows where the streak travels.
+2. **Shape it:**
+   - **Slice length:** how much of the photo the slice covers.
+   - **Direction.**
+   - **Bend:** curls the streak to the left or right of its direction.
+   - **Fan out:** widens it as it goes, or tapers it.
+   - **Length:** stops it short, or runs it to the edge.
+   - **Softness:** gives silkier bands.
+3. **Keep your subject in front** with **Protect** (paint) or **Subject** (tap, and an on-device AI model finds the outline), so the streak comes out from behind it.
+4. **Save image (full size)** saves at the photo's own resolution, up to 4096 px. For a video, choose **Shoot out** (the streak grows, holds and pulls back) or **Sway** (it stays out and its bend breathes), then **Make video**.
 
 ## How to use it
 
@@ -152,7 +169,8 @@ Opening `index.html` straight from disk also works, but the web app manifest nee
 | `index.html` | The dashboard and the Streak Lab editor |
 | `portals.html` | Portals, the two-photo square swap |
 | `pulse.html`, `flow.html` | Pulse and Flow, the two video-loop tools |
-| `living.js`, `living.css` | Shared code for Pulse and Flow: WebGL shaders, personalities, recording |
+| `stretch.html` | Stretch, one clean pixel stretch |
+| `living.js`, `living.css` | Shared code for Pulse, Flow and Stretch: WebGL shaders, protect paint, personalities, saving and recording |
 | `engine.js` | The image pipeline: adjustments, streaks, masks and effects, as pure functions |
 | `worker.js` | Renders the editing preview in the background so sliders stay smooth |
 | `manifest.webmanifest` | Lets the app be installed to a home screen |

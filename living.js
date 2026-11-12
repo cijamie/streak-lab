@@ -1,16 +1,20 @@
-// Pulse and Flow: two ways to give a still photograph a movement it couldn't capture.
+// Pulse, Flow and Stretch: one photo, one movement, rendered on the GPU (WebGL).
 // Pulse: something in the photo sends a disturbance through the space around it.
 // Flow: one detail stays perfectly still while the rest of the photo flows around it.
-// Both render on the GPU (WebGL) and record a seamless loop with MediaRecorder.
+// Stretch: one line of pixels is pulled out into a clean, bending streak; nothing else changes.
+// Each saves a still or records a seamless loop with MediaRecorder.
 (function(){
-const MODE=document.body.dataset.mode==='flow'?'flow':'pulse', OTHER=MODE==='pulse'?'flow':'pulse';
+const MODE=['flow','stretch'].includes(document.body.dataset.mode)?document.body.dataset.mode:'pulse', OTHER={pulse:'flow',flow:'pulse'}[MODE]||null;
 const $=id=>document.getElementById(id), TAU=Math.PI*2;
+const on=(id,fn)=>{const el=$(id);if(el)el.onclick=fn};
 
 // ---------- settings: P belongs to this tool, S is shared by both so a series matches
 const DEF={
   pulse:{brush:6,style:'ripple',strength:35,reach:55,settle:50,still:8,dir:0,variety:55,seed:1,pt:{x:.5,y:.45},zoom:100,fx:50,fy:50},
-  flow:{brush:6,style:'last',strength:60,dir:0,halo:35,soften:35,size:12,shape:0,variety:55,seed:1,pt:{x:.5,y:.45},zoom:100,fx:50,fy:50}};
-const SDEF={grade:'muted',grain:22,dur:8,aspect:'45'};
+  flow:{brush:6,style:'last',strength:60,dir:0,halo:35,soften:35,size:12,shape:0,variety:55,seed:1,pt:{x:.5,y:.45},zoom:100,fx:50,fy:50},
+  stretch:{brush:6,style:'still',width:40,dir:0,bend:40,fan:40,length:100,soft:10,variety:0,seed:1,pt:{x:.5,y:.5},zoom:100,fx:50,fy:50}};
+// Stretch keeps its own shape and never grades the photo; Pulse and Flow share theirs so a series matches
+const SDEF=MODE==='stretch'?{grade:'none',grain:0,dur:6,aspect:'orig'}:{grade:'muted',grain:22,dur:8,aspect:'45'}, SKEY=MODE==='stretch'?'stretch-series':'living-series';
 const P=JSON.parse(JSON.stringify(DEF[MODE])), S={...SDEF};
 const STYLES={
   pulse:{
@@ -23,7 +27,11 @@ const STYLES={
   flow:{
     anchor:'The subject stays intact while the surroundings stream past it, parting around it like a current around a stone.',
     last:'Only a small detail stays. Everything else stretches into long bands, softens toward colour and pulls apart in patches, then comes back.',
-    resist:'The stretching creeps up to the subject as if to pull it apart, slows at its edge, and retreats. It never quite succeeds.'}};
+    resist:'The stretching creeps up to the subject as if to pull it apart, slows at its edge, and retreats. It never quite succeeds.'},
+  stretch:{
+    still:'A still image: the photo exactly as it was, plus one clean streak.',
+    grow:'Video: the streak shoots out of the slice, holds, then pulls back into the photo. It loops seamlessly.',
+    sway:'Video: the streak stays out and slowly sways as its bend breathes in and out. It loops seamlessly.'}};
 
 // ---------- small helpers
 let toastT=0;const status=t=>{const el=$('status');el.textContent=t;el.hidden=!t;clearTimeout(toastT);if(t)toastT=setTimeout(()=>el.hidden=true,5000)};
@@ -51,8 +59,9 @@ const stamp=()=>new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
 // ---------- the photo, framed to the video's shape
 let img=null, blob=null, name='', framed=null, W=1080, H=1350, mask=null; // mask: AI outline {w,h,data,fit,key} in framed pixels
 const minDim=()=>Math.min(W,H);
-function dims(){if(S.aspect==='orig'&&img){const r=clamp(img.naturalHeight/img.naturalWidth,.5,2);return[1080,Math.round(1080*r/2)*2]}
-  return({'45':[1080,1350],'11':[1080,1080],'916':[1080,1920]})[S.aspect]||[1080,1350]}
+let Q=1; // above 1 only while saving a full-size still
+function dims(){let d;if(S.aspect==='orig'&&img){const r=clamp(img.naturalHeight/img.naturalWidth,.5,2);d=[1080,Math.round(1080*r/2)*2]}
+  else d=({'45':[1080,1350],'11':[1080,1080],'916':[1080,1920]})[S.aspect]||[1080,1350];return[Math.round(d[0]*Q),Math.round(d[1]*Q)]}
 let FT={s:1,ox:0,oy:0}; // framed pixel = photo pixel × s − offset
 const frameKey=()=>JSON.stringify([S.aspect,P.zoom,P.fx,P.fy,name]);
 function buildFramed(){if(!img)return;[W,H]=dims();const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.imageSmoothingQuality='high';
@@ -116,6 +125,19 @@ void main(){vec2 p=pix();vec3 orig=tex(p);float m=max(prot(p),paintedSoft(p));ve
   col=mix(col,vec3(luma(col)),e*uSoft*(1.-m)*.55);
   col=mix(col,orig,m);
   gl_FragColor=vec4(finish(col),1.);}`;
+// Stretch: pixels on the slice (a line across the start, perpendicular to the direction) are carried along a circular arc.
+// For each pixel: s = distance along the arc, v = offset across it; the colour comes from the slice at the matching offset.
+const STRETCH_FS=COMMON+`uniform vec2 uC,uDir;uniform float uHalf,uK,uFan,uLen,uSoftS;
+void main(){vec2 p=pix();vec3 orig=tex(p);vec2 n=vec2(-uDir.y,uDir.x),r=p-uC;float s,v;
+  if(abs(uK)*uMin<1e-4){s=dot(r,uDir);v=dot(r,n);}
+  else{float R=1./uK;vec2 O=uC+n*R,q=p-O,a0=uC-O;float d=length(q),ang=atan(a0.x*q.y-a0.y*q.x,dot(a0,q)),sg=a0.x*uDir.y-a0.y*uDir.x>0.?1.:-1.;
+    s=ang*sg*abs(R);v=R-sign(R)*d;}
+  float hw=max(.75,uHalf*(1.+uFan*max(s,0.))),u=clamp(v/hw,-1.,1.);
+  vec2 b=uC+n*(u*uHalf)-uDir*.6;vec3 c=tex(b);
+  if(uSoftS>.01)c=(c*2.+tex(b+n*uSoftS)+tex(b-n*uSoftS)+.5*tex(b+n*uSoftS*2.)+.5*tex(b-n*uSoftS*2.))/5.;
+  float a=clamp(hw-abs(v)+.5,0.,1.)*clamp(s+.5,0.,1.)*clamp((uLen-s)/(uMin*.006)+.5,0.,1.);
+  vec3 col=mix(mix(orig,c,a),orig,paintedSoft(p));
+  gl_FragColor=vec4(finish(col),1.);}`;
 
 // ---------- WebGL renderer
 const gl$=$('gl');let R=null;
@@ -123,7 +145,7 @@ function makeRenderer(cv){
   const gl=cv.getContext('webgl',{antialias:false,premultipliedAlpha:false,preserveDrawingBuffer:true});if(!gl)return null;
   const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
   const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));
-  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,MODE==='pulse'?PULSE_FS:FLOW_FS));gl.linkProgram(pr);
+  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,({pulse:PULSE_FS,flow:FLOW_FS,stretch:STRETCH_FS})[MODE]));gl.linkProgram(pr);
   if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));gl.useProgram(pr);
   const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const al=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(al);gl.vertexAttribPointer(al,2,gl.FLOAT,false,0,0);
@@ -212,12 +234,20 @@ function flowPlan(){
   const desc=`Holds still for ${env[0].toFixed(1)} s. ${v>.15?`The ${firstAt} starts to move first; `:''}the longest trails form near the ${where(strong[0],strong[1]).replace('middle ','')}, peak at ${env[1].toFixed(1)} s, ${spread>.6?'return unevenly':'return together'} and settle by ${Math.min(D,env[3]+spread/2).toFixed(1)} s.`;
   return{env,spread,strong,seed,dir:[Math.cos(ang),Math.sin(ang)],wob,band,desc}}
 
+// ---------- Stretch: the streak's shape at time t
+function stretchAt(t){const D=S.dur,M=minDim();let g=1,b=1,d=0;
+  if(P.style==='grow'){const a=.4,b1=a+D*.3,c=D*.66,e=D-.4;g=t<a?0:t<b1?1-Math.pow(1-(t-a)/(b1-a),3):t<c?1:t<e?1-easeIO((t-c)/(e-c)):0}
+  else if(P.style==='sway'){const ph=TAU*t/D;b=1+.35*Math.sin(ph);d=.06*Math.sin(ph+1)}
+  const full=P.length>=100?Math.hypot(W,H)*1.6:P.length/100*Math.hypot(W,H),ang=P.dir*Math.PI/180+d;
+  return{c:[P.pt.x*W,P.pt.y*H],dir:[Math.cos(ang),Math.sin(ang)],ang,half:P.width/100*M/2,k:-(P.bend*b*Math.PI/180)/M,fan:P.fan/100/M,len:full*g,soft:P.soft/100*M*.012}}
+
 // ---------- drawing a frame
 let plan=null, planKey='', dirty=true, frameNo=0;
-function getPlan(){const k=JSON.stringify([P,S,W,H,!!mask]);if(k!==planKey){planKey=k;plan=MODE==='pulse'?pulsePlan():flowPlan();$('persona').textContent=plan.desc;$('seedLabel').textContent='Personality #'+P.seed}return plan}
+function getPlan(){if(MODE==='stretch')return null;const k=JSON.stringify([P,S,W,H,!!mask]);if(k!==planKey){planKey=k;plan=MODE==='pulse'?pulsePlan():flowPlan();$('persona').textContent=plan.desc;$('seedLabel').textContent='Personality #'+P.seed}return plan}
 function render(t){if(!R||!framed)return;const pl=getPlan(),M=minDim();
   const u={uCan:[gl$.width,gl$.height],uRes:[W,H],uMin:M,uGrain:S.grain/100,uFrame:frameNo++,uGrade:GRADES[S.grade]||0,uHasPaint:protOn?1:0};
-  if(MODE==='pulse'){const s=pl.at(t);Object.assign(u,{uSrc:[P.pt.x*W,P.pt.y*H],uProt:P.still/100*M*.5,uReach:pl.reach,uKind:pl.kind,uN:s.n,'uE[0]':s.E,'uF[0]':s.F})}
+  if(MODE==='stretch'){const g=stretchAt(t);Object.assign(u,{uC:g.c,uDir:g.dir,uHalf:g.half,uK:g.k,uFan:g.fan,uLen:g.len,uSoftS:g.soft})}
+  else if(MODE==='pulse'){const s=pl.at(t);Object.assign(u,{uSrc:[P.pt.x*W,P.pt.y*H],uProt:P.still/100*M*.5,uReach:pl.reach,uKind:pl.kind,uN:s.n,'uE[0]':s.E,'uF[0]':s.F})}
   else{const g=anchorGeom();Object.assign(u,{uC:g.c,uAx:g.ax,uDir:pl.dir,uStrong:[pl.strong[0]*W,pl.strong[1]*H],uHasMask:mask?1:0,uAmt:P.strength/100*.5*M,uT:t,uSpread:pl.spread,
     uSeed:pl.seed,uHalo:P.halo/100*1.5,uSoft:P.soften/100*(P.style==='last'?1:.5),uWob:pl.wob,uBand:pl.band,uKind:{anchor:0,last:1,resist:2}[P.style]||0,uEnv:pl.env})}
   R.draw(u)}
@@ -226,7 +256,7 @@ function render(t){if(!R||!framed)return;const pl=getPlan(),M=minDim();
 let playing=true, tNow=0, last=performance.now(), recording=false, guideUntil=0, scrubbing=false;
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(.1,(now-last)/1000);last=now;if(!framed||recording)return;
   if(protDirty){rebuildProt();dirty=true}
-  if(playing&&!scrubbing){tNow=(tNow+dt)%S.dur;dirty=true}
+  if(playing&&!scrubbing&&!(MODE==='stretch'&&P.style==='still')){tNow=(tNow+dt)%S.dur;dirty=true}
   if(dirty){render(tNow);dirty=false;$('scrub').value=Math.round(tNow/S.dur*1000);$('time').textContent=`${tNow.toFixed(1)} / ${S.dur} s`}
   drawGuides(now)}
 requestAnimationFrame(loop);
@@ -249,6 +279,11 @@ function drawGuides(now){const painting=tool!=='place',show=!recording&&(now<gui
   if(painting){if(hover&&tool!=='subject'){ox.strokeStyle='rgba(255,255,255,.9)';ox.beginPath();ox.arc(hover[0],hover[1],brushPx()/2,0,TAU);ox.stroke();ox.strokeStyle='rgba(0,0,0,.5)';ox.beginPath();ox.arc(hover[0],hover[1],brushPx()/2+1.5/k,0,TAU);ox.stroke()}ox.restore();return}
   ox.strokeStyle='rgba(247,178,103,.95)';ox.fillStyle='rgba(247,178,103,.95)';ox.setLineDash([7/k,5/k]);
   const arrow=(x,y,a,len)=>{ox.save();ox.setLineDash([]);ox.translate(x,y);ox.rotate(a);ox.beginPath();ox.moveTo(0,0);ox.lineTo(len,0);ox.stroke();ox.beginPath();ox.moveTo(len,0);ox.lineTo(len-12/k,-7/k);ox.lineTo(len-12/k,7/k);ox.fill();ox.restore()};
+  if(MODE==='stretch'){const g=stretchAt(P.style==='grow'?S.dur*.5:0),n=[-g.dir[1],g.dir[0]],[cx,cy]=g.c,M=minDim();
+    ox.setLineDash([]);ox.lineWidth=3/k;ox.beginPath();ox.moveTo(cx-n[0]*g.half,cy-n[1]*g.half);ox.lineTo(cx+n[0]*g.half,cy+n[1]*g.half);ox.stroke();
+    ox.lineWidth=2/k;ox.setLineDash([7/k,5/k]);ox.beginPath();ox.moveTo(cx,cy);let x=cx,y=cy,th=g.ang;const L=Math.min(g.len,Math.hypot(W,H)*1.2),st=L/80;
+    for(let i=0;i<80;i++){x+=Math.cos(th)*st;y+=Math.sin(th)*st;th+=g.k*st;ox.lineTo(x,y);if(x<-M||y<-M||x>W+M||y>H+M)break}ox.stroke();
+    ox.setLineDash([]);ox.beginPath();ox.arc(cx,cy,5/k,0,TAU);ox.fill();ox.restore();return}
   if(MODE==='pulse'){const x=P.pt.x*W,y=P.pt.y*H,M=minDim();ox.beginPath();ox.arc(x,y,Math.max(6/k,P.still/100*M*.5),0,TAU);ox.stroke();
     ox.setLineDash([]);ox.beginPath();ox.arc(x,y,4/k,0,TAU);ox.fill();ox.globalAlpha=.35;ox.setLineDash([3/k,7/k]);ox.beginPath();ox.arc(x,y,P.reach/100*M,0,TAU);ox.stroke();ox.globalAlpha=1;
     if(P.style==='directional')arrow(x,y,P.dir*Math.PI/180,M*.18)}
@@ -256,8 +291,10 @@ function drawGuides(now){const painting=tool!=='place',show=!recording&&(now<gui
     else{ox.setLineDash([]);ox.beginPath();ox.arc(g.c[0],g.c[1],4/k,0,TAU);ox.fill()}
     const a=P.dir*Math.PI/180,M=minDim();arrow(M*.09+Math.max(0,-Math.cos(a))*M*.16,M*.09+Math.max(0,-Math.sin(a))*M*.16,a,M*.14)}
   ox.restore()}
-let drag=false;
-function placeAt(e){const r=gl$.getBoundingClientRect();P.pt={x:clamp((e.clientX-r.left)/r.width,0,1),y:clamp((e.clientY-r.top)/r.height,0,1)};
+let drag=false, downAt=null;
+function placeAt(e){if(MODE==='stretch'){const q=toFramed(e);if(!downAt){downAt=q;P.pt={x:clamp(q[0]/W,0,1),y:clamp(q[1]/H,0,1)}}
+    else if(Math.hypot(q[0]-downAt[0],q[1]-downAt[1])>minDim()*.03){P.dir=Math.round(((Math.atan2(q[1]-downAt[1],q[0]-downAt[0])*180/Math.PI)+360)%360);syncUI()}
+    dirty=true;guideUntil=performance.now()+1500;return}const r=gl$.getBoundingClientRect();P.pt={x:clamp((e.clientX-r.left)/r.width,0,1),y:clamp((e.clientY-r.top)/r.height,0,1)};
   if(mask){mask=null;R.setMask(null);syncAnchorUI()}dirty=true;guideUntil=performance.now()+1500}
 const toFramed=e=>{const r=gl$.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H]};
 let hover=null, lastPt=null;
@@ -269,7 +306,7 @@ gl$.addEventListener('pointerdown',e=>{if(recording||!framed)return;
 gl$.addEventListener('pointermove',e=>{hover=toFramed(e);if(!drag)return;
   if(tool==='place'){placeAt(e);return}const q=toFramed(e);stroke(lastPt,q,tool==='erase');lastPt=q});
 gl$.addEventListener('pointerleave',()=>{hover=null});
-['pointerup','pointercancel'].forEach(t=>gl$.addEventListener(t,()=>{if(drag){drag=false;lastPt=null;persist()}}));
+['pointerup','pointercancel'].forEach(t=>gl$.addEventListener(t,()=>{downAt=null;if(drag){drag=false;lastPt=null;persist()}}));
 
 // ---------- protect paint: like Streak Lab's Protect, kept in photo coordinates so it survives reframing
 let tool='place', pm=null, pmx=null, protOn=false, protDirty=false, protFramed=null, protTint=null, undo=[];
@@ -284,7 +321,7 @@ function stroke(a,b,erase){if(!pm)return;const A=toPaint(a),B=toPaint(b);pmx.sav
   if(!erase)protOn=true;protDirty=true}
 function pushUndo(){if(!pm)return;const c=document.createElement('canvas');c.width=pm.width;c.height=pm.height;c.getContext('2d').drawImage(pm,0,0);undo.push({c,on:protOn});if(undo.length>8)undo.shift();syncProtUI()}
 function rebuildProt(){protDirty=false;if(!R)return;if(!pm||!protOn){R.setPaint(null);protTint=null;syncProtUI();return}
-  if(!protFramed||protFramed.width!==W||protFramed.height!==H){protFramed=document.createElement('canvas');protFramed.width=W;protFramed.height=H;protTint=document.createElement('canvas');protTint.width=W;protTint.height=H}
+  if(!protFramed||!protTint||protFramed.width!==W||protFramed.height!==H){protFramed=document.createElement('canvas');protFramed.width=W;protFramed.height=H;protTint=document.createElement('canvas');protTint.width=W;protTint.height=H}
   const x=protFramed.getContext('2d');x.clearRect(0,0,W,H);x.drawImage(pm,-FT.ox,-FT.oy,img.naturalWidth*FT.s,img.naturalHeight*FT.s);R.setPaint(protFramed);
   const t=protTint.getContext('2d');t.globalCompositeOperation='source-over';t.clearRect(0,0,W,H);t.drawImage(protFramed,0,0);t.globalCompositeOperation='source-in';t.fillStyle='#ef8f3f';t.fillRect(0,0,W,H);syncProtUI()}
 function syncProtUI(){$('protUndo').disabled=!undo.length;$('protClear').disabled=!protOn}
@@ -301,19 +338,20 @@ addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,sele
   if(e.key==='['||e.key===']'){P.brush=clamp(P.brush+(e.key===']'?1:-1),1,25);syncUI();guideUntil=performance.now()+800}});
 
 // ---------- controls: data-key ranges and segments bind to P, or to S with data-store="S"
-const FMT={pct:v=>v+'%',deg:v=>v+'°',settle:v=>v<30?'Quickly':v<70?'Gently':'Slowly',shape:v=>v<-15?'Tall':v>15?'Wide':'Round',size:v=>v?v:'Off'};
+const FMT={pct:v=>v+'%',deg:v=>v+'°',settle:v=>v<30?'Quickly':v<70?'Gently':'Slowly',shape:v=>v<-15?'Tall':v>15?'Wide':'Round',size:v=>v?v:'Off',bend:v=>v?(v>0?'↺ ':'↻ ')+Math.abs(v)+'°':'Straight',fan:v=>(v>0?'+':'')+v+'%',len:v=>v>=100?'To the edge':v+'%'};
 const store=el=>el.dataset.store==='S'?S:P;
 function syncOut(el){const o=el.parentNode.querySelector('output');if(o)o.textContent=(FMT[el.dataset.fmt]||(v=>v))(+el.value);el.style.setProperty('--p',((el.value-el.min)/(el.max-el.min)*100)+'%')}
 function syncUI(){
   document.querySelectorAll('input[type=range][data-key]').forEach(el=>{el.value=store(el)[el.dataset.key];syncOut(el)});
   document.querySelectorAll('[data-key]:not(input)').forEach(g=>g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(store(g)[g.dataset.key])===b.dataset.v)));
   document.querySelectorAll('[data-show]').forEach(el=>el.hidden=!el.dataset.show.split(' ').includes(P.style));
-  $('styleHint').textContent=STYLES[MODE][P.style]||'';syncAnchorUI()}
+  $('styleHint').textContent=STYLES[MODE][P.style]||'';syncAnchorUI();
+  if(MODE==='stretch'){const st=P.style==='still';if(framed)$('transport').hidden=st;$('make').hidden=st}}
 function changed(framing){if(framing)buildFramed();dirty=true;guideUntil=performance.now()+1200;persist()}
 document.querySelectorAll('input[type=range][data-key]').forEach(el=>el.addEventListener('input',()=>{store(el)[el.dataset.key]=+el.value;syncOut(el);changed(['zoom','fx','fy'].includes(el.dataset.key))}));
 document.querySelectorAll('[data-key]:not(input)').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=g.dataset.key,st=store(g);st[k]='num' in g.dataset?+b.dataset.v:b.dataset.v;
   if(k==='dur')tNow=Math.min(tNow,S.dur-.01);syncUI();changed(k==='aspect')}));
-$('reroll').onclick=()=>{P.seed=1+Math.floor(Math.random()*9999);tNow=0;setPlaying(true);changed();status('A new personality. The timing, echoes and unevenness have changed; the idea stays the same.')};
+on('reroll',()=>{P.seed=1+Math.floor(Math.random()*9999);tNow=0;setPlaying(true);changed();status('A new personality. The timing, echoes and unevenness have changed; the idea stays the same.')});
 
 // ---------- Flow: find the exact outline of the detail with an on-device AI model
 const MP='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
@@ -352,9 +390,9 @@ if(MODE==='flow'){
 // ---------- photos
 async function setPhoto(f,nm,quiet,paint){try{const r=await readPhoto(f);img=r.img;blob=r.blob;name=nm||f.name||'photo';show();
   let keep=null;if(paint){try{keep=await loadImg(paint)}catch(e){}}initProt(keep);buildFramed();persist();
-  if(!quiet)status(MODE==='pulse'?'Tap the thing whose presence moves the space.':'Tap the one detail the photograph refuses to lose.');guideUntil=performance.now()+2500}
+  if(!quiet)status({pulse:'Tap the thing whose presence moves the space.',flow:'Tap the one detail the photograph refuses to lose.',stretch:'Tap where the streak starts and drag the way it should go.'}[MODE]);guideUntil=performance.now()+2500}
   catch(e){status('Couldn’t open that photo: '+(e.message||e))}}
-function show(){$('empty').hidden=true;$('view').hidden=false;$('ptools').hidden=false;$('transport').hidden=false;['makeTop','make','stillBtn','toOther'].forEach(k=>$(k).disabled=false);
+function show(){$('empty').hidden=true;$('view').hidden=false;$('ptools').hidden=false;$('transport').hidden=MODE==='stretch'&&P.style==='still';['makeTop','saveTop','make','stillBtn','toOther'].forEach(k=>{if($(k))$(k).disabled=false});
   if(!R){try{R=makeRenderer(gl$)}catch(e){R=null;console.error(e)}if(!R){status('This browser can’t run WebGL, which this tool needs. Try another browser.');return}}
   requestAnimationFrame(fit)}
 const pick=()=>$('file').click();$('pick').onclick=pick;$('pick2').onclick=pick;
@@ -382,26 +420,45 @@ function sampleBlob(){const w=1400,h=1750,c=document.createElement('canvas');c.w
   x.beginPath();x.moveTo(960,1300);x.lineTo(1040,1210);x.lineTo(1160,1210);x.lineTo(1210,1300);x.stroke();x.beginPath();x.ellipse(1070,1195,90,26,0,0,TAU);x.fill();
   x.beginPath();x.moveTo(1150,1210);x.lineTo(1180,1130);x.lineTo(1215,1125);x.stroke();x.fillStyle='#c33a2c';x.beginPath();x.ellipse(1110,1225,60,28,0,0,TAU);x.fill();
   return new Promise(r=>c.toBlob(r,'image/jpeg',.9))}
-async function loadSample(){const b=await sampleBlob();mask=null;Object.assign(P,{zoom:100,fx:50,fy:50,...(MODE==='pulse'?{pt:{x:.596,y:.323},still:16}:{pt:{x:.775,y:.71},size:14,shape:30})});syncUI();
+function moonBlob(){const w=1400,h=1750,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');let s=5;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  let g=x.createLinearGradient(0,0,0,h*.6);g.addColorStop(0,'#1f3b62');g.addColorStop(1,'#4d73a3');x.fillStyle=g;x.fillRect(0,0,w,h);
+  const mx=560,my=640,mr=70,mg=x.createRadialGradient(mx-20,my-20,5,mx,my,mr);mg.addColorStop(0,'#fbfbf7');mg.addColorStop(.75,'#e3e5e6');mg.addColorStop(1,'#c4c9cf');x.fillStyle=mg;x.beginPath();x.arc(mx,my,mr,0,TAU);x.fill();
+  x.fillStyle='rgba(120,128,140,.35)';for(const [a,b,r] of [[-22,-10,16],[18,14,12],[4,-30,9],[-8,26,10],[30,-18,7]]){x.beginPath();x.arc(mx+a,my+b,r,0,TAU);x.fill()}
+  x.fillStyle='#14171a';x.beginPath();x.moveTo(0,h);x.lineTo(0,1040);for(let X=0;X<=w;X+=20)x.lineTo(X,1040+X*.04+Math.sin(X/90)*10+rnd()*8);x.lineTo(w,h);x.fill();
+  for(let i=0;i<9;i++){const X=180+rnd()*1050,Y=1200+rnd()*300,gg=x.createRadialGradient(X,Y,5,X,Y,90);gg.addColorStop(0,'rgba(220,190,200,.45)');gg.addColorStop(1,'rgba(220,190,200,0)');x.fillStyle=gg;x.fillRect(X-90,Y-140,180,230)}
+  for(let i=0;i<20000;i++){x.fillStyle=rnd()<.5?'rgba(255,255,255,.03)':'rgba(0,0,0,.18)';x.fillRect(rnd()*w,1050+rnd()*700,3,3)}
+  return new Promise(r=>c.toBlob(r,'image/jpeg',.92))}
+async function loadSample(){if(MODE==='stretch'){const b=await moonBlob();Object.assign(P,{zoom:100,fx:50,fy:50,pt:{x:.4,y:.366},dir:0,width:11,bend:28,fan:260,length:100,soft:20,style:'still'});S.aspect='orig';syncUI();
+    await setPhoto(new File([b],'sample.jpg',{type:'image/jpeg'}),'Sample: moon',true);
+    const q=toPaint([.4*W,.366*H]);pmx.fillStyle='#fff';pmx.beginPath();pmx.arc(q[0],q[1],74*pm.width/img.naturalWidth,0,TAU);pmx.fill();protOn=true;protDirty=true;persist();syncUI();
+    status('The moon is protected, so the streak comes out from behind it. Tap and drag anywhere to start a new streak.');return}
+  const b=await sampleBlob();mask=null;Object.assign(P,{zoom:100,fx:50,fy:50,...(MODE==='pulse'?{pt:{x:.596,y:.323},still:16}:{pt:{x:.775,y:.71},size:14,shape:30})});syncUI();
   await setPhoto(new File([b],'sample.jpg',{type:'image/jpeg'}),'Sample: night street',true);
   status(MODE==='pulse'?'The lit window is the source. Tap anywhere else to move it.':'The motorbike stays still. Tap anything else to keep that instead.')}
 $('sample').onclick=loadSample;$('sample2').onclick=loadSample;
 
 // ---------- saving: state on this device, shared series settings, and handing the photo to the other tool
 const paintBlob=()=>new Promise(r=>{if(!pm||!protOn)return r(null);pm.toBlob(b=>r(b),'image/png')});
-let saveT=0;function persist(){clearTimeout(saveT);saveT=setTimeout(async()=>{const paint=await paintBlob();idb.set(MODE,{v:1,blob,name,P,mask,paint}).catch(()=>{});idb.set('living-series',S).catch(()=>{})},400)}
-$('toOther').onclick=async()=>{if(!blob)return;try{
+let saveT=0;function persist(){clearTimeout(saveT);saveT=setTimeout(async()=>{const paint=await paintBlob();idb.set(MODE,{v:1,blob,name,P,mask,paint}).catch(()=>{});idb.set(SKEY,S).catch(()=>{})},400)}
+on('toOther',async()=>{if(!blob)return;try{
   const pt=MODE==='pulse'?{...P.pt}:(mask&&mask.fit?{x:mask.fit.cx,y:mask.fit.cy}:{...P.pt});
   await idb.set(OTHER,{v:1,blob,name,P:{pt,zoom:P.zoom,fx:P.fx,fy:P.fy,seed:P.seed,brush:P.brush},mask:null,paint:await paintBlob(),handoff:true});await idb.set('living-series',S);location.href=OTHER+'.html'}
-  catch(e){status('Couldn’t hand the photo over: '+(e.message||e))}};
+  catch(e){status('Couldn’t hand the photo over: '+(e.message||e))}});
 
 // ---------- export: a still frame, or one seamless loop recorded in real time
-$('stillBtn').onclick=()=>{if(!framed)return;const keep=[gl$.width,gl$.height];gl$.width=W;gl$.height=H;render(tNow);
-  gl$.toBlob(b=>{gl$.width=keep[0];gl$.height=keep[1];dirty=true;saveFiles([{blob:b,name:`${MODE}-${stamp()}.jpg`}])},'image/jpeg',.95)};
+async function saveStill(){if(!framed||recording)return;const keep=[gl$.width,gl$.height];
+  if(MODE==='stretch'){ // full resolution: as many pixels as the photo has in the frame, within what the GPU can draw
+    const glc=gl$.getContext('webgl'),lim=Math.min(4096,glc?glc.getParameter(glc.MAX_TEXTURE_SIZE):4096,glc?glc.getParameter(glc.MAX_RENDERBUFFER_SIZE):4096);
+    Q=clamp(Math.min(1/FT.s,lim/Math.max(W,H)),1,8);if(Q>1){status('Rendering at full size…');await tick();buildFramed();rebuildProt()}}
+  gl$.width=W;gl$.height=H;render(MODE==='stretch'&&P.style==='still'?0:tNow);
+  const b=await new Promise(r=>gl$.toBlob(r,'image/jpeg',.95)),size=`${W} × ${H}`;
+  if(Q!==1){Q=1;buildFramed();rebuildProt()}gl$.width=keep[0];gl$.height=keep[1];dirty=true;fit();
+  if(MODE==='stretch')status(`Image ready: ${size}.`);saveFiles([{blob:b,name:`${MODE}-${stamp()}.jpg`}])}
+on('stillBtn',saveStill);on('saveTop',saveStill);
 function pickMime(){if(typeof MediaRecorder==='undefined')return null;for(const m of['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'])if(MediaRecorder.isTypeSupported(m))return m;return''}
 let vidFile=null, stopRec=false;
 async function makeVideo(){if(!framed||recording)return;const mime=pickMime();if(mime===null||!gl$.captureStream){status('This browser can’t record video. Try Safari or Chrome.');return}
-  recording=true;stopRec=false;$('recbar').hidden=false;$('ptools').hidden=true;['make','makeTop'].forEach(k=>$(k).disabled=true);ox.clearRect(0,0,ov.width,ov.height);
+  recording=true;stopRec=false;$('recbar').hidden=false;$('ptools').hidden=true;['make','makeTop'].forEach(k=>{if($(k))$(k).disabled=true});ox.clearRect(0,0,ov.width,ov.height);
   const keep=[gl$.width,gl$.height];gl$.width=W;gl$.height=H;frameNo=0;render(0);
   try{const stream=gl$.captureStream(30),rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:14e6}:{videoBitsPerSecond:14e6}),chunks=[];
     rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};const done=new Promise(r=>rec.onstop=r);rec.start(250);
@@ -411,17 +468,17 @@ async function makeVideo(){if(!framed||recording)return;const mime=pickMime();if
     render(D-.001);await new Promise(r=>setTimeout(r,80));rec.stop();await done;stream.getTracks().forEach(t=>t.stop());
     const type=rec.mimeType||mime||'video/webm',ext=type.includes('mp4')?'mp4':'webm',b=new Blob(chunks,{type:type.split(';')[0]});
     vidFile={blob:b,name:`${MODE}-${P.style}-${stamp()}.${ext}`};const v=$('vid');if(v.src.startsWith('blob:'))URL.revokeObjectURL(v.src);v.src=URL.createObjectURL(b);$('vidBox').hidden=false;v.play().catch(()=>{});
-    status(`Video ready: ${ext.toUpperCase()}, ${(b.size/1e6).toFixed(1)} MB, one ${D} s loop.`+(ext==='webm'?' This browser only records WebM; Instagram wants MP4, so convert it or record in Safari.':''));
+    status(`Video ready: ${ext.toUpperCase()}, ${b.size<1e6?Math.max(1,Math.round(b.size/1e3))+' KB':(b.size/1e6).toFixed(1)+' MB'}, one ${D} s loop.`+(ext==='webm'?' This browser only records WebM; Instagram wants MP4, so convert it or record in Safari.':''));
     if(matchMedia('(max-width:899px) and (orientation:portrait),(max-width:599px)').matches)$('vidBox').scrollIntoView({behavior:'smooth',block:'center'})}
   catch(e){status('Couldn’t make the video: '+(e.message||e))}
-  gl$.width=keep[0];gl$.height=keep[1];recording=false;$('recbar').hidden=true;$('ptools').hidden=false;['make','makeTop'].forEach(k=>$(k).disabled=false);dirty=true;fit()}
-$('make').onclick=makeVideo;$('makeTop').onclick=makeVideo;
+  gl$.width=keep[0];gl$.height=keep[1];recording=false;$('recbar').hidden=true;$('ptools').hidden=false;['make','makeTop'].forEach(k=>{if($(k))$(k).disabled=false});dirty=true;fit()}
+on('make',makeVideo);on('makeTop',makeVideo);
 $('saveVid').onclick=()=>{if(vidFile)saveFiles([vidFile])};
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&recording){stopRec=true;status('Recording stopped because the screen was hidden. Keep this screen open while it records.')}});
 
 // ---------- start: shared series settings, then the last photo (or one handed over from the other tool)
 syncUI();
-(async()=>{try{const ss=await idb.get('living-series');if(ss)Object.assign(S,ss);
+(async()=>{try{const ss=await idb.get(SKEY);if(ss)Object.assign(S,ss);
   const s=await idb.get(MODE);if(s&&s.blob){Object.assign(P,s.P||{});if(s.mask&&!s.handoff)mask=s.mask;syncUI();await setPhoto(s.blob,s.name,!s.handoff,s.paint);
     if(s.handoff){status((MODE==='flow'?'The same photo, now with Flow. The source of the pulse is what stays still.':'The same photo, now with Pulse. What stayed still is the source of the pulse.')+(s.paint?' Your protect paint came with it.':''));persist()}}
   syncUI()}catch(e){}})();
