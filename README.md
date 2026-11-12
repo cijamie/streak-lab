@@ -1,6 +1,6 @@
 # Streak Lab
 
-Two photo tools for light, motion and pixels. **Streak Lab** is a photo editor for pixel-streak art, and **Portals** swaps a square between two photos. Pull pixels into streaks (straight, radial, swirling, out of edges or along paths), add light and motion effects, grade the result in two tones with grain, then export a full-size photo, an Instagram carousel or a video.
+Four photo tools for light, motion and pixels. **Streak Lab** is a photo editor for pixel-streak art, **Portals** swaps a square between two photos, and **Pulse** and **Flow** turn one photo into a seamless video loop. Pull pixels into streaks (straight, radial, swirling, out of edges or along paths), add light and motion effects, grade the result in two tones with grain, then export a full-size photo, an Instagram carousel or a video.
 
 **Live: [jamies.dev/streak-lab](https://jamies.dev/streak-lab/)**
 
@@ -38,6 +38,37 @@ Portals puts photos in windows on each other. Pick a style:
 5. **Save** at 1080 or 2160 wide, or tap **Edit the result in Streak Lab** to add streaks, effects or a grade.
 
 Your last photos and settings are kept on the device. For a carousel like the ones on Instagram, make several and post them together.
+
+## Pulse and Flow
+
+[jamies.dev/streak-lab/pulse.html](https://jamies.dev/streak-lab/pulse.html) · [jamies.dev/streak-lab/flow.html](https://jamies.dev/streak-lab/flow.html)
+
+Two related series for one idea: the photograph stays recognisable, but its movement shows a feeling the camera alone couldn't capture.
+
+**Pulse: a photograph with a pulse.** Tap the thing whose presence changes the space, like an empty chair, a lit window or a distant figure. A quiet disturbance spreads from it, echoes and settles back into the photograph. The thing itself stays still (the *still zone*); only the space around it moves.
+
+| Movement | What it does |
+| --- | --- |
+| **Ripple** | A soft wave spreads out, sometimes with a weaker, slightly different echo |
+| **Breathing** | The space slowly expands and contracts |
+| **Tension** | Straight lines bow toward the source, hold, then release |
+| **Aftershock** | One clear disturbance, then smaller echoes |
+| **Interrupted** | The pulse starts, hesitates, then carries on |
+| **Directional** | The pulse travels one way, down a hallway or along a road |
+
+**Flow: the world flows around one detail.** Tap the one thing the photograph refuses to lose. It stays perfectly still while everything else stretches into a slow current and returns. Use the oval, or let an on-device AI model find its exact outline.
+
+| Movement | What it does |
+| --- | --- |
+| **The anchor** | The surroundings part around the subject like a current around a stone |
+| **The last detail** | Everything else stretches into bands, softens toward colour and pulls apart in patches |
+| **Resistance** | The stretching creeps up to the subject's edge, slows, and retreats |
+
+How they work:
+- **Personality:** Each loop gets its own randomised personality, described in words: when the pulses come, how strong and uneven they are, which areas move first, where the longest trails form and how unevenly things return. The subject and the main direction stay yours. **New personality** rolls another one; **Unpredictability** sets how far it can vary.
+- **Shared settings:** The **Look** (None, Muted, Night, Mono or Faded, plus grain), the **shape** and the **loop length** (6–12 s) are shared between the two tools, so a series matches.
+- **Make the other version:** This button opens the same photo in the other tool: the source of the pulse becomes what stays still.
+- **Export:** **Make video** records one seamless loop at 1080 wide. It starts and ends on the untouched photo. **Save this frame** saves a still.
 
 ## How to use it
 
@@ -119,6 +150,8 @@ Opening `index.html` straight from disk also works, but the web app manifest nee
 | --- | --- |
 | `index.html` | The dashboard and the Streak Lab editor |
 | `portals.html` | Portals, the two-photo square swap |
+| `pulse.html`, `flow.html` | Pulse and Flow, the two video-loop tools |
+| `living.js`, `living.css` | Shared code for Pulse and Flow: WebGL shaders, personalities, recording |
 | `engine.js` | The image pipeline: adjustments, streaks, masks and effects, as pure functions |
 | `worker.js` | Renders the editing preview in the background so sliders stay smooth |
 | `manifest.webmanifest` | Lets the app be installed to a home screen |

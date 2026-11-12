@@ -12,7 +12,9 @@
   "categories": ["photo", "graphics"],
   "shortcuts": [
     { "name": "Streak Lab", "short_name": "Streaks", "url": "./?home", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Portals", "short_name": "Portals", "description": "Swap a square between two photos", "url": "./portals.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Portals", "short_name": "Portals", "description": "Swap a square between two photos", "url": "./portals.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Pulse", "short_name": "Pulse", "description": "Give a photograph a pulse", "url": "./pulse.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Flow", "short_name": "Flow", "description": "Let the world flow around one detail", "url": "./flow.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flow · Streak Lab</title>
+<meta name="description" content="The world flows around one detail: one thing stays perfectly still while the rest of the photo stretches away and returns. Make seamless video loops. Free, and your photo never leaves your device.">
+<link rel="canonical" href="https://jamies.dev/streak-lab/flow.html">
+<meta name="theme-color" content="#0a111d">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Streak Lab">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Flow · Streak Lab">
+<meta property="og:description" content="The world flows around one detail: one thing stays perfectly still while the rest of the photo stretches away and returns. Make seamless video loops. Free, and your photo never leaves your device.">
+<meta property="og:url" content="https://jamies.dev/streak-lab/flow.html">
+<meta property="og:image" content="https://jamies.dev/streak-lab/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="living.css">
+</head>
+<body data-mode="flow">
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="./?home" title="Back to the dashboard"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2340"/><circle cx="40" cy="22" r="11" fill="#f7e8cf"/><g fill="#e0843a"><rect x="9" y="30" width="4" height="25" rx="2"/><rect x="17" y="22" width="4" height="33" rx="2"/><rect x="25" y="34" width="4" height="21" rx="2"/><rect x="33" y="27" width="4" height="28" rx="2"/><rect x="41" y="37" width="4" height="18" rx="2"/><rect x="49" y="29" width="4" height="26" rx="2"/></g></svg><b>Streak Lab</b></a>
+    <span class="crumb">Flow</span>
+    <button class="btn" id="makeTop" disabled><svg class="i" viewBox="0 0 20 20"><path d="M10 12.5V2.5M6.5 6L10 2.5 13.5 6"/><path d="M4 11v5.5h12V11"/></svg>Make video</button>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="empty" id="empty">
+      <h1>Every photograph has<br>one thing it <em>refuses to lose</em></h1>
+      <p>Tap the detail that matters: a cup, a lit window, a person waiting. It stays perfectly still while the rest of the photo stretches into a slow current and returns.</p>
+      <div class="inline" style="justify-content:center"><button class="btn" id="pick">Choose a photo</button><button class="btn ghost" id="sample">Try the sample</button></div>
+      <p style="font-size:13px;color:var(--dim)">Ask why it deserves to stay, not just what stays sharp. Your photo stays on this device.</p>
+    </div>
+    <div class="view" id="view" hidden><canvas id="gl" aria-label="Preview. Tap or drag to place what stays still."></canvas><canvas id="ov" aria-hidden="true"></canvas><span class="recbar" id="recbar" hidden>Recording</span></div>
+    <div class="transport" id="transport" hidden>
+      <button class="play" id="play" aria-label="Pause"><svg class="i" viewBox="0 0 20 20" id="playIcon"><path d="M7 4.5v11M13 4.5v11"/></svg></button>
+      <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Position in the loop">
+      <span class="time" id="time">0.0 / 8 s</span>
+    </div>
+    <p class="toast" id="status" role="status" aria-live="polite" hidden></p>
+  </main>
+
+  <aside class="panel" aria-label="Flow settings">
+    <section class="sec">
+      <h2>Photo</h2>
+      <div class="inline"><button class="chip" id="pick2">Choose a photo</button><button class="chip" id="sample2">Sample</button></div>
+      <input type="file" accept="image/*,.heic,.heif" id="file">
+      <p class="hint">Tap or drag on the photo to place what stays: the one thing the photograph refuses to lose.</p>
+    </section>
+    <section class="sec">
+      <h2>Movement</h2>
+      <div class="tiles three" data-key="style">
+        <button data-v="anchor"><svg viewBox="0 0 40 40"><path d="M2 10Q14 10 18 16M2 30Q14 30 18 24M22 16Q26 10 38 10M22 24Q26 30 38 30M2 20h8M30 20h8" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="20" cy="20" r="6" fill="#f7b267"/></svg>The anchor</button>
+        <button data-v="last"><svg viewBox="0 0 40 40"><path d="M2 8h36M2 14h36M2 26h36M2 32h36" stroke="currentColor" stroke-width="2.4" opacity=".55"/><rect x="16" y="15" width="8" height="10" rx="1.5" fill="#f7b267"/></svg>The last detail</button>
+        <button data-v="resist"><svg viewBox="0 0 40 40"><path d="M4 10h9M4 16h6M4 24h6M4 30h9M27 10h9M30 16h6M30 24h6M27 30h9" stroke="currentColor" stroke-width="1.6"/><circle cx="20" cy="20" r="7" fill="none" stroke="#f7b267" stroke-width="2"/><circle cx="20" cy="20" r="3" fill="#f7b267"/></svg>Resistance</button>
+      </div>
+      <p class="hint" id="styleHint"></p>
+    </section>
+    <section class="sec">
+      <h2>What stays</h2>
+      <div class="sl"><label for="size">Size</label><output></output><input type="range" id="size" data-key="size" min="3" max="45"></div>
+      <div class="sl"><label for="shape">Shape</label><output></output><input type="range" id="shape" data-key="shape" min="-100" max="100" step="5" data-fmt="shape"></div>
+      <div class="inline"><button class="chip" id="findSubj">Find its outline (AI)</button><button class="chip" id="clearSubj" hidden>Use the oval</button></div>
+      <p class="hint" id="anchorHint">Tap the photo to place it. The oval is kept perfectly still, or let an on-device AI model find the exact outline of what you tapped.</p>
+    </section>
+    <section class="sec">
+      <h2>Flow</h2>
+      <div class="sl"><label for="strength">Stretch</label><output></output><input type="range" id="strength" data-key="strength" min="5" max="100"></div>
+      <div class="sl"><label for="dir">Direction</label><output></output><input type="range" id="dir" data-key="dir" min="0" max="355" step="5" data-fmt="deg"></div>
+      <div class="sl"><label for="halo">Distance kept</label><output></output><input type="range" id="halo" data-key="halo" min="0" max="100"></div>
+      <div class="sl"><label for="soften">Softening</label><output></output><input type="range" id="soften" data-key="soften" min="0" max="100"></div>
+      <p class="hint">Stretch sets how long the pixel trails get at the peak. Distance kept is how close the flow is allowed to come. Softening fades the surroundings towards colour while the detail stays sharp.</p>
+    </section>
+    <section class="sec">
+      <h2>Personality</h2>
+      <p class="personality" id="persona"></p>
+      <div class="sl"><label for="variety">Unpredictability</label><output></output><input type="range" id="variety" data-key="variety" min="0" max="100"></div>
+      <div class="inline"><button class="chip" id="reroll">New personality</button><span class="seed" id="seedLabel"></span></div>
+      <p class="hint">Each loop gets its own personality: which areas move first, how long the trails get, where the strongest pull develops and how unevenly it returns. The subject and the main direction stay yours.</p>
+    </section>
+    <section class="sec">
+      <h2>Look <span class="series">Shared with Pulse</span></h2>
+      <div class="seg" data-key="grade" data-store="S"><button data-v="none">None</button><button data-v="muted">Muted</button><button data-v="night">Night</button><button data-v="mono">Mono</button><button data-v="faded">Faded</button></div>
+      <div class="sl"><label for="grain">Grain</label><output></output><input type="range" id="grain" data-key="grain" data-store="S" min="0" max="100"></div>
+      <p class="hint">Keep one restrained colour treatment across a series. The look, shape and loop length here are shared with Pulse, so a pulse version and a flow version of the same photo match.</p>
+    </section>
+    <section class="sec">
+      <h2>Video <span class="series">Shared with Pulse</span></h2>
+      <div class="row">Shape<div class="seg" data-key="aspect" data-store="S"><button data-v="45">4:5</button><button data-v="11">1:1</button><button data-v="916">9:16</button><button data-v="orig">Photo</button></div></div>
+      <div class="row">Loop<div class="seg" data-key="dur" data-store="S" data-num><button data-v="6">6 s</button><button data-v="8">8 s</button><button data-v="10">10 s</button><button data-v="12">12 s</button></div></div>
+      <div class="sl"><label for="zoom">Zoom</label><output></output><input type="range" id="zoom" data-key="zoom" min="100" max="250" data-fmt="pct"></div>
+      <div class="sl"><label for="fx">Across</label><output></output><input type="range" id="fx" data-key="fx" min="0" max="100"></div>
+      <div class="sl"><label for="fy">Down</label><output></output><input type="range" id="fy" data-key="fy" min="0" max="100"></div>
+    </section>
+    <section class="sec">
+      <h2>Export</h2>
+      <button class="btn wide" id="make" disabled>Make video</button>
+      <div id="vidBox" hidden><video id="vid" playsinline muted loop controls></video><button class="btn ghost wide" id="saveVid">Save video</button></div>
+      <button class="btn ghost wide" id="stillBtn" disabled>Save this frame</button>
+      <button class="btn ghost wide" id="toOther" disabled>Make the Pulse version of this photo</button>
+      <p class="hint">One seamless loop at 1080 wide, silent so you can add music. Keep this screen open while it records. Safari records MP4; some other browsers only record WebM.</p>
+    </section>
+    <section class="sec">
+      <details class="ideas"><summary>Ideas to shoot</summary>
+        <table><tr><th>Movement</th><th>Try it on</th><th>Theme</th></tr>
+        <tr><td>The anchor</td><td>A person waiting, a motorcycle standing still, a small plant</td><td>Holding your position while everything changes</td></tr>
+        <tr><td>The last detail</td><td>The window where a light was on, one cup on a table, a hand on a railing</td><td>Remembering one detail more clearly than the whole</td></tr>
+        <tr><td>Resistance</td><td>A doorway in a fragmenting street, a figure whose colours stretch away</td><td>Trying not to lose something</td></tr>
+        </table>
+      </details>
+    </section>
+  </aside>
+</div>
+<script src="living.js"></script>
+</body>
+</html>

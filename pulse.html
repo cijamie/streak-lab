@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pulse · Streak Lab</title>
+<meta name="description" content="A photograph with a pulse: something in the photo sends a quiet disturbance through the space around it. Make seamless video loops. Free, and your photo never leaves your device.">
+<link rel="canonical" href="https://jamies.dev/streak-lab/pulse.html">
+<meta name="theme-color" content="#0a111d">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Streak Lab">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pulse · Streak Lab">
+<meta property="og:description" content="A photograph with a pulse: something in the photo sends a quiet disturbance through the space around it. Make seamless video loops. Free, and your photo never leaves your device.">
+<meta property="og:url" content="https://jamies.dev/streak-lab/pulse.html">
+<meta property="og:image" content="https://jamies.dev/streak-lab/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="living.css">
+</head>
+<body data-mode="pulse">
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="./?home" title="Back to the dashboard"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2340"/><circle cx="40" cy="22" r="11" fill="#f7e8cf"/><g fill="#e0843a"><rect x="9" y="30" width="4" height="25" rx="2"/><rect x="17" y="22" width="4" height="33" rx="2"/><rect x="25" y="34" width="4" height="21" rx="2"/><rect x="33" y="27" width="4" height="28" rx="2"/><rect x="41" y="37" width="4" height="18" rx="2"/><rect x="49" y="29" width="4" height="26" rx="2"/></g></svg><b>Streak Lab</b></a>
+    <span class="crumb">Pulse</span>
+    <button class="btn" id="makeTop" disabled><svg class="i" viewBox="0 0 20 20"><path d="M10 12.5V2.5M6.5 6L10 2.5 13.5 6"/><path d="M4 11v5.5h12V11"/></svg>Make video</button>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="empty" id="empty">
+      <h1>A photograph<br>with a <em>pulse</em></h1>
+      <p>Tap the thing whose presence changes the room: an empty chair, a lit window, a distant figure. A quiet disturbance spreads from it, echoes, and settles back into the photograph.</p>
+      <div class="inline" style="justify-content:center"><button class="btn" id="pick">Choose a photo</button><button class="btn ghost" id="sample">Try the sample</button></div>
+      <p style="font-size:13px;color:var(--dim)">Places where someone should be work best: empty seats, closed doors, abandoned objects. Your photo stays on this device.</p>
+    </div>
+    <div class="view" id="view" hidden><canvas id="gl" aria-label="Preview. Tap or drag to place the source of the pulse."></canvas><canvas id="ov" aria-hidden="true"></canvas><span class="recbar" id="recbar" hidden>Recording</span></div>
+    <div class="transport" id="transport" hidden>
+      <button class="play" id="play" aria-label="Pause"><svg class="i" viewBox="0 0 20 20" id="playIcon"><path d="M7 4.5v11M13 4.5v11"/></svg></button>
+      <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Position in the loop">
+      <span class="time" id="time">0.0 / 8 s</span>
+    </div>
+    <p class="toast" id="status" role="status" aria-live="polite" hidden></p>
+  </main>
+
+  <aside class="panel" aria-label="Pulse settings">
+    <section class="sec">
+      <h2>Photo</h2>
+      <div class="inline"><button class="chip" id="pick2">Choose a photo</button><button class="chip" id="sample2">Sample</button></div>
+      <input type="file" accept="image/*,.heic,.heif" id="file">
+      <p class="hint">Tap or drag on the photo to place the source: the thing whose presence moves the space.</p>
+    </section>
+    <section class="sec">
+      <h2>Movement</h2>
+      <div class="tiles" data-key="style">
+        <button data-v="ripple"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="3" fill="#f7b267"/><circle cx="20" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg>Ripple</button>
+        <button data-v="breathe"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="3" fill="#f7b267"/><circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 3"/><path d="M20 4v4M20 32v4M4 20h4M32 20h4" stroke="currentColor" stroke-width="1.4"/></svg>Breathing</button>
+        <button data-v="tension"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="3" fill="#f7b267"/><path d="M4 8Q20 16 36 8M4 32Q20 24 36 32M8 4Q16 20 8 36M32 4Q24 20 32 36" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Tension</button>
+        <button data-v="aftershock"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="3" fill="#f7b267"/><circle cx="20" cy="20" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" stroke-width="1" opacity=".6"/><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width=".6" opacity=".4"/></svg>Aftershock</button>
+        <button data-v="interrupted"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="3" fill="#f7b267"/><circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="10 5"/></svg>Interrupted</button>
+        <button data-v="directional"><svg viewBox="0 0 40 40"><circle cx="9" cy="20" r="3" fill="#f7b267"/><path d="M16 12Q20 20 16 28M23 9Q28 20 23 31M30 6Q36 20 30 34" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Directional</button>
+      </div>
+      <p class="hint" id="styleHint"></p>
+    </section>
+    <section class="sec">
+      <h2>Pulse</h2>
+      <div class="sl"><label for="strength">Strength</label><output></output><input type="range" id="strength" data-key="strength" min="5" max="100"></div>
+      <div class="sl"><label for="reach">Reach</label><output></output><input type="range" id="reach" data-key="reach" min="15" max="100"></div>
+      <div class="sl"><label for="settle">Settles</label><output></output><input type="range" id="settle" data-key="settle" min="0" max="100" data-fmt="settle"></div>
+      <div class="sl"><label for="still">Still zone</label><output></output><input type="range" id="still" data-key="still" min="0" max="40"></div>
+      <div class="sl" data-show="directional"><label for="dir">Direction</label><output></output><input type="range" id="dir" data-key="dir" min="0" max="355" step="5" data-fmt="deg"></div>
+      <p class="hint">Keep it subtle: the best version makes people wonder whether anything moved. The still zone keeps the source itself untouched. The space moves, not the thing.</p>
+    </section>
+    <section class="sec">
+      <h2>Personality</h2>
+      <p class="personality" id="persona"></p>
+      <div class="sl"><label for="variety">Unpredictability</label><output></output><input type="range" id="variety" data-key="variety" min="0" max="100"></div>
+      <div class="inline"><button class="chip" id="reroll">New personality</button><span class="seed" id="seedLabel"></span></div>
+      <p class="hint">Each loop gets its own personality: when the pulses come, how strong, how uneven, whether they echo. It stays the same until you roll a new one.</p>
+    </section>
+    <section class="sec">
+      <h2>Look <span class="series">Shared with Flow</span></h2>
+      <div class="seg" data-key="grade" data-store="S"><button data-v="none">None</button><button data-v="muted">Muted</button><button data-v="night">Night</button><button data-v="mono">Mono</button><button data-v="faded">Faded</button></div>
+      <div class="sl"><label for="grain">Grain</label><output></output><input type="range" id="grain" data-key="grain" data-store="S" min="0" max="100"></div>
+      <p class="hint">Keep one restrained colour treatment across a series. The look, shape and loop length here are shared with Flow, so a pulse version and a flow version of the same photo match.</p>
+    </section>
+    <section class="sec">
+      <h2>Video <span class="series">Shared with Flow</span></h2>
+      <div class="row">Shape<div class="seg" data-key="aspect" data-store="S"><button data-v="45">4:5</button><button data-v="11">1:1</button><button data-v="916">9:16</button><button data-v="orig">Photo</button></div></div>
+      <div class="row">Loop<div class="seg" data-key="dur" data-store="S" data-num><button data-v="6">6 s</button><button data-v="8">8 s</button><button data-v="10">10 s</button><button data-v="12">12 s</button></div></div>
+      <div class="sl"><label for="zoom">Zoom</label><output></output><input type="range" id="zoom" data-key="zoom" min="100" max="250" data-fmt="pct"></div>
+      <div class="sl"><label for="fx">Across</label><output></output><input type="range" id="fx" data-key="fx" min="0" max="100"></div>
+      <div class="sl"><label for="fy">Down</label><output></output><input type="range" id="fy" data-key="fy" min="0" max="100"></div>
+    </section>
+    <section class="sec">
+      <h2>Export</h2>
+      <button class="btn wide" id="make" disabled>Make video</button>
+      <div id="vidBox" hidden><video id="vid" playsinline muted loop controls></video><button class="btn ghost wide" id="saveVid">Save video</button></div>
+      <button class="btn ghost wide" id="stillBtn" disabled>Save this frame</button>
+      <button class="btn ghost wide" id="toOther" disabled>Make the Flow version of this photo</button>
+      <p class="hint">One seamless loop at 1080 wide, silent so you can add music. Keep this screen open while it records. Safari records MP4; some other browsers only record WebM.</p>
+    </section>
+    <section class="sec">
+      <details class="ideas"><summary>Ideas to shoot</summary>
+        <table><tr><th>Photograph</th><th>Movement</th><th>Feeling</th></tr>
+        <tr><td>An empty chair across a table</td><td>A faint wave spreads from the chair, bending the table edges</td><td>Someone’s absence</td></tr>
+        <tr><td>A person at a distant crossing</td><td>Tension: the road contracts toward them, then releases</td><td>Anticipation</td></tr>
+        <tr><td>A lit apartment window</td><td>Breathing: a slow expansion into the dark façade</td><td>Warmth, life inside</td></tr>
+        <tr><td>A parked motorcycle</td><td>Aftershock: small uneven vibrations through the pavement</td><td>Wanting to leave</td></tr>
+        <tr><td>A closed shop at night</td><td>Interrupted: one disturbance through the shutters, then a long pause</td><td>A place holding on</td></tr>
+        <tr><td>A hallway or a road</td><td>Directional: the pulse travels along it</td><td>Something approaching</td></tr>
+        </table>
+      </details>
+    </section>
+  </aside>
+</div>
+<script src="living.js"></script>
+</body>
+</html>
