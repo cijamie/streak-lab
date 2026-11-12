@@ -10,6 +10,10 @@
   "background_color": "#0f2340",
   "theme_color": "#0f2340",
   "categories": ["photo", "graphics"],
+  "shortcuts": [
+    { "name": "Streak Lab", "short_name": "Streaks", "url": "./?home", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Portals", "short_name": "Portals", "description": "Swap a square between two photos", "url": "./portals.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

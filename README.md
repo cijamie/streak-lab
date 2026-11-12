@@ -1,12 +1,37 @@
 # Streak Lab
 
-A photo editor for pixel-streak art. Pull pixels into streaks (straight, radial, swirling, out of edges or along paths), add light and motion effects, grade the result in two tones with grain, then export a full-size photo, an Instagram carousel or a video.
+Two photo tools for light, motion and pixels. **Streak Lab** is a photo editor for pixel-streak art, and **Portals** swaps a square between two photos. Pull pixels into streaks (straight, radial, swirling, out of edges or along paths), add light and motion effects, grade the result in two tones with grain, then export a full-size photo, an Instagram carousel or a video.
 
 **Live: [jamies.dev/streak-lab](https://jamies.dev/streak-lab/)**
 
 ![Streak Lab on a computer: the Masks tab, with Protect, a linear mask and its tools](docs/screenshot.jpg)
 
 Everything runs in your browser. Photos are never uploaded anywhere.
+
+## The dashboard
+
+The start screen lets you choose a tool, and shows your recent Streak Lab edits so you can pick up where you left off. Tap the logo in either tool to come back to it. If you reload in the middle of an edit, it reopens where you were.
+
+## Portals
+
+[jamies.dev/streak-lab/portals.html](https://jamies.dev/streak-lab/portals.html)
+
+1. **Choose two photos**, or try the sample pair. Portals cuts the same square out of both and swaps them, so each photo shows a window into the other. It works best with two photos that share a colour or a shape.
+2. **Pick a layout:**
+   - **Stacked 4:5** and **Side by side**: one 1080 × 1350 post.
+   - **Story 9:16**: 1080 × 1920.
+   - **Carousel**: two 1080 × 1350 slides, one per photo.
+3. **Style the window:**
+   - **Size**, and **Shape**: square, rounded or circle.
+   - **Border**, with its colour, and an optional **soft shadow**.
+   - **Same spot in both photos** keeps the two windows lined up for a clean swap. Turn it off to place them separately.
+4. **Frame the photos:**
+   - **Drag a window** on the preview to move it.
+   - **Drag a photo** outside its window to reframe it.
+   - **Zoom** each photo, and add a **gap** between them.
+5. **Save** at 1080 or 2160 wide, or tap **Edit the result in Streak Lab** to add streaks, effects or a grade to it.
+
+The last pair and its settings are kept on the device.
 
 ## How to use it
 
@@ -86,7 +111,8 @@ Opening `index.html` straight from disk also works, but the web app manifest nee
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | The page: markup, styles and the editor's interface code |
+| `index.html` | The dashboard and the Streak Lab editor |
+| `portals.html` | Portals, the two-photo square swap |
 | `engine.js` | The image pipeline: adjustments, streaks, masks and effects, as pure functions |
 | `worker.js` | Renders the editing preview in the background so sliders stay smooth |
 | `manifest.webmanifest` | Lets the app be installed to a home screen |

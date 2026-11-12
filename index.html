@@ -157,6 +157,19 @@ body.is-busy .veil{display:grid}
 .hero p{margin:0;color:var(--muted);font-size:15.5px;max-width:46ch}
 .hero .ctas{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .hero .small{font-size:13px;color:var(--dim)}
+.hero.dash{max-width:820px;gap:16px;padding:24px 18px 32px;align-self:start;margin:auto}
+.stage:has(.dash:not([hidden])){overflow:auto;place-items:start center}
+.toolcards{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;text-align:left}
+.toolcard{display:grid;gap:10px;align-content:start;padding:12px 12px 16px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line2);color:inherit;text-decoration:none}
+a.toolcard:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.toolcard .art{width:100%;height:auto;border-radius:10px;display:block}
+.toolcard h2{margin:2px 4px 0;font-size:20px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.toolcard p{margin:0 4px;font-size:14px;max-width:none}
+.toolcard .ctas{justify-content:flex-start;margin:4px 4px 0}
+.toolcard>.btn{justify-self:start;margin:4px 4px 0}
+.new{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--accent);color:var(--accent-fg);padding:2px 7px;border-radius:999px}
+@media (max-width:640px){.toolcards{grid-template-columns:1fr}.toolcard .art{height:104px}.hero.dash h1{font-size:28px}}
+.brand{cursor:pointer}
 .feats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:2px 0 0;padding:0;list-style:none}
 .recent{display:grid;gap:8px;width:100%}
 .recentgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
@@ -387,7 +400,7 @@ dialog[open]{display:flex;flex-direction:column}
 
 <div class="shell">
   <header class="topbar">
-    <div class="brand">
+    <div class="brand" id="homeBtn" role="link" tabindex="0" title="Back to the dashboard">
       <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2340"/><circle cx="40" cy="22" r="11" fill="#f7e8cf"/><g fill="#e0843a"><rect x="9" y="30" width="4" height="25" rx="2"/><rect x="17" y="22" width="4" height="33" rx="2"/><rect x="25" y="34" width="4" height="21" rx="2"/><rect x="33" y="27" width="4" height="28" rx="2"/><rect x="41" y="37" width="4" height="18" rx="2"/><rect x="49" y="29" width="4" height="26" rx="2"/></g></svg>
       <b>Streak Lab</b>
       <span class="file" id="fileInfo"></span>
@@ -421,17 +434,31 @@ dialog[open]{display:flex;flex-direction:column}
       <div class="bsize" id="brushRow" hidden><label for="brush">Size</label><input type="range" id="brush" min="4" max="120" value="30"><output></output></div>
     </div>
     <div class="stage" id="stage">
-      <div class="hero" id="empty">
-        <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2340"/><circle cx="40" cy="22" r="11" fill="#f7e8cf"/><g fill="#e0843a"><rect x="9" y="30" width="4" height="25" rx="2"/><rect x="17" y="22" width="4" height="33" rx="2"/><rect x="25" y="34" width="4" height="21" rx="2"/><rect x="33" y="27" width="4" height="28" rx="2"/><rect x="41" y="37" width="4" height="18" rx="2"/><rect x="49" y="29" width="4" height="26" rx="2"/></g></svg>
-        <h1>Pull your photos<br>into <em>light</em></h1>
-        <p>Streak pixels straight up, around a point, or out of any edge you draw. Stack them in layers, grade in two tones, and export for Instagram.</p>
-        <div class="ctas">
-          <label class="btn big pickzone">Open a photo<input type="file" accept="image/*" class="pick"></label>
-          <button class="btn ghost big" id="sampleBtn">Try a sample</button>
+      <div class="hero dash" id="empty">
+        <h1>What are you <em>making</em> today?</h1>
+        <p>Two tools for light, motion and pixels. Everything runs on this device.</p>
+        <div class="toolcards">
+          <div class="toolcard">
+            <svg class="art" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="dsg" x1="0" y1="1" x2="0" y2="0"><stop offset=".3" stop-color="#e0843a"/><stop offset="1" stop-color="#e0843a" stop-opacity="0"/></linearGradient></defs>
+              <rect width="320" height="180" fill="#0f2340"/><circle cx="215" cy="62" r="30" fill="#f7e8cf"/>
+              <g fill="url(#dsg)"><rect x="24" y="40" width="7" height="90"/><rect x="40" y="62" width="9" height="68"/><rect x="58" y="30" width="6" height="100"/><rect x="74" y="72" width="10" height="58"/><rect x="92" y="48" width="7" height="82"/><rect x="108" y="80" width="8" height="50"/><rect x="126" y="56" width="6" height="74"/><rect x="250" y="66" width="8" height="64"/><rect x="266" y="44" width="6" height="86"/><rect x="282" y="76" width="9" height="54"/></g>
+              <path d="M0 140 L40 118 L70 132 L110 108 L150 128 L190 112 L230 134 L270 116 L320 130 L320 180 L0 180Z" fill="#0a1830"/></svg>
+            <h2>Streak Lab</h2>
+            <p>Pull a photo into streaks, add light and motion effects, grade it in two tones, and export photos, carousels or Reels.</p>
+            <div class="ctas"><label class="btn pickzone">Open a photo<input type="file" accept="image/*" class="pick"></label><button class="btn ghost" id="sampleBtn">Try a sample</button></div>
+          </div>
+          <a class="toolcard" href="portals.html">
+            <svg class="art" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="320" height="90" fill="#2f78d6"/><rect y="90" width="320" height="90" fill="#d6a240"/>
+              <rect x="128" y="18" width="64" height="58" fill="#d6a240"/><circle cx="160" cy="47" r="10" fill="#c0141e"/>
+              <rect x="128" y="106" width="64" height="58" fill="#2f78d6"/><path d="M140 160 L178 112" stroke="#c9c4bb" stroke-width="4" stroke-linecap="round"/><circle cx="170" cy="125" r="3" fill="#f4f1ea"/>
+              <path d="M40 70 L120 40" stroke="#c9c4bb" stroke-width="5" stroke-linecap="round"/></svg>
+            <h2>Portals <span class="new">New</span></h2>
+            <p>Pick two photos and swap a square between them, so each one shows a window into the other. One image, a carousel or a Story.</p>
+            <span class="btn ghost">Open Portals</span>
+          </a>
         </div>
-        <ul class="feats"><li>Vertical, radial &amp; edge streaks</li><li>Layers</li><li>Duotone + grain</li><li>Carousels &amp; Reels</li><li>Works offline</li></ul>
         <div class="recent" id="recent" hidden><div class="sub">Pick up where you left off</div><div class="recentgrid" id="recentGrid"></div></div>
-        <p class="small"><span id="dropHint">Or drop or paste a photo. </span>Free, no sign-up, and your photos never leave this device.</p>
+        <p class="small"><span id="dropHint">You can also drop or paste a photo here to open it in Streak Lab. </span>Free, no sign-up, and your photos never leave this device.</p>
       </div>
       <div id="zoomer" hidden><div id="imgwrap"><canvas id="view"></canvas><canvas id="overlay" aria-label="Photo. Tap or drag to place streaks, edges, masks or protect paint."></canvas></div></div>
       <div class="zoombar" id="zoombar" hidden>
@@ -1061,7 +1088,7 @@ function loadFile(f,label,opt={}){
     strokes=[]; edges=[]; st.cx=.5; st.cy=.5; layers.forEach(L=>{L.edges=[];L.cx=.5;L.cy=.5;L.maskId=''}); layers[act].edges=edges; $('lmask').value='';
     rebuildSource(true); syncS2UI();
     const s=W/FW;
-    document.body.classList.remove('no-photo');
+    document.body.classList.remove('no-photo'); try{sessionStorage.setItem('sl.editing','1')}catch(e){}
     $('empty').hidden=true; $('zoomer').hidden=false; $('zoombar').hidden=false;
     $('saveBox').style.display='none'; $('slides').innerHTML=''; $('carAll').hidden=true; $('reelBox').style.display='none'; reelPrep=null; $('thumbs').innerHTML=''; $('variHint').hidden=true; status('');
     $('sizeInfo').textContent=s<1?`Original size ${FW} × ${FH}. You’re editing a smaller preview; saving renders at the original size.`:`Original size ${FW} × ${FH}.`;
@@ -1649,8 +1676,11 @@ function usedRasters(){const used={},add=id=>{const R=rasters.get(id);if(R)used[
   for(const s of strokes)if(s.t==='auto')add(s.id);for(const M of S2.masks)if(M.raster)add(M.raster);return used}
 function thumbBlob(){const K=S2.geo.crop,s=Math.min(1,360/Math.max(W*K.w,H*K.h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(W*K.w*s));c.height=Math.max(1,Math.round(H*K.h*s));
   c.getContext('2d').drawImage(view,K.x*W,K.y*H,K.w*W,K.h*H,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',.8))}
-function persistState(){clearTimeout(saveT);saveT=setTimeout(async()=>{if(!src||!photoId||hi<0)return;const id=photoId,state={snap:hist[hi],act,rasters:usedRasters()};
-  try{const thumb=await thumbBlob(),rec=await idb.photo(id);if(!rec||id!==photoId)return;rec.state=state;rec.thumb=thumb;rec.updated=Date.now();await idb.put(rec)}catch(e){}},800)}
+async function saveState(){if(!src||!photoId||hi<0)return;const id=photoId,state={snap:hist[hi],act,rasters:usedRasters()};
+  try{const thumb=await thumbBlob(),rec=await idb.photo(id);if(!rec||id!==photoId)return;rec.state=state;rec.thumb=thumb;rec.updated=Date.now();await idb.put(rec)}catch(e){}}
+function persistState(){clearTimeout(saveT);saveT=setTimeout(saveState,800)}
+async function goHome(){if(busy)return;clearTimeout(saveT);if(src){status('Saving…');await saveState()}try{sessionStorage.removeItem('sl.editing')}catch(e){}location.href='./?home'}
+$('homeBtn').onclick=goHome;$('homeBtn').onkeydown=e=>{if(e.key==='Enter')goHome()};
 function openRecord(rec){return new Promise(res=>{photoId=rec.id;idb.set('current',rec.id).catch(()=>{});loadFile(rec.blob,rec.name,{fromStore:true,saved:rec.state,done:res})})}
 async function resumeLast(){try{
   const old=await idb.get('photo'); // older versions kept a single photo under 'photo' / 'state'
@@ -1658,6 +1688,11 @@ async function resumeLast(){try{
     await idb.put({id,name:old.name||'Photo',blob:old.blob,state:s0&&s0.id===old.id?{snap:s0.snap,act:s0.act,rasters:s0.rasters}:null,thumb:null,added:Date.now(),updated:Date.now()});
     await idb.set('current',id);await idb.del('photo');await idb.del('state')}
   renderRecent();
+  // a fresh launch shows the dashboard; a reload mid-edit, or a hand-off from Portals, reopens the photo
+  const q=new URLSearchParams(location.search);let editing=false;try{editing=!!sessionStorage.getItem('sl.editing')}catch(e){}
+  if(q.has('home')){try{sessionStorage.removeItem('sl.editing')}catch(e){}editing=false}
+  if(q.has('open')||q.has('home'))history.replaceState(null,'',location.pathname);
+  if(!q.has('open')&&!editing)return;
   const cur=await idb.get('current');if(!cur||src)return;const rec=await idb.photo(cur);if(rec)openRecord(rec)}catch(e){}}
 const thumbURL=new Map();
 function recThumb(rec){if(!rec.thumb)return'';const k=rec.id+':'+rec.updated;if(!thumbURL.has(k))thumbURL.set(k,URL.createObjectURL(rec.thumb));return thumbURL.get(k)}

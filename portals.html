@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portals · Streak Lab</title>
+<meta name="description" content="Swap a square between two photos: each one gets a window into the other. Export as one image, a carousel or a Story. Free, and your photos never leave your device.">
+<link rel="canonical" href="https://jamies.dev/streak-lab/portals.html">
+<meta name="theme-color" content="#0a111d">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Streak Lab">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Portals · Streak Lab">
+<meta property="og:description" content="Swap a square between two photos, so each one gets a window into the other.">
+<meta property="og:url" content="https://jamies.dev/streak-lab/portals.html">
+<meta property="og:image" content="https://jamies.dev/streak-lab/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a111d;--stage:#060b14;--panel:#0f1828;--panel2:#152136;--raise:#1b2942;--line:#1f2c44;--line2:#2c3c5a;--fg:#eee5d4;--muted:#8e9ab0;--dim:#5f6d86;
+  --accent:#ef8f3f;--accent-hi:#f7b267;--accent-fg:#1a1006;--cream:#f7e8cf;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,select,input,label{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+input[type=file]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.shell{height:100vh;height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:auto minmax(0,1fr);grid-template-areas:"top top" "stage panel"}
+.topbar{grid-area:top;display:flex;align-items:center;gap:10px;padding:calc(8px + var(--sat)) 12px 8px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;color:inherit;text-decoration:none;min-width:0}
+.brand svg{width:28px;height:28px;border-radius:7px;flex:none}
+.brand b{font-weight:800;font-size:19px;letter-spacing:-.02em;white-space:nowrap;background:repeating-linear-gradient(90deg,var(--cream) 0 3px,var(--accent) 3px 4px,var(--cream) 4px 9px,var(--accent) 9px 10px,var(--cream) 10px 14px);-webkit-background-clip:text;background-clip:text;color:transparent}
+.crumb{color:var(--muted);font-weight:600;padding-left:10px;border-left:1px solid var(--line2);margin-right:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;background:var(--accent);color:var(--accent-fg);font-weight:600;min-height:38px;padding:8px 16px;border-radius:9px;white-space:nowrap}
+.btn:hover:not(:disabled){background:var(--accent-hi)}
+.btn.ghost{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1px var(--line2)}
+.btn.ghost:hover:not(:disabled){background:var(--raise)}
+.btn.wide{width:100%}
+.chip{display:inline-flex;align-items:center;gap:6px;border:0;box-shadow:inset 0 0 0 1px var(--line2);background:var(--panel2);font-size:13px;min-height:32px;padding:5px 11px;border-radius:999px}
+.chip:hover:not(:disabled){box-shadow:inset 0 0 0 1px var(--accent)}
+.stage{grid-area:stage;position:relative;display:grid;place-items:center;overflow:hidden;background:radial-gradient(120% 90% at 50% 40%,#0c1424 0%,var(--stage) 70%);touch-action:none;user-select:none;-webkit-user-select:none}
+#out{display:block;box-shadow:0 18px 60px rgba(0,0,0,.55);border-radius:4px;cursor:grab;touch-action:none}
+#out.moving{cursor:grabbing}
+.empty{display:grid;gap:16px;justify-items:center;text-align:center;padding:24px;max-width:560px}
+.empty h1{margin:0;font-size:clamp(26px,5vw,40px);line-height:1.05;font-weight:800;letter-spacing:-.02em}
+.empty h1 em{font-style:normal;background:linear-gradient(180deg,var(--cream) 30%,var(--accent) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.empty p{margin:0;color:var(--muted);font-size:15px;max-width:44ch}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;max-width:calc(100% - 24px);width:max-content;background:rgba(21,33,54,.96);box-shadow:inset 0 0 0 1px var(--line2);border-radius:10px;padding:9px 14px;font-size:13.5px;margin:0;pointer-events:none}
+.panel{grid-area:panel;border-left:1px solid var(--line);background:var(--panel);overflow:auto;overscroll-behavior:contain}
+.sec{padding:14px;display:grid;gap:10px;border-bottom:1px solid var(--line)}
+.sec h2{margin:0;font-size:13.5px;font-weight:600;letter-spacing:.02em}
+.hint{margin:0;color:var(--muted);font-size:12.5px}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slot{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:12px;background:var(--bg) center/cover no-repeat;box-shadow:inset 0 0 0 1.5px var(--line2);cursor:pointer;overflow:hidden;font-size:12.5px;color:var(--muted);text-align:center;padding:8px}
+.slot.has{box-shadow:inset 0 0 0 1.5px var(--line2)}
+.slot.has span{position:absolute;left:6px;bottom:6px;background:rgba(10,17,29,.82);color:var(--fg);border-radius:6px;padding:2px 7px;font-size:11.5px}
+.slot:hover{box-shadow:inset 0 0 0 2px var(--accent)}
+.slot b{display:block;color:var(--fg);font-size:14px}
+.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tiles button{display:grid;justify-items:center;gap:6px;border:0;border-radius:10px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--line);padding:9px 4px 7px;font-size:11.5px;color:var(--muted);line-height:1.15}
+.tiles button[aria-pressed="true"]{color:var(--cream);box-shadow:inset 0 0 0 1.5px var(--accent);background:var(--raise)}
+.tiles i{display:grid;gap:2px;width:22px;height:28px}
+.tiles i b{display:block;border:1.5px solid currentColor;border-radius:2px}
+.seg{display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:3px;box-shadow:inset 0 0 0 1px var(--line)}
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);font-size:13px;min-height:32px;padding:5px 8px;border-radius:7px}
+.seg button[aria-pressed="true"]{background:var(--raise);color:var(--fg);font-weight:600}
+.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 8px}
+.sl label{color:var(--muted);font-size:13px}
+.sl output{font-size:13px;font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.sl input{grid-column:1/-1}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;background:transparent;--p:50%;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:linear-gradient(90deg,var(--accent) var(--p),var(--line2) var(--p))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-6.5px;border-radius:50%;background:var(--cream);border:0;box-shadow:0 0 0 4px rgba(239,143,63,.22)}
+input[type=range]::-moz-range-track{height:3px;background:var(--line2)}
+input[type=range]::-moz-range-progress{height:3px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--cream);border:0}
+@media (pointer:coarse){input[type=range]{height:34px}input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-10.5px}}
+.check{display:flex;gap:9px;align-items:center;font-size:13.5px}
+.check input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
+input[type=color]{-webkit-appearance:none;appearance:none;width:34px;height:34px;border:0;border-radius:50%;padding:0;background:none;box-shadow:0 0 0 2px var(--line2);cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
+.row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.row .seg{flex:1}
+@media (max-width:899px) and (orientation:portrait),(max-width:599px){
+  .shell{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"top" "stage" "panel"}
+  .panel{border-left:0;border-top:1px solid var(--line);height:min(44dvh,420px);padding-bottom:var(--sab)}
+  .brand b{display:none}
+  .toast{bottom:10px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="./?home" title="Back to the dashboard"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2340"/><circle cx="40" cy="22" r="11" fill="#f7e8cf"/><g fill="#e0843a"><rect x="9" y="30" width="4" height="25" rx="2"/><rect x="17" y="22" width="4" height="33" rx="2"/><rect x="25" y="34" width="4" height="21" rx="2"/><rect x="33" y="27" width="4" height="28" rx="2"/><rect x="41" y="37" width="4" height="18" rx="2"/><rect x="49" y="29" width="4" height="26" rx="2"/></g></svg><b>Streak Lab</b></a>
+    <span class="crumb">Portals</span>
+    <button class="btn" id="saveTop" disabled><svg class="i" viewBox="0 0 20 20"><path d="M10 12.5V2.5M6.5 6L10 2.5 13.5 6"/><path d="M4 11v5.5h12V11"/></svg>Export</button>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="empty" id="empty">
+      <h1>Give each photo a<br><em>window</em> into the other</h1>
+      <p>Pick two photos. Portals cuts the same square out of both and swaps them, so each one shows a piece of the other. Post them together as one image, a carousel or a Story.</p>
+      <div class="inline" style="justify-content:center"><button class="btn" id="pickBoth">Choose two photos</button><button class="btn ghost" id="sample">Try a sample pair</button></div>
+      <p style="font-size:13px;color:var(--dim)">Works best with two photos that share a colour or a shape. Your photos stay on this device.</p>
+    </div>
+    <canvas id="out" hidden aria-label="Preview. Drag a window to move it, drag a photo to reframe it."></canvas>
+    <p class="toast" id="status" role="status" aria-live="polite" hidden></p>
+  </main>
+
+  <aside class="panel" aria-label="Portals settings">
+    <section class="sec">
+      <h2>Photos</h2>
+      <div class="slots">
+        <label class="slot" id="slotA"><div><b>Photo 1</b>Tap to choose</div><input type="file" accept="image/*,.heic,.heif" id="fileA"></label>
+        <label class="slot" id="slotB"><div><b>Photo 2</b>Tap to choose</div><input type="file" accept="image/*,.heic,.heif" id="fileB"></label>
+      </div>
+      <div class="inline"><button class="chip" id="swapAB">Swap order</button><button class="chip" id="sample2">Sample pair</button></div>
+      <input type="file" accept="image/*,.heic,.heif" multiple id="fileBoth">
+    </section>
+    <section class="sec">
+      <h2>Layout</h2>
+      <div class="tiles" id="layoutSeg">
+        <button data-layout="stack" aria-pressed="true"><i><b style="height:12px"></b><b style="height:12px"></b></i>Stacked 4:5</button>
+        <button data-layout="side" aria-pressed="false"><i style="grid-template-columns:1fr 1fr;height:28px"><b></b><b></b></i>Side by side</button>
+        <button data-layout="story" aria-pressed="false"><i style="width:16px;height:30px"><b></b><b></b></i>Story 9:16</button>
+        <button data-layout="carousel" aria-pressed="false"><i style="grid-template-columns:1fr 1fr;width:30px;height:20px"><b></b><b></b></i>Carousel</button>
+      </div>
+      <p class="hint" id="layoutHint"></p>
+    </section>
+    <section class="sec">
+      <h2>Window</h2>
+      <div class="sl"><label for="size">Size</label><output></output><input type="range" id="size" min="12" max="80" value="40"></div>
+      <div class="row">Shape<div class="seg" id="shapeSeg"><button data-shape="square" aria-pressed="true">Square</button><button data-shape="round" aria-pressed="false">Rounded</button><button data-shape="circle" aria-pressed="false">Circle</button></div></div>
+      <div class="row">Border<div class="seg" id="borderSeg"><button data-border="0" aria-pressed="true">None</button><button data-border="1" aria-pressed="false">Thin</button><button data-border="2" aria-pressed="false">Thick</button></div><input type="color" id="bcol" value="#ffffff" aria-label="Border colour"></div>
+      <label class="check"><input type="checkbox" id="shadow"> Soft shadow</label>
+      <label class="check"><input type="checkbox" id="linked" checked> Same spot in both photos</label>
+      <p class="hint">Drag a window on the preview to move it. With “Same spot” on, both windows move together, which gives the cleanest swap.</p>
+    </section>
+    <section class="sec">
+      <h2>Framing</h2>
+      <div class="sl"><label for="zoomA">Zoom photo 1</label><output></output><input type="range" id="zoomA" min="100" max="300" value="100" data-suffix="%"></div>
+      <div class="sl"><label for="zoomB">Zoom photo 2</label><output></output><input type="range" id="zoomB" min="100" max="300" value="100" data-suffix="%"></div>
+      <div class="sl"><label for="gap">Gap between photos</label><output></output><input type="range" id="gap" min="0" max="60" value="0"></div>
+      <div class="row">Gap colour<input type="color" id="gcol" value="#0a111d" aria-label="Gap colour"></div>
+      <div class="inline"><button class="chip" id="resetFrame">Reset framing</button></div>
+      <p class="hint">Drag a photo (outside its window) to reframe it.</p>
+    </section>
+    <section class="sec">
+      <h2>Export</h2>
+      <div class="row">Size<div class="seg" id="resSeg"><button data-res="1" aria-pressed="true">1080 wide</button><button data-res="2" aria-pressed="false">2160 wide</button></div></div>
+      <button class="btn wide" id="saveBtn" disabled>Save</button>
+      <button class="btn ghost wide" id="toLab" disabled>Edit the result in Streak Lab</button>
+      <p class="hint">Saving uses your share sheet where it can, so you can send it straight to Photos or Instagram.</p>
+    </section>
+  </aside>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id), TAU=Math.PI*2;
+const P={layout:'stack',size:40,shape:'square',border:0,bcol:'#ffffff',shadow:false,linked:true,gap:0,gcol:'#0a111d',res:1,
+  A:{zoom:1,px:0,py:0,sq:{x:.5,y:.5}},B:{zoom:1,px:0,py:0,sq:{x:.5,y:.5}}};
+let imgA=null,imgB=null,blobA=null,blobB=null,nameA='',nameB='';
+const LAYOUT_HINT={stack:'One 1080 × 1350 post: photo 1 on top, photo 2 below.',side:'One 1080 × 1350 post: photo 1 on the left, photo 2 on the right.',
+  story:'One 1080 × 1920 Story or Reel cover: photo 1 on top, photo 2 below.',carousel:'Two 1080 × 1350 slides, one for each photo. Swipe between them to see the swap.'};
+
+// ---------- small helpers
+let toastT=0;const status=t=>{const el=$('status');el.textContent=t;el.hidden=!t;clearTimeout(toastT);if(t)toastT=setTimeout(()=>el.hidden=true,4500)};
+const setSeg=(id,attr,v)=>document.querySelectorAll('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset[attr]===String(v)));
+const syncOut=id=>{const el=$(id),o=el.parentNode.querySelector('output');if(o)o.textContent=el.value+(el.dataset.suffix||'');el.style.setProperty('--p',((el.value-el.min)/(el.max-el.min)*100)+'%')};
+const loadImg=b=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(b)});
+const isHeic=f=>/hei[cf]/i.test(f.type||'')||/\.(heic|heif)$/i.test(f.name||'');
+let heicP=null;
+function convertHeic(f){if(!heicP)heicP=new Promise((res,rej)=>{if(window.heic2any)return res(window.heic2any);const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';s.onload=()=>res(window.heic2any);s.onerror=()=>{heicP=null;rej(new Error('the HEIC converter couldn’t load'))};document.head.appendChild(s)});
+  return heicP.then(h=>h({blob:f,toType:'image/jpeg',quality:.95})).then(b=>new File([Array.isArray(b)?b[0]:b],(f.name||'photo').replace(/\.(heic|heif)$/i,'')+'.jpg',{type:'image/jpeg'}))}
+async function readPhoto(f){try{return{img:await loadImg(f),blob:f}}catch(e){if(isHeic(f)){status('Converting the HEIC photo…');const j=await convertHeic(f);return{img:await loadImg(j),blob:j}}throw new Error('that file couldn’t be opened')}}
+const idb=(()=>{let dbp=null;const open=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open('streaklab',2);
+    r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('kv'))db.createObjectStore('kv');if(!db.objectStoreNames.contains('photos'))db.createObjectStore('photos',{keyPath:'id'})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+  const run=(n,m,fn)=>open().then(db=>new Promise((res,rej)=>{const t=db.transaction(n,m),r=fn(t.objectStore(n));t.oncomplete=()=>res(r&&r.result);t.onerror=t.onabort=()=>rej(t.error)}));
+  return{get:k=>run('kv','readonly',s=>s.get(k)),set:(k,v)=>run('kv','readwrite',s=>s.put(v,k)),put:r=>run('photos','readwrite',s=>s.put(r))}})();
+let saveT=0;function persist(){clearTimeout(saveT);saveT=setTimeout(()=>{idb.set('portals',{a:blobA,b:blobB,nameA,nameB,P}).catch(()=>{})},400)}
+async function saveFiles(list){
+  const files=list.map(f=>new File([f.blob],f.name,{type:f.blob.type}));
+  if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files});return}catch(e){if(e.name==='AbortError')return}}
+  for(const f of list){const a=document.createElement('a');a.href=URL.createObjectURL(f.blob);a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);await new Promise(r=>setTimeout(r,400))}}
+
+// ---------- geometry: frames (where each photo sits) and windows (the swapped squares)
+function frames(scale){const k=scale||1,g=Math.round(P.gap*k);
+  if(P.layout==='carousel')return{slides:[{w:1080*k,h:1350*k,f:[{who:'A',x:0,y:0,w:1080*k,h:1350*k}]},{w:1080*k,h:1350*k,f:[{who:'B',x:0,y:0,w:1080*k,h:1350*k}]}]};
+  if(P.layout==='side'){const W=1080*k,H=1350*k,h2=(W-g)/2;return{slides:[{w:W,h:H,f:[{who:'A',x:0,y:0,w:h2,h:H},{who:'B',x:h2+g,y:0,w:h2,h:H}]}]}}
+  const W=1080*k,H=(P.layout==='story'?1920:1350)*k,h2=(H-g)/2;return{slides:[{w:W,h:H,f:[{who:'A',x:0,y:0,w:W,h:h2},{who:'B',x:0,y:h2+g,w:W,h:h2}]}]}}
+function sqRect(who,w,h){const s=(P.linked?P.A:P[who]).sq,side=P.size/100*Math.min(w,h),cx=Math.min(Math.max(s.x*w,side/2),w-side/2),cy=Math.min(Math.max(s.y*h,side/2),h-side/2);
+  return{x:cx-side/2,y:cy-side/2,s:side}}
+function drawPhoto(x,img,st,w,h){const s=Math.max(w/img.naturalWidth,h/img.naturalHeight)*st.zoom,dw=img.naturalWidth*s,dh=img.naturalHeight*s,ox=dw-w,oy=dh-h;
+  x.drawImage(img,-ox/2-st.px*ox/2,-oy/2-st.py*oy/2,dw,dh)}
+function photoCanvas(who,w,h){const c=document.createElement('canvas');c.width=Math.round(w);c.height=Math.round(h);const x=c.getContext('2d');x.imageSmoothingQuality='high';drawPhoto(x,who==='A'?imgA:imgB,P[who],c.width,c.height);return c}
+function shapePath(x,r){x.beginPath();if(P.shape==='circle')x.arc(r.x+r.s/2,r.y+r.s/2,r.s/2,0,TAU);else if(P.shape==='round'&&x.roundRect)x.roundRect(r.x,r.y,r.s,r.s,r.s*.12);else x.rect(r.x,r.y,r.s,r.s)}
+// one framed photo with the other photo's square swapped into its window
+function frameCanvas(who,w,h){
+  const other=who==='A'?'B':'A', base=photoCanvas(who,w,h), oth=photoCanvas(other,w,h), x=base.getContext('2d'), r=sqRect(who,w,h), ro=sqRect(other,w,h), m=Math.min(w,h);
+  if(P.shadow){x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=m*.04;x.shadowOffsetY=m*.012;shapePath(x,r);x.fillStyle='#000';x.fill();x.restore()}
+  x.save();shapePath(x,r);x.clip();x.drawImage(oth,ro.x,ro.y,ro.s,ro.s,r.x,r.y,r.s,r.s);x.restore();
+  if(P.border){x.save();x.lineWidth=m*(P.border===1?.006:.016);x.strokeStyle=P.bcol;shapePath(x,{x:r.x+x.lineWidth/2,y:r.y+x.lineWidth/2,s:r.s-x.lineWidth});x.stroke();x.restore()}
+  return base}
+function renderSlides(scale){const F=frames(scale);return F.slides.map(sl=>{const c=document.createElement('canvas');c.width=Math.round(sl.w);c.height=Math.round(sl.h);const x=c.getContext('2d');
+  x.fillStyle=P.gcol;x.fillRect(0,0,c.width,c.height);for(const f of sl.f)x.drawImage(frameCanvas(f.who,f.w,f.h),Math.round(f.x),Math.round(f.y));return c})}
+
+// ---------- preview (slides side by side for a carousel) and fitting it to the screen
+const out=$('out'), ox=out.getContext('2d'); let layoutInfo=null, raf=0;
+function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
+  const ready=imgA&&imgB; $('empty').hidden=!!ready; out.hidden=!ready; ['saveTop','saveBtn','toLab'].forEach(k=>$(k).disabled=!ready); if(!ready)return;
+  const sc=.5, slides=renderSlides(sc), gap=P.layout==='carousel'?24:0, W=slides.reduce((a,c)=>a+c.width,0)+gap*(slides.length-1), H=slides[0].height;
+  out.width=W;out.height=H;ox.fillStyle='#060b14';ox.fillRect(0,0,W,H);let xo=0;layoutInfo=[];
+  const F=frames(sc);slides.forEach((c,i)=>{ox.drawImage(c,xo,0);for(const f of F.slides[i].f)layoutInfo.push({...f,x:f.x+xo});xo+=c.width+gap});
+  fit()})}
+function fit(){if(out.hidden)return;const st=$('stage'),pad=phone()?16:56,s=Math.min((st.clientWidth-pad)/out.width,(st.clientHeight-pad)/out.height);out.style.width=out.width*s+'px';out.style.height=out.height*s+'px'}
+const phone=()=>matchMedia('(max-width:899px) and (orientation:portrait),(max-width:599px)').matches;
+addEventListener('resize',fit);
+
+// ---------- dragging: move a window, or reframe a photo
+let drag=null;
+function hit(e){const r=out.getBoundingClientRect(),X=(e.clientX-r.left)/r.width*out.width,Y=(e.clientY-r.top)/r.height*out.height;
+  for(const f of layoutInfo||[])if(X>=f.x&&X<=f.x+f.w&&Y>=f.y&&Y<=f.y+f.h){const q=sqRect(f.who,f.w,f.h),lx=X-f.x,ly=Y-f.y;return{f,lx,ly,inSq:lx>=q.x&&lx<=q.x+q.s&&ly>=q.y&&ly<=q.y+q.s}}
+  return null}
+out.addEventListener('pointerdown',e=>{const h=hit(e);if(!h)return;out.setPointerCapture(e.pointerId);out.classList.add('moving');
+  const st=P[h.f.who],sq=(P.linked?P.A:st).sq;drag={h,sx:e.clientX,sy:e.clientY,sq0:{...sq},px0:st.px,py0:st.py}});
+out.addEventListener('pointermove',e=>{if(!drag)return;const r=out.getBoundingClientRect(),k=out.width/r.width,dx=(e.clientX-drag.sx)*k,dy=(e.clientY-drag.sy)*k,f=drag.h.f,st=P[f.who];
+  if(drag.h.inSq){const sq=(P.linked?P.A:st).sq;sq.x=Math.min(1,Math.max(0,drag.sq0.x+dx/f.w));sq.y=Math.min(1,Math.max(0,drag.sq0.y+dy/f.h))}
+  else{const img=f.who==='A'?imgA:imgB,s=Math.max(f.w/img.naturalWidth,f.h/img.naturalHeight)*st.zoom,ovx=img.naturalWidth*s-f.w,ovy=img.naturalHeight*s-f.h;
+    st.px=ovx>0?Math.min(1,Math.max(-1,drag.px0-dx/(ovx/2))):0;st.py=ovy>0?Math.min(1,Math.max(-1,drag.py0-dy/(ovy/2))):0}
+  draw()});
+['pointerup','pointercancel'].forEach(t=>out.addEventListener(t,()=>{if(drag){drag=null;out.classList.remove('moving');persist()}}));
+out.addEventListener('wheel',e=>{const h=hit(e);if(!h)return;e.preventDefault();const st=P[h.f.who];st.zoom=Math.min(3,Math.max(1,st.zoom*Math.exp(-e.deltaY*.002)));syncUI();draw();persist()},{passive:false});
+
+// ---------- controls
+function syncUI(){setSeg('layoutSeg','layout',P.layout);setSeg('shapeSeg','shape',P.shape);setSeg('borderSeg','border',P.border);setSeg('resSeg','res',P.res);
+  $('size').value=P.size;$('zoomA').value=Math.round(P.A.zoom*100);$('zoomB').value=Math.round(P.B.zoom*100);$('gap').value=P.gap;
+  ['size','zoomA','zoomB','gap'].forEach(syncOut);$('bcol').value=P.bcol;$('gcol').value=P.gcol;$('shadow').checked=P.shadow;$('linked').checked=P.linked;$('layoutHint').textContent=LAYOUT_HINT[P.layout]}
+const bindSeg=(id,attr,key,num)=>document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{P[key]=num?+b.dataset[attr]:b.dataset[attr];syncUI();draw();persist()});
+bindSeg('layoutSeg','layout','layout');bindSeg('shapeSeg','shape','shape');bindSeg('borderSeg','border','border',true);bindSeg('resSeg','res','res',true);
+$('size').oninput=()=>{P.size=+$('size').value;syncOut('size');draw();persist()};
+$('zoomA').oninput=()=>{P.A.zoom=+$('zoomA').value/100;syncOut('zoomA');draw();persist()};
+$('zoomB').oninput=()=>{P.B.zoom=+$('zoomB').value/100;syncOut('zoomB');draw();persist()};
+$('gap').oninput=()=>{P.gap=+$('gap').value;syncOut('gap');draw();persist()};
+$('bcol').oninput=()=>{P.bcol=$('bcol').value;if(!P.border){P.border=1;syncUI()}draw();persist()};
+$('gcol').oninput=()=>{P.gcol=$('gcol').value;draw();persist()};
+$('shadow').onchange=()=>{P.shadow=$('shadow').checked;draw();persist()};
+$('linked').onchange=()=>{P.linked=$('linked').checked;if(!P.linked)P.B.sq={...P.A.sq};draw();persist()};
+$('resetFrame').onclick=()=>{for(const k of ['A','B'])Object.assign(P[k],{zoom:1,px:0,py:0,sq:{x:.5,y:.5}});syncUI();draw();persist()};
+
+// ---------- photos
+function setSlot(id,blob,name){const s=$(id);s.classList.add('has');s.style.backgroundImage=`url(${URL.createObjectURL(blob)})`;s.querySelector('div').innerHTML='<span></span>';s.querySelector('span').textContent=name}
+async function setPhoto(which,f,name){try{const r=await readPhoto(f);if(which==='A'){imgA=r.img;blobA=r.blob;nameA=name||f.name||'Photo 1';setSlot('slotA',r.blob,nameA)}else{imgB=r.img;blobB=r.blob;nameB=name||f.name||'Photo 2';setSlot('slotB',r.blob,nameB)}
+  draw();persist();if(imgA&&!imgB)status('Now choose photo 2.')}catch(e){status('Couldn’t open that photo: '+(e.message||e))}}
+$('fileA').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)setPhoto('A',f)};
+$('fileB').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)setPhoto('B',f)};
+$('pickBoth').onclick=()=>$('fileBoth').click();
+$('fileBoth').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;await setPhoto('A',fs[0]);if(fs[1])await setPhoto('B',fs[1]);else status('Now choose photo 2 in the panel.')};
+$('swapAB').onclick=()=>{if(!imgA||!imgB)return;[imgA,imgB]=[imgB,imgA];[blobA,blobB]=[blobB,blobA];[nameA,nameB]=[nameB,nameA];[P.A,P.B]=[P.B,P.A];setSlot('slotA',blobA,nameA);setSlot('slotB',blobB,nameB);syncUI();draw();persist()};
+addEventListener('dragover',e=>{if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files'))e.preventDefault()});
+addEventListener('drop',async e=>{const fs=[...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/')||isHeic(f));if(!fs.length)return;e.preventDefault();
+  if(fs.length>1){await setPhoto('A',fs[0]);await setPhoto('B',fs[1])}else await setPhoto(imgA&&!imgB?'B':'A',fs[0])});
+
+// a sample pair drawn on the fly: a street lamp against blue sky, and a warm wall with a red ball
+function sampleBlobs(){
+  const mk=(w,h,fn)=>{const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);return new Promise(r=>c.toBlob(r,'image/jpeg',.92))};
+  let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  const sky=mk(1600,1600,(x,w,h)=>{let g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#1d5fc4');g.addColorStop(1,'#3a8ae0');x.fillStyle=g;x.fillRect(0,0,w,h);
+    x.fillStyle='#f4f1ea';x.beginPath();x.arc(w*.56,h*.43,w*.018,0,TAU);x.fill();
+    x.strokeStyle='#c9c4bb';x.lineCap='round';x.lineWidth=w*.03;x.beginPath();x.moveTo(w*.42,h*1.02);x.lineTo(w*.6,h*.05);x.stroke();
+    x.lineWidth=w*.022;x.beginPath();x.moveTo(w*.08,h*.32);x.lineTo(w*.72,h*.52);x.stroke();
+    x.fillStyle='#1b1d22';x.save();x.translate(w*.74,h*.53);x.rotate(.35);x.beginPath();x.ellipse(0,0,w*.11,w*.035,0,0,TAU);x.fill();x.restore();
+    x.fillStyle='#2a2c30';x.beginPath();x.arc(w*.08,h*.32,w*.025,0,TAU);x.fill()});
+  const wall=mk(1600,1600,(x,w,h)=>{x.fillStyle='#d6a240';x.fillRect(0,0,w,h);
+    for(let i=0;i<14000;i++){const v=rnd();x.fillStyle=v<.5?'rgba(120,80,20,.25)':'rgba(255,230,160,.25)';x.fillRect(rnd()*w,rnd()*h,2.2,2.2)}
+    let g=x.createLinearGradient(0,0,w,0);g.addColorStop(0,'rgba(255,240,190,.35)');g.addColorStop(.5,'rgba(255,240,190,0)');g.addColorStop(1,'rgba(120,80,20,.2)');x.fillStyle=g;x.fillRect(0,0,w,h);
+    x.fillStyle='#e7c77a';x.beginPath();x.moveTo(0,0);x.lineTo(w,0);x.lineTo(w,h*.08);x.lineTo(0,h*.2);x.fill();
+    x.strokeStyle='rgba(90,60,20,.6)';x.lineWidth=4;x.beginPath();x.moveTo(0,h*.2);x.lineTo(w,h*.08);x.stroke();
+    x.fillStyle='#c0141e';x.beginPath();x.arc(w*.5,h*.5,w*.05,0,TAU);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(w*.49,h*.495,w*.02,0,TAU);x.fill();
+    x.fillStyle='#222';x.font=`700 ${w*.022}px sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText('9',w*.49,h*.496)});
+  return Promise.all([sky,wall])}
+const sampleFn=async()=>{const [a,b]=await sampleBlobs();await setPhoto('A',new File([a],'sky.jpg',{type:'image/jpeg'}),'Sample: sky');await setPhoto('B',new File([b],'wall.jpg',{type:'image/jpeg'}),'Sample: wall');status('Drag the window to move it, or drag a photo to reframe it.')};
+$('sample').onclick=sampleFn;$('sample2').onclick=sampleFn;
+
+// ---------- export
+async function exportBlobs(){const slides=renderSlides(P.res),stamp=new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
+  return Promise.all(slides.map((c,i)=>new Promise(r=>c.toBlob(b=>r({blob:b,name:`portals-${stamp}${slides.length>1?'-'+(i+1):''}.jpg`}),'image/jpeg',.95))))}
+async function doSave(){if(!imgA||!imgB)return;status('Rendering…');const files=await exportBlobs();status(files.length>1?`${files.length} slides ready.`:'Image ready.');await saveFiles(files)}
+$('saveBtn').onclick=doSave;$('saveTop').onclick=doSave;
+$('toLab').onclick=async()=>{if(!imgA||!imgB)return;const [f]=await exportBlobs();const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  try{await idb.put({id,name:'Portals.jpg',blob:new File([f.blob],'Portals.jpg',{type:'image/jpeg'}),state:null,thumb:null,added:Date.now(),updated:Date.now()});await idb.set('current',id);location.href='./?open'}
+  catch(e){status('Couldn’t hand the image to Streak Lab: '+(e.message||e))}};
+
+// ---------- start: restore the last pair
+syncUI();draw();
+(async()=>{try{const s=await idb.get('portals');if(!s||!s.a||!s.b)return;Object.assign(P,s.P||{});syncUI();await setPhoto('A',s.a,s.nameA);await setPhoto('B',s.b,s.nameB);syncUI();draw()}catch(e){}})();
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+})();
+</script>
+</body>
+</html>
