@@ -65,6 +65,7 @@ Two related series for one idea: the photograph stays recognisable, but its move
 | **Resistance** | The stretching creeps up to the subject's edge, slows, and retreats |
 
 How they work:
+- **Protect:** Paint over anything that must not move, as you would with Protect in Streak Lab, and it stays exactly as photographed while the pulse or the flow moves around it. The tool bar on the photo switches between placing the source or detail, **Protect** (paint), **Erase** and **Subject** (tap a person or object and an on-device AI model protects its outline). The brush has a size slider, **Undo** and **Clear**. Keys: P, B, E, S, `[` `]`, Ctrl/⌘ Z. The paint is kept with the photo, survives reframing, and comes along when you make the other version. In Flow, set the oval's size to Off to keep only what you paint.
 - **Personality:** Each loop gets its own randomised personality, described in words: when the pulses come, how strong and uneven they are, which areas move first, where the longest trails form and how unevenly things return. The subject and the main direction stay yours. **New personality** rolls another one; **Unpredictability** sets how far it can vary.
 - **Shared settings:** The **Look** (None, Muted, Night, Mono or Faded, plus grain), the **shape** and the **loop length** (6–12 s) are shared between the two tools, so a series matches.
 - **Make the other version:** This button opens the same photo in the other tool: the source of the pulse becomes what stays still.

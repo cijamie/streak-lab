@@ -40,6 +40,12 @@
       <div class="inline" style="justify-content:center"><button class="btn" id="pick">Choose a photo</button><button class="btn ghost" id="sample">Try the sample</button></div>
       <p style="font-size:13px;color:var(--dim)">Ask why it deserves to stay, not just what stays sharp. Your photo stays on this device.</p>
     </div>
+    <div class="ptools" id="ptools" role="toolbar" aria-label="Tools" hidden>
+      <button data-tool="place" aria-pressed="true" title="Detail (P)"><svg class="i" viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.2"/><circle cx="10" cy="10" r="6.5" stroke-dasharray="2.5 2.5"/></svg><span>Detail</span></button>
+      <button data-tool="paint" aria-pressed="false" title="Paint what must not move (B)"><svg class="i" viewBox="0 0 20 20"><path d="M13.5 3.5l3 3-8 8H5.5v-3z"/><path d="M3 17.5h14"/></svg><span>Protect</span></button>
+      <button data-tool="erase" aria-pressed="false" title="Erase protect paint (E)"><svg class="i" viewBox="0 0 20 20"><path d="M8 16.5l-4.5-4.5 8-8 6 6-6.5 6.5z"/><path d="M8 16.5h9M7.5 7.5l6 6"/></svg><span>Erase</span></button>
+      <button data-tool="subject" aria-pressed="false" title="Tap a person or object to protect it (S)"><svg class="i" viewBox="0 0 20 20"><circle cx="10" cy="6.5" r="3"/><path d="M4 17c.8-3.4 3.2-5 6-5s5.2 1.6 6 5"/></svg><span>Subject</span></button>
+    </div>
     <div class="view" id="view" hidden><canvas id="gl" aria-label="Preview. Tap or drag to place what stays still."></canvas><canvas id="ov" aria-hidden="true"></canvas><span class="recbar" id="recbar" hidden>Recording</span></div>
     <div class="transport" id="transport" hidden>
       <button class="play" id="play" aria-label="Pause"><svg class="i" viewBox="0 0 20 20" id="playIcon"><path d="M7 4.5v11M13 4.5v11"/></svg></button>
@@ -57,6 +63,12 @@
       <p class="hint">Tap or drag on the photo to place what stays: the one thing the photograph refuses to lose.</p>
     </section>
     <section class="sec">
+      <h2>Protect</h2>
+      <div class="sl"><label for="brush">Brush size</label><output></output><input type="range" id="brush" data-key="brush" min="1" max="25"></div>
+      <div class="inline"><button class="chip" id="protPaint">Paint</button><button class="chip" id="protSubject">Tap a subject</button><button class="chip" id="protUndo" disabled>Undo</button><button class="chip" id="protClear" disabled>Clear</button></div>
+      <p class="hint">Paint over anything that must not move, like in Streak Lab: it stays exactly as photographed while everything else flows. Erase to take paint away, or tap a person or object with Subject and an on-device AI model protects its outline. The paint follows the photo into Pulse.</p>
+    </section>
+    <section class="sec">
       <h2>Movement</h2>
       <div class="tiles three" data-key="style">
         <button data-v="anchor"><svg viewBox="0 0 40 40"><path d="M2 10Q14 10 18 16M2 30Q14 30 18 24M22 16Q26 10 38 10M22 24Q26 30 38 30M2 20h8M30 20h8" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="20" cy="20" r="6" fill="#f7b267"/></svg>The anchor</button>
@@ -67,10 +79,10 @@
     </section>
     <section class="sec">
       <h2>What stays</h2>
-      <div class="sl"><label for="size">Size</label><output></output><input type="range" id="size" data-key="size" min="3" max="45"></div>
+      <div class="sl"><label for="size">Size</label><output></output><input type="range" id="size" data-key="size" min="0" max="45" data-fmt="size"></div>
       <div class="sl"><label for="shape">Shape</label><output></output><input type="range" id="shape" data-key="shape" min="-100" max="100" step="5" data-fmt="shape"></div>
       <div class="inline"><button class="chip" id="findSubj">Find its outline (AI)</button><button class="chip" id="clearSubj" hidden>Use the oval</button></div>
-      <p class="hint" id="anchorHint">Tap the photo to place it. The oval is kept perfectly still, or let an on-device AI model find the exact outline of what you tapped.</p>
+      <p class="hint" id="anchorHint">Tap the photo to place it. The oval is kept perfectly still, or let an on-device AI model find the exact outline of what you tapped. Set the size to Off to keep only what you paint under Protect.</p>
     </section>
     <section class="sec">
       <h2>Flow</h2>
