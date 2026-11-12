@@ -4,7 +4,7 @@ A photo editor for pixel-streak art. Pull pixels into streaks (straight, radial,
 
 **Live: [jamies.dev/streak-lab](https://jamies.dev/streak-lab/)**
 
-![Streak Lab on a computer: the photo with streak layers, the tool rail, and the panels with starter looks](docs/screenshot.jpg)
+![Streak Lab on a computer: the Masks tab, with Protect, a linear mask and its tools](docs/screenshot.jpg)
 
 Everything runs in your browser. Photos are never uploaded anywhere.
 
@@ -12,73 +12,25 @@ Everything runs in your browser. Photos are never uploaded anywhere.
 
 Streak Lab works like a photo editor:
 - **The photo** sits in the middle.
-- **Tools** are on the left, or along the bottom on a phone.
-- **Panels** are on the right, or behind the tabs at the bottom on a phone.
+- **Seven tabs** run along the top of the panel on a computer, or the bottom of the screen on a phone. Each tab is one step of the edit and brings only the tools that make sense for it, so tapping the photo never changes something you didn't mean to.
+
+| Tab | What it's for | Tools on the photo |
+| --- | --- | --- |
+| **Crop** | Shape (Free, Original, 4:5, 1:1, 9:16, 16:9, 3:2, 5:4), rotate, flip, straighten. The full photo is kept, so you can change it later | Drag the corners or the frame |
+| **Adjust** | Exposure, contrast, highlights, shadows, whites, blacks, temperature, tint, vibrance, saturation, a tone curve, vignette and sharpening, applied before the streaks | Hand |
+| **Streaks** | Layers, each one Linear, Radial, Swirl, Edge or Path, with its own sliders, opacity, blend mode and optional mask. Edge layers can snap to outlines or auto-trace the horizon | Line or Centre (tap) or Draw (edges and paths), Erase edges, Hand |
+| **Masks** | **Protect** keeps your subject free of streaks. Linear, radial, brush, subject (AI) and sky masks can brighten, cool or saturate an area, limit a streak layer, or limit the duotone | Brush, Subject (tap), Erase for Protect; Draw or Paint for the selected mask |
+| **Effects** | Echo trails, slit-scan, zoom/spin blur, halation, bloom, light leak, lens flare, risograph, dither, topographic lines, datamosh | Hand |
+| **Grade** | Duotone colours or a palette, strength, grain, and where the duotone applies | Hand |
+| **Looks** | Starter looks previewed on your photo, variations, saved looks, copy and paste settings | Hand |
+
+The badges on Masks and Effects show how many are in use. **Undo and redo** cover everything. Your photo and edit are saved on the device, so a reload picks up where you left off, on the same tab.
 
 ### Open a photo
 
 - **Open** a photo, tap **Try a sample**, or pick up a recent edit from the start screen. On a computer you can also drop or paste a photo.
 - **HEIC photos** from an iPhone are converted automatically in browsers that can't open them.
 - **The Library** keeps every photo you've edited on this device, with its edits.
-
-### Tools
-
-| Tool | Key | What it does |
-| --- | --- | --- |
-| Line / Centre / Edge / Path | P | Places the streaks for the selected layer: tap for Linear, Radial and Swirl, draw for Edge and Path |
-| Protect | B | Keeps parts sharp. **Brush** paints; **Tap subject** uses an on-device AI model (Google's MediaPipe) to find a person, animal or object |
-| Erase | E | Removes protect paint and cuts away parts of edges |
-| Mask | M | Draws or reshapes the selected mask |
-| Crop | C | Crops (Free, Original, 4:5, 1:1, 9:16, 16:9, 3:2), rotates, flips and straightens. The full photo is kept, so you can change the crop later |
-| Hand | H or hold Space | Moves the photo when zoomed in |
-
-### Panels
-
-- **Light & colour:**
-  - **Light:** exposure, contrast, highlights, shadows, whites, blacks.
-  - **Colour:** temperature, tint, vibrance, saturation.
-  - **Tone curve:** five points you drag up or down.
-  - **Finish:** vignette and sharpening.
-  - These apply before the streaks, so they also change which areas streak.
-- **Streaks:** up to four **layers**, each with its own mode, opacity and blend mode (Normal, Lighten, Screen, Darken). A layer can be limited to a mask.
-  - **Linear:** streaks pull out of a line, up, down, left or right.
-  - **Radial:** rings around a centre point.
-  - **Swirl:** bright areas trail around a centre, like star trails.
-  - **Edge:** streaks grow out of edges you draw.
-    - **Snap to outlines** pulls a rough line onto the real outline.
-    - **Auto-trace horizon** finds the skyline in one tap.
-    - **Edge overlap** lets streaks reach back over the edge and fade in.
-  - **Path:** a ribbon of colour smeared along a curve you draw.
-  - **Pixel sort** (Linear and Radial): sort by brightness, hue or saturation, within a brightness range.
-- **Effects:** each has an on/off switch and its own sliders.
-  - **Motion:**
-    - **Echo trails:** fading copies of your protected subject or a mask.
-    - **Slit-scan:** wave, shear or melt.
-    - **Zoom & spin blur.**
-  - **Light:**
-    - **Halation:** a film-style red glow around highlights.
-    - **Bloom on streaks.**
-    - **Light leak.**
-    - **Lens flare.**
-  - **Texture:**
-    - **Risograph:** your duotone printed as two misregistered inks in dots.
-    - **Dither:** Atkinson or grid patterns, over the whole photo or only the streaks.
-    - **Topographic lines.**
-  - **Glitch:**
-    - **Datamosh.**
-- **Masks:** linear gradient, radial, brush, subject (AI, tap to select) and sky (found from the horizon). Each mask can:
-  - apply its own exposure, contrast, highlights, shadows, temperature, tint and saturation;
-  - limit a streak layer (Streaks › Only inside);
-  - limit the duotone (Colour › Apply).
-  - Masks can be inverted and feathered.
-- **Colour:** three duotone colours or a palette, strength, grain, and where the duotone applies.
-- **Looks:**
-  - **Starter looks,** previewed on your photo.
-  - **Variations** of your edit.
-  - **Saved looks.**
-  - **Copy and paste settings,** with or without edges, masks and crop.
-
-**Undo and redo** cover everything above. Your current photo and edit are saved on the device, so a reload picks up where you left off.
 
 ### Export
 
@@ -100,7 +52,9 @@ Streak Lab works like a photo editor:
 | Key | Action |
 | --- | --- |
 | Ctrl/⌘ Z, Ctrl/⌘ Shift Z | Undo, redo |
-| P / B / E / M / C / H | Place, Protect, Erase, Mask, Crop and Hand tools |
+| C / A / M / F / G | Crop, Adjust, Masks, Effects and Grade tabs |
+| P | Streaks tab, place tool |
+| B / S / E / D / H | Brush, Subject, Erase, Draw and Hand, when the tab has them |
 | Hold Space | Hand tool while held |
 | Hold `\` | Show the original |
 | `[` `]` | Smaller or larger brush |
@@ -117,7 +71,7 @@ Streak Lab works like a photo editor:
 
 Saving uses the share sheet where the browser supports it, so you can send images and Reels straight to Photos or Instagram. Elsewhere it downloads the files.
 
-<img src="docs/screenshot-phone.jpg" alt="Streak Lab on a phone: the photo on top, tools below it, and the Effects panel" width="300">
+<img src="docs/screenshot-phone.jpg" alt="Streak Lab on a phone: the photo, the Protect tools, and the tab bar" width="300">
 
 ## Development
 

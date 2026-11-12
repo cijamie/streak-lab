@@ -53,9 +53,30 @@ input[type=file]{position:absolute;opacity:0;width:1px;height:1px;pointer-events
 
 /* ---------- shell */
 .shell{height:100vh;height:100dvh;display:grid;
-  grid-template-columns:68px minmax(0,1fr) 312px;grid-template-rows:auto minmax(0,1fr);
-  grid-template-areas:"top top top" "rail main panel";padding:0 var(--sar) 0 var(--sal)}
-.topbar{grid-area:top}.rail{grid-area:rail}.main{grid-area:main}.panel{grid-area:panel}.tabbar{grid-area:tabbar;display:none}
+  grid-template-columns:68px minmax(0,1fr) 336px;grid-template-rows:auto auto minmax(0,1fr);
+  grid-template-areas:"top top top" "rail main tabbar" "rail main panel";padding:0 var(--sar) 0 var(--sal)}
+.topbar{grid-area:top}.rail{grid-area:rail}.main{grid-area:main}.panel{grid-area:panel}.tabbar{grid-area:tabbar;display:flex;gap:2px;padding:6px;background:var(--panel);border-left:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--dim);font-size:10.5px;padding:7px 0 6px;border-radius:8px;min-width:0;position:relative}
+.tabbar button:hover{color:var(--fg);background:var(--panel2)}
+.tabbar button[aria-selected="true"]{color:var(--cream);background:var(--raise)}
+.tabbar button[aria-selected="true"] svg{color:var(--accent)}
+.tabbar .badge{position:absolute;top:3px;right:calc(50% - 20px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--accent);color:var(--accent-fg);font-size:10px;font-weight:700;line-height:16px;text-align:center}
+.tabbar .badge:empty{display:none}
+.phead{padding:12px 14px 4px}
+.phead h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.phead p{margin:3px 0 0;color:var(--muted);font-size:12.5px}
+.sec{display:none;border:0}
+body[data-tab="crop"] .sec[data-sec="crop"],body[data-tab="adjust"] .sec[data-sec="adjust"],body[data-tab="streaks"] .sec[data-sec="layers"],body[data-tab="streaks"] .sec[data-sec="streaks"],body[data-tab="masks"] .sec[data-sec="masks"],body[data-tab="effects"] .sec[data-sec="effects"],body[data-tab="grade"] .sec[data-sec="grade"],body[data-tab="looks"] .sec[data-sec="looks"]{display:block}
+.sec-head{display:none!important}
+.sec .sec-body{display:grid}
+body[data-tab="streaks"] .sec[data-sec="layers"] .sec-body{padding-bottom:6px;border-bottom:1px solid var(--line)}
+body[data-tab="streaks"] .sec[data-sec="streaks"] .sec-body{padding-top:12px}
+.aspects{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.aspects button{display:grid;justify-items:center;gap:5px;border:0;border-radius:10px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--line);padding:9px 4px 7px;font-size:11.5px;color:var(--muted)}
+.aspects button i{display:block;height:24px;border:1.5px solid currentColor;border-radius:3px}
+.aspects button[aria-pressed="true"]{color:var(--cream);box-shadow:inset 0 0 0 1.5px var(--accent);background:var(--raise)}
+.rotrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rotrow .chip{justify-content:center;min-height:40px}
 body.no-photo .shell{grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "main"}
 body.no-photo :is(.rail,.panel,.tabbar,.optbar,.tb-edit,#exportBtn,#newBtn){display:none!important}
 body.no-photo #libBtn{margin-left:auto}
@@ -296,21 +317,19 @@ dialog[open]{display:flex;flex-direction:column}
   .rail{flex-direction:row;padding:4px 8px;border-right:0;border-top:1px solid var(--line);gap:4px;overflow:visible}
   .tool{flex:1;min-width:0;min-height:46px;flex-direction:column;gap:2px;font-size:10.5px;padding:4px 0}
   #libBtn .lbl,#newBtn .lbl{display:none}
+  body.rail-min .rail{display:none}
   .topbar{gap:4px}
   .ib{min-width:34px;padding:0 6px}
   .tool[aria-pressed="true"]::before{left:10px;right:10px;top:auto;bottom:-4px;width:auto;height:3px;border-radius:3px 3px 0 0}
   .tool kbd,.rail .grow,.rail .zoomtool{display:none}
   .panel{height:clamp(170px,30dvh,280px);border-left:0;border-top:1px solid var(--line)}
   .histo{display:none}
-  .sec{display:none;border:0}
-  body[data-tab="light"] .sec[data-sec="light"],body[data-tab="streaks"] .sec[data-sec="layers"],body[data-tab="streaks"] .sec[data-sec="streaks"],body[data-tab="effects"] .sec[data-sec="effects"],body[data-tab="masks"] .sec[data-sec="masks"],body[data-tab="colour"] .sec[data-sec="colour"],body[data-tab="looks"] .sec[data-sec="looks"]{display:block}
-  body[data-tab="streaks"] .sec[data-sec="layers"] .sec-body{padding-bottom:4px}
-  .sec-head{display:none}
-  .sec.collapsed .sec-body{display:grid}
+  .phead{display:none}
   .sec-body{padding:14px 14px 18px}
-  .tabbar{display:flex;border-top:1px solid var(--line);background:var(--bg);padding:0 0 var(--sab)}
+  .tabbar{display:flex;border-top:1px solid var(--line);border-left:0;border-bottom:0;background:var(--bg);padding:0 0 var(--sab);gap:0}
+  .tabbar .badge{right:calc(50% - 22px)}
   .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;color:var(--dim);font-size:10.5px;padding:6px 0 5px;min-height:50px;min-width:0}
-  .tabbar button[aria-selected="true"]{color:var(--cream)}
+  .tabbar button[aria-selected="true"]{color:var(--cream);background:transparent}
   .tabbar button[aria-selected="true"] svg{color:var(--accent)}
   .toast{bottom:auto;top:10px}
   body.no-photo .brand b{display:inline}
@@ -322,7 +341,8 @@ dialog[open]{display:flex;flex-direction:column}
 }
 /* landscape phones: keep the desktop layout but tighter */
 @media (orientation:landscape) and (max-height:520px){
-  .shell{grid-template-columns:60px minmax(0,1fr) 270px}
+  .shell{grid-template-columns:60px minmax(0,1fr) 290px}
+  .tabbar button{font-size:0;gap:0;padding:6px 0}
   .topbar{padding:calc(4px + var(--sat)) 10px 4px}
   .brand .file{display:none}
   .optbar .hint{display:none}
@@ -385,11 +405,11 @@ dialog[open]{display:flex;flex-direction:column}
 
   <nav class="rail" id="toolSeg" aria-label="Tools">
     <button class="tool" data-tool="move" id="primaryTool" aria-pressed="true" title="Place streaks (P)"><kbd>P</kbd><svg class="i" id="primaryIcon"><use href="#i-line"/></svg><span class="lbl" id="primaryLabel">Line</span></button>
-    <button class="tool" data-tool="paint" aria-pressed="false" title="Protect brush: keeps parts sharp (B)"><kbd>B</kbd><svg class="i"><use href="#i-protect"/></svg><span class="lbl">Protect</span></button>
-    <button class="tool" data-tool="erase" aria-pressed="false" title="Eraser: removes protect paint and cuts edges (E)"><kbd>E</kbd><svg class="i"><use href="#i-erase"/></svg><span class="lbl">Erase</span></button>
-    <button class="tool" data-tool="mask" aria-pressed="false" title="Mask: draw or reshape the selected mask (M)"><kbd>M</kbd><svg class="i"><use href="#i-mask"/></svg><span class="lbl">Mask</span></button>
-    <button class="tool" data-tool="crop" aria-pressed="false" title="Crop, straighten and rotate (C)"><kbd>C</kbd><svg class="i"><use href="#i-crop"/></svg><span class="lbl">Crop</span></button>
-    <button class="tool" data-tool="pan" aria-pressed="false" title="Hand: move the photo (H, or hold Space)"><kbd>H</kbd><svg class="i"><use href="#i-hand"/></svg><span class="lbl">Hand</span></button>
+    <button class="tool" data-tool="mask" id="maskTool" aria-pressed="false" title="Draw the selected mask (D)" hidden><kbd>D</kbd><svg class="i" id="maskToolIcon"><use href="#i-line"/></svg><span class="lbl">Draw</span></button>
+    <button class="tool" data-tool="paint" id="paintTool" aria-pressed="false" title="Brush (B)" hidden><kbd>B</kbd><svg class="i" id="paintIcon"><use href="#i-protect"/></svg><span class="lbl" id="paintLabel">Brush</span></button>
+    <button class="tool" data-tool="subject" id="subjectTool" aria-pressed="false" title="Tap a subject to select it (S)" hidden><kbd>S</kbd><svg class="i"><use href="#i-fx"/></svg><span class="lbl">Subject</span></button>
+    <button class="tool" data-tool="erase" id="eraseTool" aria-pressed="false" title="Erase (E)" hidden><kbd>E</kbd><svg class="i"><use href="#i-erase"/></svg><span class="lbl">Erase</span></button>
+    <button class="tool" data-tool="pan" id="panTool" aria-pressed="false" title="Hand: move the photo (H, or hold Space)"><kbd>H</kbd><svg class="i"><use href="#i-hand"/></svg><span class="lbl">Hand</span></button>
     <span class="grow"></span>
     <button class="tool zoomtool" id="zoomFitRail" title="Fit the photo to the screen (0)"><svg class="i"><use href="#i-fit"/></svg><span class="lbl">Fit</span></button>
   </nav>
@@ -399,18 +419,6 @@ dialog[open]{display:flex;flex-direction:column}
       <span class="tname" id="toolName">Line</span><span class="tag" id="layerTag" hidden></span>
       <p class="hint" id="tapHint"></p>
       <div class="bsize" id="brushRow" hidden><label for="brush">Size</label><input type="range" id="brush" min="4" max="120" value="30"><output></output></div>
-      <div class="bsize" id="psoftRow" hidden title="How gently protected areas blend into the streaks"><label for="psoft">Softness</label><input type="range" id="psoft" min="0" max="20" value="3"><output></output></div>
-      <button class="chip" id="clearMask" hidden>Clear protect</button>
-      <div class="seg mini" id="protSeg" hidden aria-label="Protect with"><button data-prot="brush" aria-pressed="true">Brush</button><button data-prot="subject" aria-pressed="false">Tap subject</button></div>
-      <span class="inline" id="edgeOpts" hidden><button class="chip" id="autoTrace" title="Find the strongest horizon, skyline or ridge line">Auto-trace horizon</button><label class="chip" title="Pull edges you draw onto the nearest real outline"><input type="checkbox" id="snapEdges" checked> Snap to outlines</label></span>
-      <span id="edgeBtns" hidden><button class="chip" id="clearEdges">Clear edges</button></span>
-      <span class="inline" id="maskOpts" hidden><div class="seg mini" id="mbSeg" aria-label="Mask brush"><button data-mb="paint" aria-pressed="true">Paint</button><button data-mb="erase" aria-pressed="false">Erase</button></div><label class="chip"><input type="checkbox" id="maskShow" checked> Show mask</label></span>
-      <div class="cropbar" id="cropOpts" hidden>
-        <div class="seg mini" id="aspectSeg" aria-label="Crop shape"><button data-ar="free" aria-pressed="true">Free</button><button data-ar="orig">Original</button><button data-ar="0.8">4:5</button><button data-ar="1">1:1</button><button data-ar="0.5625">9:16</button><button data-ar="1.7778">16:9</button><button data-ar="1.5">3:2</button></div>
-        <span class="inline"><button class="ib" id="rotL" title="Rotate left" aria-label="Rotate left"><svg class="i"><use href="#i-rotl"/></svg></button><button class="ib" id="rotR" title="Rotate right" aria-label="Rotate right"><svg class="i"><use href="#i-rotr"/></svg></button><button class="ib" id="flipH" title="Flip" aria-label="Flip horizontally"><svg class="i"><use href="#i-flip"/></svg></button></span>
-        <div class="bsize"><label for="straighten">Straighten</label><input type="range" id="straighten" min="-45" max="45" step="0.5" value="0"><output></output></div>
-        <button class="chip" id="cropReset">Reset</button><button class="btn" id="cropDone">Done</button>
-      </div>
     </div>
     <div class="stage" id="stage">
       <div class="hero" id="empty">
@@ -440,8 +448,26 @@ dialog[open]{display:flex;flex-direction:column}
 
   <aside class="panel" aria-label="Adjustments">
     <div class="histo"><canvas id="histo" width="560" height="128" aria-hidden="true"></canvas><div class="meta"><span id="metaSize"></span><span id="metaLayers"></span></div></div>
+    <div class="phead"><h2 id="ptitle"></h2><p id="pdesc"></p></div>
     <div class="pscroll">
-      <section class="sec" data-sec="light">
+      <section class="sec" data-sec="crop">
+        <div class="sec-body">
+          <div class="sub">Shape</div>
+          <div class="aspects" id="aspectSeg" aria-label="Crop shape">
+            <button data-ar="free" aria-pressed="true"><i style="width:26px;border-style:dashed"></i>Free</button><button data-ar="orig"><i style="width:36px"></i>Original</button>
+            <button data-ar="0.8"><i style="width:19px"></i>4:5</button><button data-ar="1"><i style="width:24px"></i>1:1</button>
+            <button data-ar="0.5625"><i style="width:14px"></i>9:16</button><button data-ar="1.7778"><i style="width:42px;height:24px"></i>16:9</button>
+            <button data-ar="1.5"><i style="width:36px"></i>3:2</button><button data-ar="1.25"><i style="width:30px"></i>5:4</button>
+          </div>
+          <div class="sub">Rotate</div>
+          <div class="rotrow"><button class="chip" id="rotL"><svg class="i"><use href="#i-rotl"/></svg>Left</button><button class="chip" id="rotR"><svg class="i"><use href="#i-rotr"/></svg>Right</button><button class="chip" id="flipH"><svg class="i"><use href="#i-flip"/></svg>Flip</button></div>
+          <div class="sl"><label for="straighten">Straighten</label><output></output><input type="range" id="straighten" min="-45" max="45" step="0.5" value="0" data-suffix="°"></div>
+          <div class="inline"><button class="chip" id="cropReset">Reset crop</button><button class="btn" id="cropDone">Done</button></div>
+          <p class="hint">Drag the corners on the photo, or drag inside the frame to move it. The full photo is always kept, so you can change the crop later. Every export uses this crop.</p>
+        </div>
+      </section>
+
+      <section class="sec" data-sec="adjust">
         <button class="sec-head" aria-expanded="true">Light &amp; colour<svg class="i chev"><use href="#i-chev"/></svg></button>
         <div class="sec-body" id="lightBody">
           <div class="sub">Tone curve</div>
@@ -454,15 +480,8 @@ dialog[open]{display:flex;flex-direction:column}
         <button class="sec-head" aria-expanded="true">Layers <span class="count" id="layerCount"></span><svg class="i chev"><use href="#i-chev"/></svg></button>
         <div class="sec-body">
           <div class="layers" id="layerBar"></div>
-          <div class="sub">Add a layer</div>
-          <div class="addrow" id="addRow">
-            <button class="chip" data-add="vertical"><svg class="i"><use href="#i-line"/></svg>Linear</button>
-            <button class="chip" data-add="radial"><svg class="i"><use href="#i-centre"/></svg>Radial</button>
-            <button class="chip" data-add="swirl"><svg class="i"><use href="#i-swirl"/></svg>Swirl</button>
-            <button class="chip" data-add="edge"><svg class="i"><use href="#i-edge"/></svg>Edge</button>
-            <button class="chip" data-add="path"><svg class="i"><use href="#i-path"/></svg>Path</button>
-          </div>
-          <p class="hint">Stack modes on one photo, like rings around the moon plus streaks off a ridge. Later layers streak the result of earlier ones.</p>
+          <div class="addrow" id="addRow"><button class="chip" id="addLayerBtn"><svg class="i"><use href="#i-layers"/></svg>Add a layer</button></div>
+          <p class="hint">Layers stack, so you can combine kinds, like rings around the moon plus streaks off a ridge. Pick the selected layer’s kind below.</p>
         </div>
       </section>
 
@@ -477,6 +496,8 @@ dialog[open]{display:flex;flex-direction:column}
             <button data-mode="path" aria-pressed="false">Path</button>
           </div>
           <p class="hint" id="modeHint"></p>
+          <div class="inline" id="edgeTools" hidden><button class="chip" id="autoTrace" title="Find the strongest horizon, skyline or ridge line">Auto-trace horizon</button><label class="chip" title="Pull edges you draw onto the nearest real outline"><input type="checkbox" id="snapEdges" checked> Snap to outlines</label></div>
+          <div class="inline" id="edgeBtns" hidden><button class="chip" id="clearEdges">Clear all</button></div>
           <div class="selrow" id="vdirRow"><label for="vdir">Direction</label>
             <select id="vdir"><option value="up">Up</option><option value="down">Down</option><option value="left">Left</option><option value="right">Right</option></select></div>
           <div class="selrow" id="spinRow" hidden><label for="spin">Turn</label>
@@ -515,16 +536,23 @@ dialog[open]{display:flex;flex-direction:column}
         <button class="sec-head" aria-expanded="true">Masks <span class="count" id="maskCount"></span><svg class="i chev"><use href="#i-chev"/></svg></button>
         <div class="sec-body">
           <div class="layers" id="maskList"></div>
+          <div class="medit" id="protEdit" hidden>
+            <div class="sub">Protect settings</div>
+            <p class="hint">Use Brush or Subject on the photo. Protected areas stay free of streaks and warps, and Echo trails repeat what you protect.</p>
+            <div class="sl"><label for="psoft">Edge softness</label><output></output><input type="range" id="psoft" min="0" max="20" value="3"></div>
+            <div class="inline"><button class="chip" id="clearMask">Clear protect</button></div>
+          </div>
           <div class="sub">Add a mask</div>
           <div class="addrow" id="maskAdd">
             <button class="chip" data-madd="linear">Linear</button><button class="chip" data-madd="radial">Radial</button><button class="chip" data-madd="brush">Brush</button><button class="chip" data-madd="subject">Subject</button><button class="chip" data-madd="sky">Sky</button>
           </div>
+          <label class="check"><input type="checkbox" id="maskShow" checked> Show the selected mask on the photo</label>
           <div id="maskEdit"></div>
-          <p class="hint">A mask can brighten, cool or saturate one area, limit a streak layer (Streaks › Only inside), or limit the duotone (Colour › Apply). Select the Mask tool to draw or reshape it.</p>
+          <p class="hint">A mask can brighten, cool or saturate one area, limit a streak layer (Streaks › Only inside), or limit the duotone (Grade › Apply).</p>
         </div>
       </section>
 
-      <section class="sec" data-sec="colour">
+      <section class="sec" data-sec="grade">
         <button class="sec-head" aria-expanded="true">Colour<svg class="i chev"><use href="#i-chev"/></svg></button>
         <div class="sec-body">
           <div class="swatches">
@@ -570,12 +598,13 @@ dialog[open]{display:flex;flex-direction:column}
   </aside>
 
   <nav class="tabbar" role="tablist" aria-label="Panels">
-    <button role="tab" data-tab="light" aria-selected="false"><svg class="i"><use href="#i-sun"/></svg>Light</button>
-    <button role="tab" data-tab="streaks" aria-selected="true"><svg class="i"><use href="#i-streaks"/></svg>Streaks</button>
-    <button role="tab" data-tab="effects" aria-selected="false"><svg class="i"><use href="#i-fx"/></svg>Effects</button>
-    <button role="tab" data-tab="masks" aria-selected="false"><svg class="i"><use href="#i-mask"/></svg>Masks</button>
-    <button role="tab" data-tab="colour" aria-selected="false"><svg class="i"><use href="#i-colour"/></svg>Colour</button>
-    <button role="tab" data-tab="looks" aria-selected="false"><svg class="i"><use href="#i-looks"/></svg>Looks</button>
+    <button role="tab" data-tab="crop" aria-selected="false" title="Crop & rotate (C)"><svg class="i"><use href="#i-crop"/></svg>Crop</button>
+    <button role="tab" data-tab="adjust" aria-selected="false" title="Adjust light and colour (A)"><svg class="i"><use href="#i-sun"/></svg>Adjust</button>
+    <button role="tab" data-tab="streaks" aria-selected="true" title="Streaks (P)"><svg class="i"><use href="#i-streaks"/></svg>Streaks</button>
+    <button role="tab" data-tab="masks" aria-selected="false" title="Protect and masks (M)"><svg class="i"><use href="#i-mask"/></svg>Masks<span class="badge" id="maskBadge"></span></button>
+    <button role="tab" data-tab="effects" aria-selected="false" title="Effects (F)"><svg class="i"><use href="#i-fx"/></svg>Effects<span class="badge" id="fxBadge"></span></button>
+    <button role="tab" data-tab="grade" aria-selected="false" title="Duotone and grain (G)"><svg class="i"><use href="#i-colour"/></svg>Grade</button>
+    <button role="tab" data-tab="looks" aria-selected="false" title="Looks"><svg class="i"><use href="#i-looks"/></svg>Looks</button>
   </nav>
 </div>
 
@@ -736,20 +765,32 @@ async function saveFiles(list){ // list of {blob,name}
 }
 const stamp=()=>new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
 
-// ---------- panels: collapsible sections on a computer, one tab at a time on a phone
-const SECS=['light','streaks','effects','masks','colour','looks'];
+// ---------- tabs: one step of the edit at a time, the same on a computer and a phone.
+// Each tab brings its own tools, so tapping the photo only ever does what that tab is about.
+const SECS=['crop','adjust','streaks','masks','effects','grade','looks'];
+const TAB_INFO={crop:['Crop & rotate','Frame the photo. The full photo is kept, so you can change this later.'],
+  adjust:['Adjust','Light and colour, applied before the streaks.'],
+  streaks:['Streaks','Build the streaks in layers. Tap or draw on the photo to place the selected layer.'],
+  masks:['Masks','Protect your subject, or pick an area to brighten, recolour or limit.'],
+  effects:['Effects','Motion, light and texture. Switch on as many as you like.'],
+  grade:['Grade','The duotone colours and grain that tie it together.'],
+  looks:['Looks','Start from a look, try variations, or reuse your own.']};
+const TAB_HINT={adjust:'Drag the sliders in the panel. Pinch or scroll to zoom.',effects:'Switch effects on in the panel. Pinch or scroll to zoom.',
+  grade:'Pick colours or a palette in the panel.',looks:'Tap a look in the panel to try it.',crop:'Drag the corners, or drag inside the frame to move it.'};
+let prevTab='streaks';
 function showSec(name){
+  const was=document.body.dataset.tab; if(was&&was!=='crop')prevTab=was;
   document.body.dataset.tab=name;
   document.querySelectorAll('.tabbar button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===name));
-  store.set('streaklab.tab',name); document.querySelector('.pscroll').scrollTop=0; queueStarters();
+  $('ptitle').textContent=TAB_INFO[name][0]; $('pdesc').textContent=TAB_INFO[name][1];
+  if(name==='masks'&&!curMask)curMask='__protect';
+  store.set('streaklab.tab',name); document.querySelector('.pscroll').scrollTop=0;
+  if(typeof applyTabTools==='function'&&src){applyTabTools();if(name==='masks')renderMasks()}
+  queueStarters();
 }
-document.querySelectorAll('.tabbar button').forEach(b=>b.onclick=()=>showSec(b.dataset.tab));
-const collapsed=new Set((store.get('streaklab.collapsed')||'').split(',').filter(Boolean));
-document.querySelectorAll('.sec').forEach(s=>{const h=s.querySelector('.sec-head'),k=s.dataset.sec;
-  const apply=()=>{s.classList.toggle('collapsed',collapsed.has(k));h.setAttribute('aria-expanded',!collapsed.has(k))};apply();
-  h.onclick=()=>{collapsed.has(k)?collapsed.delete(k):collapsed.add(k);apply();store.set('streaklab.collapsed',[...collapsed].join());queueStarters()}});
-{const t=store.get('streaklab.tab');showSec(SECS.includes(t)?t:'streaks')}
-const looksVisible=()=>phoneMQ.matches?document.body.dataset.tab==='looks':!collapsed.has('looks');
+document.querySelectorAll('.tabbar button').forEach(b=>b.onclick=()=>{if(!busy)showSec(b.dataset.tab)});
+{const t=store.get('streaklab.tab');showSec(SECS.includes(t)&&t!=='crop'?t:'streaks')}
+const looksVisible=()=>document.body.dataset.tab==='looks';
 
 // ---------- controls
 const sliders=['start','len','thr','jit','band','brush','amt','grain','angle','lop','soft','psoft','upper','rays','pw'];
@@ -773,28 +814,53 @@ for(const [k,c] of Object.entries(PALETTES)){const b=document.createElement('but
 
 function setSeg(segId,attr,val){document.querySelectorAll('#'+segId+' button').forEach(b=>{if(b.dataset[attr]!=null)b.setAttribute('aria-pressed',b.dataset[attr]===val)})}
 function updateCtx(){
-  const t=st.tool, brush=t==='paint'||t==='erase';
-  $('toolName').textContent=t==='move'||t==='edge'?toolTitle[st.mode]:toolTitle[t];
-  $('layerTag').hidden=layers.length<2; $('layerTag').textContent=`Layer ${act+1} · ${MODE_NAMES[st.mode]}`;
-  const subj=t==='paint'&&st.prot==='subject', M=curMaskObj(), mk=t==='mask'&&M, crop=t==='crop';
-  if(t==='mask'||crop)$('toolName').textContent=crop?'Crop':`Mask · ${M?maskName(M):''}`;
-  $('tapHint').textContent=crop?'Drag the corners or move the frame. Pick a shape, rotate or straighten, then tap Done.':mk?MASK_HINT[M.type]:subj?toolHints.subject:brush||t==='pan'?toolHints[t]:hints[st.mode];
-  $('edgeBtns').hidden=!(edges.length&&(t==='edge'||t==='erase'));
-  $('edgeOpts').hidden=t!=='edge'||st.mode!=='edge'; $('protSeg').hidden=t!=='paint';
-  $('maskOpts').hidden=!mk; $('mbSeg').hidden=!(mk&&M.type==='brush'); $('cropOpts').hidden=!crop;
-  $('brushRow').hidden=!(brush&&!subj||(mk&&M.type==='brush')); $('clearMask').hidden=!brush||!strokes.length; $('psoftRow').hidden=!brush||!strokes.length;
-  $('ctx').classList.toggle('empty',['layerTag','brushRow','clearMask','edgeBtns','edgeOpts','protSeg','psoftRow','maskOpts','cropOpts'].every(k=>$(k).hidden));
-  const h=$('tapHint').textContent; if(src&&phoneMQ.matches&&h!==lastHint&&$('tips').hidden)status(h); lastHint=h;
+  const t=st.tool, tab=document.body.dataset.tab, M=curMaskObj(), prot=curMask==='__protect', brushMask=M&&M.type==='brush';
+  let name, hint;
+  if(t==='crop'){name='Crop';hint=TAB_HINT.crop}
+  else if(t==='move'||t==='edge'){name=toolTitle[st.mode];hint=hints[st.mode]}
+  else if(t==='paint'){name=prot?'Protect brush':`Paint · ${M?maskName(M):''}`;hint=prot?'Paint over what should stay sharp. Change the size above.':'Paint where the mask applies.'}
+  else if(t==='erase'){name=tab==='streaks'?'Erase edges':prot?'Erase protect':`Erase · ${M?maskName(M):''}`;hint=tab==='streaks'?`Rub out parts of the ${st.mode==='path'?'paths':'edges'} on this layer.`:prot?'Rub out protect paint.':'Rub out parts of the mask.'}
+  else if(t==='subject'){name=prot?'Protect subject':`Select subject · ${M?maskName(M):''}`;hint=prot?'Tap a person, animal or object to keep it sharp. An AI model on this device finds its outline.':'Tap a person, animal or object to mask it.'}
+  else if(t==='mask'){name=M?maskName(M):'Mask';hint=M?MASK_HINT[M.type]:''}
+  else{name=TAB_INFO[tab]?TAB_INFO[tab][0]:'Hand';hint=TAB_HINT[tab]||toolHints.pan}
+  $('toolName').textContent=name; $('tapHint').textContent=hint;
+  $('layerTag').hidden=tab!=='streaks'||layers.length<2; $('layerTag').textContent=`Layer ${act+1} · ${MODE_NAMES[st.mode]}`;
+  $('brushRow').hidden=!(t==='paint'||t==='erase');
+  $('edgeTools').hidden=st.mode!=='edge'; $('edgeBtns').hidden=!(DRAW_MODES.includes(st.mode)&&edges.length);
+  $('protEdit').hidden=!(tab==='masks'&&prot); $('clearMask').disabled=!strokes.length;
+  $('ctx').classList.toggle('empty',['layerTag','brushRow'].every(k=>$(k).hidden));
+  const h=$('tapHint').textContent; if(src&&phoneMQ.matches&&t!=='pan'&&h!==lastHint&&$('tips').hidden)status(h); lastHint=h;
 }
 let lastHint='';
+function toolsForTab(){
+  const tab=document.body.dataset.tab, M=curMaskObj(), prot=curMask==='__protect';
+  if(tab==='streaks')return{tools:['primaryTool','eraseTool','panTool'].filter(id=>id!=='eraseTool'||DRAW_MODES.includes(st.mode)),def:$('primaryTool').dataset.tool};
+  if(tab==='masks'){
+    if(prot)return{tools:['paintTool','subjectTool','eraseTool','panTool'],def:'paint'};
+    if(M){if(M.type==='brush')return{tools:['paintTool','eraseTool','panTool'],def:'paint'};
+      if(M.type==='subject')return{tools:['subjectTool','panTool'],def:'subject'};
+      if(M.type==='sky')return{tools:['panTool'],def:'pan'};
+      return{tools:['maskTool','panTool'],def:'mask'}}
+    return{tools:['panTool'],def:'pan'}}
+  if(tab==='crop')return{tools:[],def:'crop'};
+  return{tools:['panTool'],def:'pan'}}
+function applyTabTools(keep){
+  const r=toolsForTab(), M=curMaskObj(), prot=curMask==='__protect';
+  for(const id of ['primaryTool','maskTool','paintTool','subjectTool','eraseTool','panTool'])$(id).hidden=!r.tools.includes(id);
+  document.body.classList.toggle('rail-min',r.tools.filter(id=>id!=='panTool').length===0);
+  $('paintLabel').textContent=prot?'Brush':'Paint'; $('paintIcon').innerHTML=`<use href="#${prot?'i-protect':'i-mask'}"/>`;
+  if(M&&M.type!=='brush')$('maskToolIcon').innerHTML=`<use href="#${M.type==='radial'?'i-centre':'i-line'}"/>`;
+  const ok=r.tools.map(id=>$(id).dataset.tool);
+  if(keep&&ok.includes(st.tool))updateCtx(); else setTool(r.def);
+}
 function setTool(t){
-  if(t==='mask'&&!curMaskObj()){status('Add a mask first: Masks › Add a mask.');showSec('masks');return}
   const wasCrop=cropMode; st.tool=t; zm.pan=t==='pan'; cropMode=t==='crop';
   document.body.classList.toggle('cropping',cropMode); $('stage').classList.toggle('panmode',zm.pan); setSeg('toolSeg','tool',t);
   if(wasCrop!==cropMode){layout(true);if(!cropMode)commit()}
   updateCtx(); drawOverlay()}
 function syncRows(){
   const m=st.mode, e=m==='edge', sort=$('method').value==='sort';
+  if($('edgeTools')){$('edgeTools').hidden=!e;$('edgeBtns').hidden=!(DRAW_MODES.includes(m)&&edges.length)}
   $('startRow').hidden=!(m==='vertical'||m==='radial'); $('methodRow').hidden=!(m==='vertical'||m==='radial');
   $('sideRow').hidden=!e; $('softRow').hidden=!e; $('vdirRow').hidden=m!=='vertical'; $('spinRow').hidden=m!=='swirl'; $('raysRow').hidden=true; $('pwRow').hidden=m!=='path';
   $('skeyRow').hidden=$('upperRow').hidden=$('methodRow').hidden||!sort;
@@ -809,13 +875,13 @@ function setMode(m){
   $('modeHint').textContent=modeHints[m];
   const pt=$('primaryTool'); pt.dataset.tool=e?'edge':'move'; $('primaryLabel').textContent=primaryLabel[m];
   $('primaryIcon').innerHTML=`<use href="#${primaryIcon[m]}"/>`; pt.title=`${toolTitle[m]} (P)`;
-  if(st.tool==='move'||st.tool==='edge')setTool(pt.dataset.tool); else updateCtx();
+  if(document.body.dataset.tab==='streaks'&&src)applyTabTools(st.tool!=='move'&&st.tool!=='edge'); else updateCtx();
   if(layers.length)renderLayers();
   schedule(); drawOverlay();
 }
 document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 document.querySelectorAll('#toolSeg .tool[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
-$('clearMask').onclick=()=>{if(!mask)return;mask.fill(0);strokes=[];mctx.clearRect(0,0,W,H);updateCtx();drawOverlay();schedule();commit();status('Protect paint cleared.')};
+$('clearMask').onclick=()=>{if(!mask)return;mask.fill(0);strokes=[];mctx.clearRect(0,0,W,H);updateCtx();renderMasks();drawOverlay();schedule();commit();status('Protect cleared.')};
 $('clearEdges').onclick=()=>{edges=[];if(layers[act])layers[act].edges=edges;updateCtx();drawOverlay();schedule();commit()};
 
 // ---------- layers: each has its own mode, sliders, seed, start position and edges
@@ -854,7 +920,7 @@ function renderLayers(){
     if(layers.length>1){const d=document.createElement('button');d.className='ldel';d.setAttribute('aria-label',`Remove layer ${i+1}`);d.title='Remove layer';
       d.innerHTML='<svg class="i"><use href="#i-x"/></svg>';d.onclick=e=>{e.stopPropagation();removeLayer(i)};b.appendChild(d)}
     bar.appendChild(b)});
-  $('addRow').querySelectorAll('button').forEach(b=>b.disabled=layers.length>=MAX_LAYERS);
+  $('addLayerBtn').disabled=layers.length>=MAX_LAYERS;
   $('layerCount').textContent=layers.length>1?layers.length:'';
   $('streakLayerName').textContent=layers.length>1?`Layer ${act+1}`:'';
   $('metaLayers').textContent=`${layers.length} layer${layers.length>1?'s':''} · ${layers.map((L,i)=>MODE_NAMES[i===act?st.mode:L.mode]).join(' + ')}`;
@@ -866,13 +932,13 @@ function addLayer(mode){
   layers.push({...LAYER_DEFAULT,mode,seed:1+Math.floor(Math.random()*99999),edges:[]});
   loadLayer(layers.length-1); setTool($('primaryTool').dataset.tool);
   if(phoneMQ.matches)showSec('streaks');
-  status(`Added layer ${layers.length}: ${MODE_NAMES[mode]}. `+(mode==='edge'?'Drag along an edge on the photo.':'Tap the photo to place it.'));
+  status(`Added layer ${layers.length} as ${MODE_NAMES[mode]}. Change its kind below, then `+(DRAW_MODES.includes(mode)?'draw on the photo.':'tap the photo to place it.'));
 }
 function removeLayer(i){
   if(layers.length<2)return; storeActive(); layers.splice(i,1);
   loadLayer(Math.min(i<=act?Math.max(0,act-1):act,layers.length-1)); commit(); status(`Removed layer ${i+1}.`);
 }
-document.querySelectorAll('#addRow [data-add]').forEach(b=>b.onclick=()=>addLayer(b.dataset.add));
+$('addLayerBtn').onclick=()=>{const used=layers.map((L,i)=>i===act?st.mode:L.mode);addLayer(['edge','radial','swirl','path','vertical'].find(m=>!used.includes(m))||'radial')};
 
 
 // ---------- settings, looks and variations
@@ -973,10 +1039,10 @@ function restore(s){const o=JSON.parse(s);
   layers=o.layers; ['c1','c2','c3'].forEach((k,i)=>$(k).value=o.c[i]); $('amt').value=o.amt; $('grain').value=o.grain; syncOut('amt'); syncOut('grain'); if(o.psoft!=null){$('psoft').value=o.psoft;syncOut('psoft')}
   const g0=JSON.stringify([S2.geo.rot,S2.geo.flip,S2.geo.angle]);
   S2.adj={...SL.ADJ0,...(o.adj||{})}; S2.curve=(o.curve||SL.CURVE0).slice(); S2.fx=mergeFx(o.fx||{}); S2.masks=o.masks||[]; S2.geo={...GEO0(),...(o.geo||{})}; S2.gradeMask=o.gradeMask||'';
-  if(!findMask(curMask))curMask=null;
+  if(curMask!=='__protect'&&!findMask(curMask))curMask='__protect';
   strokes=o.strokes;
   if(JSON.stringify([S2.geo.rot,S2.geo.flip,S2.geo.angle])!==g0)rebuildSource(); else{mask=maskAt(W,H);redrawMask()}
-  syncS2UI(); loadLayer(Math.min(act,layers.length-1)); layout(true); updateCtx()}
+  syncS2UI(); loadLayer(Math.min(act,layers.length-1)); layout(true); applyTabTools(true)}
 function undo(){if(busy||hi<=0)return;hi--;restore(hist[hi]);histUI();persistState()}
 function redo(){if(busy||hi>=hist.length-1)return;hi++;restore(hist[hi]);histUI();persistState()}
 $('undoBtn').onclick=undo; $('redoBtn').onclick=redo;
@@ -991,7 +1057,7 @@ function loadFile(f,label,opt={}){
   const img=new Image(); img.onload=()=>{
     if(fullImg)URL.revokeObjectURL(fullImg.src);
     fullImg=img; FW0=img.naturalWidth; FH0=img.naturalHeight; origBlob=f;
-    S2.geo=GEO0(); S2.masks=[]; S2.gradeMask=''; curMask=null; if(st.tool==='mask'||st.tool==='crop')setTool($('primaryTool').dataset.tool);
+    S2.geo=GEO0(); S2.masks=[]; S2.gradeMask=''; curMask='__protect'; if(cropMode){cropMode=false;document.body.classList.remove('cropping')}
     strokes=[]; edges=[]; st.cx=.5; st.cy=.5; layers.forEach(L=>{L.edges=[];L.cx=.5;L.cy=.5;L.maskId=''}); layers[act].edges=edges; $('lmask').value='';
     rebuildSource(true); syncS2UI();
     const s=W/FW;
@@ -1006,7 +1072,7 @@ function loadFile(f,label,opt={}){
       layout(true);
       const sv=opt.saved;
       if(sv&&sv.snap){try{for(const [id,R] of Object.entries(sv.rasters||{}))rasters.set(id,R);act=sv.act||0;restore(sv.snap);status('Welcome back. Your last edit is restored.')}catch(e){}}
-      render(); drawOverlay(); commit(); if(!sv)maybeTips(); renderMasks(); if(opt.done)opt.done()});
+      render(); renderMasks(); showSec(['crop',undefined].includes(document.body.dataset.tab)?'streaks':document.body.dataset.tab); drawOverlay(); commit(); if(!sv)maybeTips(); if(opt.done)opt.done()});
   }; img.onerror=()=>{URL.revokeObjectURL(img.src);
     if(isHeic(f)&&!opt.converted){convertHeic(f).then(j=>loadFile(j,label||f.name,{...opt,converted:true})).catch(e=>status('That HEIC photo couldn’t be converted: '+(e.message||e)+'. Export it as JPEG from your photo app.'));return}
     status('That file couldn’t be opened. Try a JPEG, PNG or HEIC exported from your photo app.')};
@@ -1041,9 +1107,10 @@ const {dirVectors,maxR,layerList}=SL;
 function drawOverlay(){ if(!src)return;
   const p=getSettings();
   octx.clearRect(0,0,W,H);
-  if(cropMode){drawCropOverlay(W/(ov.getBoundingClientRect().width||W));return}
-  octx.globalAlpha=.45; octx.drawImage(maskCv,0,0); octx.globalAlpha=1;
-  const sc=W/(ov.getBoundingClientRect().width||W);
+  const sc=W/(ov.getBoundingClientRect().width||W), tab=document.body.dataset.tab;
+  if(cropMode){drawCropOverlay(sc);return}
+  if(tab==='masks'){if(curMask==='__protect'){if($('maskShow').checked){octx.globalAlpha=.45;octx.drawImage(maskCv,0,0);octx.globalAlpha=1}}else drawMaskOverlay(sc);return}
+  if(tab!=='streaks')return;
   layers.forEach((L,i)=>{if(i===act||layers.length<2)return;
     octx.globalAlpha=.4; octx.lineWidth=2*sc; octx.strokeStyle='rgba(255,255,255,.85)'; octx.setLineDash([4*sc,6*sc]);
     if(L.mode==='vertical'){octx.beginPath();const y=L.startV/100*(H-1);octx.moveTo(0,y);octx.lineTo(W,y);octx.stroke()}
@@ -1051,8 +1118,6 @@ function drawOverlay(){ if(!src)return;
     else{octx.setLineDash([]);octx.strokeStyle='#ffa53a';octx.lineWidth=3*sc;octx.lineJoin=octx.lineCap='round';
       for(const e of L.edges){if(e.length<2)continue;octx.beginPath();e.forEach((q,j)=>{const x=q.x*W,y=q.y*H;j?octx.lineTo(x,y):octx.moveTo(x,y)});octx.stroke()}}
     octx.globalAlpha=1});
-  if(cropMode){drawCropOverlay(sc);return}
-  if(st.tool==='mask'){drawMaskOverlay(sc);return}
   octx.lineWidth=2*sc; octx.setLineDash([8*sc,6*sc]); octx.strokeStyle='rgba(255,255,255,.85)';
   if(st.mode==='vertical'){octx.beginPath();const v=$('vdir').value,h=v==='left'||v==='right';
     if(h){const x=st.startV/100*(W-1);octx.moveTo(x,0);octx.lineTo(x,H)}else{const y=st.startV/100*(H-1);octx.moveTo(0,y);octx.lineTo(W,y)}octx.stroke();
@@ -1139,8 +1204,11 @@ addEventListener('keydown',e=>{
   if(mod&&e.shiftKey&&k==='v'){e.preventDefault();pasteSettings();return}
   if(k==='l'&&!mod){openLibrary();return}
   if(cropMode&&e.key==='Enter'){$('cropDone').click();return}
-  const tools={p:$('primaryTool').dataset.tool,b:'paint',e:'erase',h:'pan',m:'mask',c:'crop'};
-  if(tools[k]){setTool(tools[k]);return}
+  const tabs={c:'crop',a:'adjust',m:'masks',f:'effects',g:'grade'};
+  if(tabs[k]){showSec(tabs[k]);return}
+  if(k==='p'){if(document.body.dataset.tab!=='streaks')showSec('streaks');setTool($('primaryTool').dataset.tool);return}
+  const ctxTools={b:'paintTool',e:'eraseTool',s:'subjectTool',d:'maskTool',h:'panTool'};
+  if(ctxTools[k]&&!$(ctxTools[k]).hidden){setTool($(ctxTools[k]).dataset.tool);return}
   if(k==='0'){fit();return}
   if(e.key==='['||e.key===']'){const b=$('brush');b.value=+b.value+(e.key===']'?6:-6);syncOut('brush');return}
 });
@@ -1159,14 +1227,16 @@ function rasterCanvas(id){const R=rasters.get(id);if(!R)return null;if(R.cv&&R.c
   const m=new Uint8Array(W*H);applyRaster(m,W,H,id);const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),d=x.createImageData(W,H);
   for(let i=0;i<m.length;i++)if(m[i]){d.data[i*4]=255;d.data[i*4+1]=59;d.data[i*4+2]=59;d.data[i*4+3]=255}
   x.putImageData(d,0,0);Object.defineProperty(R,'cv',{value:c,writable:true,enumerable:false,configurable:true});return c}
-let drawing=false;
+let drawing=false, maskRoute=false;
 function pt(e){const r=ov.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
 function paintAt(p){const rad=+$('brush').value*(W/ov.getBoundingClientRect().width);const t=st.tool;
   strokes.push({t,x:p.x/W,y:p.y/H,r:rad/W});
   dot(mask,W,H,t,p.x,p.y,rad);
   mctx.save(); if(t==='erase')mctx.globalCompositeOperation='destination-out';
   mctx.fillStyle='#ff3b3b'; mctx.beginPath(); mctx.arc(p.x,p.y,rad,0,TAU); mctx.fill(); mctx.restore();
-  if(t==='erase'&&edges.length){
+  drawOverlay()}
+function eraseEdges(p){const rad=+$('brush').value*(W/ov.getBoundingClientRect().width);
+  if(edges.length){
     const r2=rad*rad, out=[];
     for(const e of edges){let cur=[];
       for(const q of e){if((q.x*W-p.x)**2+(q.y*H-p.y)**2<=r2){if(cur.length>1)out.push(cur);cur=[]}else cur.push(q)}
@@ -1184,12 +1254,16 @@ ov.addEventListener('pointerdown',e=>{if(!src||busy)return;
   if(zm.pan||e.button===1){panning={x:e.clientX,y:e.clientY,tx:zm.tx,ty:zm.ty};return}
   const p=pt(e);
   if(cropMode){cropDown(e,p);drawing=true;return}
-  if(st.tool==='mask'){maskDown(p);drawing=true;return}
+  const tab=document.body.dataset.tab, M=curMaskObj(), prot=curMask==='__protect';
+  if(st.tool==='mask'){maskDown(p);drawing=true;maskRoute=true;return}
+  if(st.tool==='subject'){if(prot)protectSubject(p);else if(M&&M.type==='subject')segmentInto(M,p);return}
+  if((st.tool==='paint'||st.tool==='erase')&&tab==='masks'&&M&&M.type==='brush'){st.mb=st.tool;maskDown(p);drawing=true;maskRoute=true;return}
+  if(st.tool==='erase'&&tab==='streaks'){drawing=true;eraseEdges(p);return}
+  if(st.tool==='pan')return;
   if(st.tool==='move'){
     if(st.mode==='vertical'){const h=['left','right'].includes($('vdir').value);st.startV=Math.round((h?p.x/W:p.y/H)*100);$('start').value=st.startV}
     else if(CENTRE_MODES.includes(st.mode)){st.cx=p.x/W;st.cy=p.y/H}
     syncOut('start'); drawOverlay(); schedule(); drawing=true; return}
-  if(st.tool==='paint'&&st.prot==='subject'){protectSubject(p);return}
   drawing=true;
   if(st.tool==='edge'){curEdge=[{x:p.x/W,y:p.y/H}];drawOverlay()} else paintAt(p)});
 ov.addEventListener('pointermove',e=>{
@@ -1199,7 +1273,8 @@ ov.addEventListener('pointermove',e=>{
   if(panning){zm.tx=panning.tx+e.clientX-panning.x;zm.ty=panning.ty+e.clientY-panning.y;applyZoom();return}
   if(!drawing)return;const p=pt(e), sc=W/ov.getBoundingClientRect().width;
   if(cropMode){cropMove(p);return}
-  if(st.tool==='mask'){maskMove(p);return}
+  if(maskRoute){maskMove(p);return}
+  if(st.tool==='erase'&&document.body.dataset.tab==='streaks'){eraseEdges(p);return}
   if(st.tool==='move'){if(st.mode==='vertical'){const h=['left','right'].includes($('vdir').value);st.startV=Math.max(0,Math.min(100,Math.round((h?p.x/W:p.y/H)*100)));$('start').value=st.startV}else if(CENTRE_MODES.includes(st.mode)){st.cx=Math.max(0,Math.min(1,p.x/W));st.cy=Math.max(0,Math.min(1,p.y/H))}syncOut('start');drawOverlay();schedule();return}
   if(st.tool==='edge'){const l=curEdge[curEdge.length-1];if(Math.hypot(p.x-l.x*W,p.y-l.y*H)>=1.5*sc){curEdge.push({x:p.x/W,y:p.y/H});drawOverlay()}}
   else paintAt(p)});
@@ -1207,9 +1282,9 @@ ov.addEventListener('pointermove',e=>{
   if(ptrs.size<2)pinch=null; if(!ptrs.size)panning=null;
   if(!drawing)return;drawing=false;
   if(cropMode){cropUp();return}
-  if(st.tool==='mask'){maskUp();return}
+  if(maskRoute){maskRoute=false;maskUp();return}
   if(curEdge){if(curEdge.length>1){let e2=curEdge;if($('snapEdges').checked&&st.mode==='edge'){try{e2=snapEdge(curEdge)}catch(_){}}edges.push(e2)}curEdge=null;drawOverlay()}
-  edgesDirty=false; schedule(); renderLayers(); commit()}));
+  edgesDirty=false; schedule(); renderLayers(); if(document.body.dataset.tab==='masks')renderMasks(); updateCtx(); commit()}));
 
 // ---------- automatic edges: snap drawn edges onto real outlines, or trace the horizon
 let energy=null;
@@ -1291,11 +1366,10 @@ async function protectSubject(p){
     if(!best||best.at<.4||cover<best.data.length*.001){status('Couldn’t find a subject there. Try tapping the middle of it, or paint with the brush.');setBusy(false);return}
     const id='m'+Date.now().toString(36); rasters.set(id,{w:best.w,h:best.h,data:best.data}); strokes.push({t:'auto',id});
     applyRaster(mask,W,H,id); const rc=rasterCanvas(id); if(rc)mctx.drawImage(rc,0,0);
-    drawOverlay(); setBusy(false); schedule(); updateCtx(); commit();
+    drawOverlay(); setBusy(false); schedule(); updateCtx(); renderMasks(); commit();
     status('Subject protected. Tap another to add it, or use Erase to trim.');
   }catch(e){setBusy(false);status('Couldn’t run the subject finder: '+(e.message||e)+'. It needs an internet connection the first time.')}
 }
-document.querySelectorAll('#protSeg button').forEach(b=>b.onclick=()=>{st.prot=b.dataset.prot;setSeg('protSeg','prot',st.prot);updateCtx()});
 
 // ---------- offline: cache the app (and the AI model once used) with a service worker
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
@@ -1340,7 +1414,7 @@ addEventListener('input',e=>{const t=e.target,b=t.dataset&&t.dataset.bind;if(!b)
   if(b.startsWith('fx.')&&b.endsWith('.on'))fxCards();
   schedule();drawOverlay()});
 addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.bind&&!t.closest('.panel'))commit()});
-function fxCards(){let n=0;document.querySelectorAll('.fx').forEach(c=>{const on=!!(S2.fx[c.dataset.fx]||{}).on;c.classList.toggle('on',on);if(on)n++});$('fxCount').textContent=n||''}
+function fxCards(){let n=0;document.querySelectorAll('.fx').forEach(c=>{const on=!!(S2.fx[c.dataset.fx]||{}).on;c.classList.toggle('on',on);if(on)n++});$('fxCount').textContent=n||'';$('fxBadge').textContent=n||''}
 function syncS2UI(){
   document.querySelectorAll('[data-bind]').forEach(el=>{const v=getPath(S2,el.dataset.bind);if(v==null)return;
     if(el.type==='checkbox')el.checked=!!v;else el.value=v;if(el.type==='range')syncOut(el.id)});
@@ -1382,23 +1456,29 @@ function addMask(type){
   if(type==='brush')M.strokes=[];
   if(type==='subject')M.raster=null;
   if(type==='sky'){const r=traceHorizon();if(r.score<.1){status('Couldn’t find a clear horizon to separate the sky. Try a Linear mask instead.');return}M.pts=r.pts}
-  S2.masks.push(M); curMask=id; renderMasks(); fillMaskSelects(); setTool('mask'); commit(); schedule();
+  S2.masks.push(M); curMask=id; renderMasks(); fillMaskSelects(); applyTabTools(); commit(); schedule();
   status(`Added ${maskName(M)}. ${MASK_HINT[type]}`)}
 document.querySelectorAll('#maskAdd [data-madd]').forEach(b=>b.onclick=()=>addMask(b.dataset.madd));
 function maskUses(M){const u=[];layers.forEach((L,i)=>{if((i===act?$('lmask').value:L.maskId)===M.id)u.push(`layer ${i+1}`)});if(S2.gradeMask===M.id)u.push('duotone');if(S2.fx.echo.on&&S2.fx.echo.src===M.id)u.push('echo');
   const a=Object.entries(M.adj||{}).filter(([,v])=>v).map(([k,v])=>`${(LOCAL_ADJ.find(x=>x[0]===k)||[k,k])[1].toLowerCase()} ${v>0?'+':''}${v}`);return[...a,...u.map(x=>'limits '+x)]}
 function removeMask(id){S2.masks=S2.masks.filter(m=>m.id!==id);storeActive();layers.forEach(L=>{if(L.maskId===id)L.maskId=''});if($('lmask').value===id)$('lmask').value='';
-  if(S2.gradeMask===id)S2.gradeMask='';if(S2.fx.echo.src===id)S2.fx.echo.src='';if(curMask===id){curMask=null;if(st.tool==='mask')setTool($('primaryTool').dataset.tool)}
+  if(S2.gradeMask===id)S2.gradeMask='';if(S2.fx.echo.src===id)S2.fx.echo.src='';if(curMask===id){curMask='__protect';applyTabTools()}
   renderMasks();fillMaskSelects();syncS2UI();schedule();commit()}
 function renderMasks(){
   const list=$('maskList');list.innerHTML='';
+  { // Protect is always the first entry: it keeps areas free of streaks
+    const pr=document.createElement('div');pr.className='layer';pr.setAttribute('role','button');pr.tabIndex=0;pr.setAttribute('aria-pressed',curMask==='__protect');
+    pr.innerHTML='<svg class="i"><use href="#i-protect"/></svg><span class="ltext"><span class="lname">Protect</span><span class="lsub"></span></span>';
+    pr.querySelector('.lsub').textContent=strokes.length?(strokes.some(s=>s.t==='auto')?'Keeps your subject free of streaks':'Keeps painted areas free of streaks'):'Nothing protected yet: paint it or tap a subject';
+    const pick=()=>{curMask='__protect';renderMasks();applyTabTools();drawOverlay()};pr.onclick=pick;pr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}};
+    list.appendChild(pr)}
   S2.masks.forEach(M=>{const b=document.createElement('div');b.className='layer';b.setAttribute('role','button');b.tabIndex=0;b.setAttribute('aria-pressed',M.id===curMask);
     b.innerHTML=`<svg class="i"><use href="#i-mask"/></svg><span class="ltext"><span class="lname"></span><span class="lsub"></span></span><button class="ldel" aria-label="Delete mask"><svg class="i"><use href="#i-x"/></svg></button>`;
     b.querySelector('.lname').textContent=maskName(M)+(M.invert?' (inverted)':'');
     const u=maskUses(M);b.querySelector('.lsub').textContent=M.type==='subject'&&!M.raster?'Tap a subject on the photo':u.length?u.join(' · '):'Not used yet: add an adjustment below';
-    const pick=()=>{curMask=M.id;renderMasks();setTool('mask')};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}};
+    const pick=()=>{curMask=M.id;renderMasks();applyTabTools();drawOverlay()};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}};
     b.querySelector('.ldel').onclick=e=>{e.stopPropagation();removeMask(M.id)};list.appendChild(b)});
-  $('maskCount').textContent=S2.masks.length||'';
+  $('maskCount').textContent=S2.masks.length||''; $('maskBadge').textContent=(S2.masks.length+(strokes.length?1:0))||'';
   const ed=$('maskEdit');ed.innerHTML='';const M=curMaskObj();if(!M)return;
   const box=document.createElement('div');box.className='medit';
   const t=document.createElement('div');t.className='sub';t.textContent=`${maskName(M)} settings`;box.appendChild(t);
@@ -1432,7 +1512,6 @@ function maskUp(){const M=curMaskObj();if(!mDrag||!M){mDrag=null;return}
   mDrag=null;schedule();drawOverlay();renderMasks();commit()}
 function maskPaint(p){const M=curMaskObj(),rad=+$('brush').value*(W/ov.getBoundingClientRect().width);M.strokes.push({t:st.mb,x:p.x/W,y:p.y/H,r:rad/W})}
 st.mb='paint';
-document.querySelectorAll('#mbSeg button').forEach(b=>b.onclick=()=>{st.mb=b.dataset.mb;setSeg('mbSeg','mb',st.mb)});
 $('maskShow').addEventListener('change',()=>drawOverlay());
 const mOv=document.createElement('canvas'), mOvx=mOv.getContext('2d');
 function drawMaskOverlay(sc){const M=curMaskObj();if(!M)return;
@@ -1515,7 +1594,7 @@ function setAspect(a){S2.geo.aspect=a;setSeg('aspectSeg','ar',a);if(a==='free'){
 document.querySelectorAll('#aspectSeg button').forEach(b=>b.onclick=()=>{setAspect(b.dataset.ar);commit()});
 $('cropReset').onclick=()=>{const hadAngle=S2.geo.angle;S2.geo.crop={x:0,y:0,w:1,h:1};S2.geo.angle=0;S2.geo.aspect='free';$('straighten').value=0;syncOut('straighten');setSeg('aspectSeg','ar','free');
   if(hadAngle)rebuildSource();render();drawOverlay();commit()};
-$('cropDone').onclick=()=>setTool($('primaryTool').dataset.tool);
+$('cropDone').onclick=()=>showSec(prevTab||'streaks');
 let cDragC=null;
 function cropDown(e,p){const k=S2.geo.crop,r={x:k.x*W,y:k.y*H,w:k.w*W,h:k.h*H},sc=W/ov.getBoundingClientRect().width,hit=26*sc;
   const corners={nw:[r.x,r.y],ne:[r.x+r.w,r.y],sw:[r.x,r.y+r.h],se:[r.x+r.w,r.y+r.h]};
@@ -1676,10 +1755,14 @@ async function renderFullSize(progress){
 }
 
 // ---------- first-run guide
-const TIPS=[
+const TIPS_OLD=[
   ['Place your streaks','Tap or drag on the photo to move where the streaks start. Switch between Vertical, Radial and Edge in the Streaks panel.'],
   ['Shape them','Length, Threshold and Randomness change the look. Use Protect to keep a face or subject sharp, and hold Before to compare.'],
   ['Make it yours','Try a starter look, stack layers to combine modes, then Export a full-size photo, a carousel or a Reel.']];
+const TIPS=[
+  ['Place your streaks','In the Streaks tab, tap or drag on the photo. Pick Linear, Radial, Swirl, Edge or Path, and stack layers to combine them.'],
+  ['Keep your subject sharp','In the Masks tab, Protect keeps a face or subject free of streaks: paint it, or tap it with Subject. Masks can also brighten or recolour one area.'],
+  ['Finish and share','Adjust, Effects and Grade finish the look; Looks has one-tap starting points. Export saves photos, carousels and Reels.']];
 let tipI=0;
 function showTip(){const [t,p]=TIPS[tipI];$('tipStep').textContent=`Tip ${tipI+1} of ${TIPS.length}`;$('tipTitle').textContent=t;$('tipText').textContent=p;$('tipNext').textContent=tipI<TIPS.length-1?'Next':'Got it';$('tips').hidden=false}
 function endTips(){$('tips').hidden=true;store.set('streaklab.tips','1')}
