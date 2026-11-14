@@ -158,7 +158,7 @@ body.is-busy .veil{display:grid}
 .hero .ctas{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .hero .small{font-size:13px;color:var(--dim)}
 .hero.dash{max-width:820px;gap:16px;padding:24px 18px 32px;align-self:start;margin:auto}
-.stage:has(.dash:not([hidden])){overflow:auto;place-items:start center}
+.stage:has(.dash:not([hidden])){overflow:auto;place-items:start center;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .toolcards{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;text-align:left}
 .toolcard{display:grid;gap:10px;align-content:start;padding:12px 12px 16px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line2);color:inherit;text-decoration:none}
 a.toolcard:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
